@@ -106,7 +106,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New Teacher"}
         description={""}
-        className="space-y-2 py-4 text-center"
+        className="py-4 space-y-2 text-center"
       />
       <form onSubmit={onSubmit} className="space-y-4" autoComplete="off">
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -159,7 +159,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
         <div className="space-y-4">
           <Label>Select Courses</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {courses.map((course) => (
               <div key={course._id}>
                 <Checkbox

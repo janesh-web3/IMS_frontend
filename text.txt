@@ -1,0 +1,42 @@
+  const [student, setStudent] = useState<
+    {
+      _id: string;
+      personalInfo: {
+        name: string;
+        school: string;
+        address: string;
+        dob: string;
+        gender: string;
+        contactNo: string;
+        billNo: object[];
+        admissionNumber: string;
+        deadline: string;
+        guardianName: string;
+        guardianContact: string;
+        localGuardianName: string;
+        localGuardianContact: string;
+        paymentMethod: string;
+        referredBy: string;
+      };
+      photo: string;
+      document: string;
+      admissionFee: number;
+      tshirtFee: number;
+      examFee: number;
+      totalDiscount: number;
+      paid: number;
+      remaining: number;
+      totalAmount: number;
+      totalAfterDiscount: number;
+      quizzes: object;
+      selectedBook: object;
+      courses: [
+        {
+          courseEnroll: object;
+          subjectsEnroll: object;
+          feeType: string;
+          discount: string;
+        },
+      ];
+    }[]
+    >([]);

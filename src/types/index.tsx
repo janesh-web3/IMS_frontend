@@ -1,4 +1,4 @@
-import { Icons } from '@/components/ui/icons';
+import { Icons } from "@/components/ui/icons";
 
 export interface NavItem {
   title: string;
@@ -24,6 +24,31 @@ export interface FooterItem {
     title: string;
     href: string;
     external?: boolean;
+  }[];
+}
+
+export interface Courses {
+  name: string;
+  _id: string;
+  subjects: [
+    {
+      monthlyFee: string;
+      regularFee: string;
+      subjectName: string;
+      subjectTeacher: string;
+      _id: string;
+    },
+  ];
+}
+[];
+
+export interface StudentCourse {
+  courseEnroll: string;
+  subjectsEnroll: {
+    subjectId: string;
+    subjectName: string;
+    feeType: string;
+    discount: number;
   }[];
 }
 
