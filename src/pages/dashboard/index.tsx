@@ -189,9 +189,9 @@ export default function DashboardPage() {
   }
   if (error) {
     return (
-      <>
-        <h1>Failed to load data ! Error... </h1>
-      </>
+      <div>
+        <h1>Failed to load data ! Please connect to internet... </h1>
+      </div>
     );
   }
   return (

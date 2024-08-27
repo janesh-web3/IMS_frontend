@@ -1,21 +1,29 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useRouter } from '@/routes/hooks';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { crudRequest } from "@/lib/api";
+import { useRouter } from "@/routes/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+interface AuthResponse {
+  _id: string;
+  username: string;
+  token: string;
+}
 
 const formSchema = z.object({
-  email: z.string().email({ message: 'Enter a valid email address' })
+  username: z.string({ message: "Enter a valid username" }),
+  password: z.string({ message: "Incorrect Password" }),
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
@@ -24,16 +32,29 @@ export default function UserAuthForm() {
   const router = useRouter();
   const [loading] = useState(false);
   const defaultValues = {
-    email: 'demo@gmail.com'
+    username: "",
+    password: "",
   };
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
-    defaultValues
+    defaultValues,
   });
 
   const onSubmit = async (data: UserFormValue) => {
-    console.log('data', data);
-    router.push('/');
+    try {
+      const response: AuthResponse = await crudRequest(
+        "POST",
+        "/user/login-admin",
+        data
+      );
+      alert("Login successful");
+      sessionStorage.setItem("token", response.token);
+      router.push("/");
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+
+    console.log("data", data);
   };
 
   return (
@@ -45,14 +66,32 @@ export default function UserAuthForm() {
         >
           <FormField
             control={form.control}
-            name="email"
+            name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>UserName</FormLabel>
                 <FormControl>
                   <Input
-                    type="email"
-                    placeholder="Enter your email..."
+                    type="text"
+                    placeholder="Enter your username..."
+                    disabled={loading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password..."
                     disabled={loading}
                     {...field}
                   />
@@ -62,21 +101,11 @@ export default function UserAuthForm() {
             )}
           />
 
-          <Button disabled={loading} className="ml-auto w-full" type="submit">
-            Continue With Email
+          <Button disabled={loading} className="w-full ml-auto" type="submit">
+            Continue
           </Button>
         </form>
       </Form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
     </>
   );
 }

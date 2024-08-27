@@ -52,6 +52,59 @@ export interface StudentCourse {
   }[];
 }
 
+export interface StudentDetails {
+  personalInfo: {
+    studentName: string;
+    schoolName: string;
+    address: string;
+    dateOfBirth: null;
+    gender: string;
+    contactNo: string;
+    billNo: [
+      {
+        billNo: string;
+        dateSubmitted: string;
+        paid: string;
+        method: string;
+      },
+    ];
+    admissionNumber: string;
+    paymentDeadline: string;
+    guardianName: string;
+    guardianContact: string;
+    localGuardianName: string;
+    localGuardianContact: string;
+    paymentMethod: string;
+    referredBy: string;
+  };
+  courses: [
+    {
+      courseEnroll: string;
+      subjectsEnroll: [
+        {
+          subjectName: string;
+          feeType: string;
+          discount: number;
+        },
+      ];
+    },
+  ];
+  photo: string;
+  admissionFee: number;
+  selectedBook: object;
+  tshirtFee: number;
+  examFee: number;
+  document: boolean;
+  totalDiscount: number;
+  paymentDeadline: null;
+  paid: number;
+  remaining: number;
+  totalAmount: number;
+  totalAfterDiscount: number;
+  quizzes: string;
+  dateOfAdmission: string;
+}
+
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;

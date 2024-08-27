@@ -21,11 +21,12 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
-import { Courses } from "@/types";
+import { Courses, StudentDetails } from "@/types";
+import { useParams } from "react-router-dom";
 
-const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
+const StudentUpdateForm = () => {
   const [step, setStep] = useState(1);
-
+  const { id } = useParams();
   //step-1
   const [personalInfo, setPersonalInfo] = useState({
     studentName: "",
@@ -209,14 +210,85 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         );
         if (response && Array.isArray(response)) {
           setCourseData(response);
-        } else {
         }
       } catch (error) {
-        console.error("Error fetching student data:", error);
+        console.error("Error fetching courses data:", error);
       }
     };
+
+    const fetchStudentDetails = async () => {
+      try {
+        const response = await crudRequest<StudentDetails>(
+          "GET",
+          `/student/get-student/${id}`
+        );
+        if (response) {
+          // Set personal information
+          setPersonalInfo({
+            studentName: response.personalInfo.studentName,
+            schoolName: response.personalInfo.schoolName,
+            address: response.personalInfo.address,
+            dateOfBirth: response.personalInfo.dateOfBirth,
+            gender: response.personalInfo.gender,
+            contactNo: response.personalInfo.contactNo,
+            billNo: response.personalInfo.billNo[0]?.billNo || "",
+            guardianName: response.personalInfo.guardianName,
+            guardianContact: response.personalInfo.guardianContact,
+            localGuardianName: response.personalInfo.localGuardianName,
+            localGuardianContact: response.personalInfo.localGuardianContact,
+            referredBy: response.personalInfo.referredBy,
+            admissionNumber: response.personalInfo.admissionNumber,
+            paymentMethod: response.personalInfo.paymentMethod,
+          });
+
+          // Set fees information
+          setFeesInfo({
+            admissionFee: Number(response.admissionFee),
+            tshirtFee: Number(response.tshirtFee),
+            examFee: Number(response.examFee),
+            document: response.document,
+            totalDiscount: Number(response.totalDiscount),
+            totalAmount: Number(response.totalAmount),
+            totalAfterDiscount: Number(response.totalAfterDiscount),
+            paidAmount: Number(response.paid),
+            remainingAmount: Number(response.remaining),
+            paymentMethod: response.personalInfo.paymentMethod,
+            paymentDeadline: response.paymentDeadline,
+          });
+
+          // Set selected courses and subjects
+          const selectedCourses = response.courses.map(
+            (course) => course.courseEnroll
+          );
+          const selectedSubjects = response.courses.flatMap((course) =>
+            course.subjectsEnroll.map((subject) => subject.subjectName)
+          );
+
+          setSelectedCourses(selectedCourses);
+          setSelectedSubjects(selectedSubjects);
+
+          // Set subject fees
+          const subjectFeesData: {
+            [subjectId: string]: { discount: number; feeType: string };
+          } = {};
+          response.courses.forEach((course) => {
+            course.subjectsEnroll.forEach((subject) => {
+              subjectFeesData[subject.subjectName] = {
+                discount: Number(subject.discount),
+                feeType: subject.feeType,
+              };
+            });
+          });
+          setSubjectFees(subjectFeesData);
+        }
+      } catch (error) {
+        console.error("Error fetching student details:", error);
+      }
+    };
+
     fetchCourses();
-  }, []);
+    fetchStudentDetails();
+  }, [id]);
 
   const handleNext = () => {
     setStep(step + 1);
@@ -274,24 +346,29 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       totalAfterDiscount: feesInfo.totalAfterDiscount,
     };
 
-    await crudRequest("POST", "/student/add-student", studentData).then(() => {
-      alert("Student added successfully");
-      window.location.reload();
-    });
+    await crudRequest("PUT", `/student/update-student/${id}`, studentData).then(
+      () => {
+        alert("Student updated successfully");
+        window.location.reload();
+      }
+    );
   };
 
   return (
-    <div className="px-2">
+    <div className="container min-h-screen h-[100vh] px-2 overflow-auto">
       <Heading
-        title={"Create New Student"}
+        title={"Update Student Form"}
         description={""}
         className="py-4 space-y-2 text-center"
       />
-      <form className="space-y-4" autoComplete="off">
+      <form
+        className="mx-2 mt-5 mb-10 space-y-4 md:mx-4 md:mt-10 md:mb-20"
+        autoComplete="off"
+      >
         {/* first step */}
         {step === 1 && (
           <>
-            <div className="grid grid-cols-2 uppercase gap-x-8 gap-y-4">
+            <div className="grid max-h-screen grid-cols-2 uppercase gap-x-8 gap-y-4">
               <div>
                 <Label htmlFor="studentName">Student Name</Label>
                 <Input
@@ -727,7 +804,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               variant="secondary"
               className="rounded-full max-w-40"
               size="lg"
-              onClick={modalClose}
             >
               Cancel
             </Button>
@@ -744,7 +820,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             </Button>
           )}
 
-          {step < 3 ? (
+          {step < 2 ? (
             <Button
               type="button"
               className="rounded-full max-w-40"
@@ -760,7 +836,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               size="lg"
               onClick={onSubmit}
             >
-              Submit
+              Update
             </Button>
           )}
         </div>
@@ -769,4 +845,4 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   );
 };
 
-export default StudentCreateForm;
+export default StudentUpdateForm;

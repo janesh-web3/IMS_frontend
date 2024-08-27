@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Modal } from '@/components/ui/modal';
+import { Button } from "@/components/ui/button";
+import { Modal } from "@/components/ui/modal";
 
 type TAlertModalProps = {
   isOpen: boolean;
@@ -9,13 +9,14 @@ type TAlertModalProps = {
   title?: string;
   description?: string;
 };
+
 export const AlertModal = ({
   isOpen,
   onClose,
   onConfirm,
   loading,
-  title = 'Are you sure?',
-  description = 'Are you sure you want to continue?'
+  title = "Are you sure?",
+  description = "Are you sure you want to continue?",
 }: TAlertModalProps) => {
   return (
     <Modal
@@ -24,7 +25,7 @@ export const AlertModal = ({
       isOpen={isOpen}
       onClose={onClose}
     >
-      <div className="flex w-full items-center justify-end space-x-2 pt-6">
+      <div className="flex items-center justify-end w-full pt-6 space-x-2">
         <Button disabled={loading} variant="outline" onClick={onClose}>
           Cancel
         </Button>
