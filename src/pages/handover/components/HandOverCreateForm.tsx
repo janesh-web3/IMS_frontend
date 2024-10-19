@@ -18,6 +18,7 @@ import {
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 const studentFormSchema = z.object({
@@ -43,11 +44,13 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const onSubmit = async (values: StudentFormSchemaType) => {
     try {
       await crudRequest("POST", "/handover/add-handover", values);
-      alert("Handover added successfully");
-      window.location.reload();
+      toast.success("Handover added successfully");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error("Error adding handover:", error);
-      alert("Failed to add handover");
+      toast.error("Failed to add handover");
     }
   };
 
@@ -56,7 +59,7 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New HandOver"}
         description={""}
-        className="space-y-2 py-4 text-center"
+        className="py-4 space-y-2 text-center"
       />
       <Form {...form}>
         <form
@@ -74,9 +77,7 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <Controller
                       name="reception"
                       control={control}
-                      render={({
-                        field
-                      }) => (
+                      render={({ field }) => (
                         <Select
                           onValueChange={(value) => field.onChange(value)}
                           value={field.value}
@@ -117,9 +118,7 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <Controller
                       name="admin"
                       control={control}
-                      render={({
-                        field
-                      }) => (
+                      render={({ field }) => (
                         <Select
                           onValueChange={(value) => field.onChange(value)}
                           value={field.value}

@@ -22,6 +22,10 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
 import { Courses } from "@/types";
+import WebcamCapture from "@/components/shared/WebcamCapture";
+import axios from "axios";
+import { server } from "@/server";
+import { toast } from "react-toastify";
 
 const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [step, setStep] = useState(1);
@@ -143,6 +147,14 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const handleDealineChange = (selectedDate: Date | undefined) => {
     setDeadlineDate(selectedDate);
     handleFeesInfoChange("paymentDeadline", selectedDate);
+  };
+
+  // step 3
+  const [photo, setPhoto] = useState<null | string | Blob>(null);
+
+  // Handle webcam capture
+  const handleCapturePhoto = (image: Blob) => {
+    setPhoto(image);
   };
 
   // Calculate Total Amount
@@ -272,12 +284,39 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       remaining: feesInfo.remainingAmount,
       totalAmount: feesInfo.totalAmount,
       totalAfterDiscount: feesInfo.totalAfterDiscount,
+      photo: photo,
     };
 
-    await crudRequest("POST", "/student/add-student", studentData).then(() => {
-      alert("Student added successfully");
-      window.location.reload();
-    });
+    const token = sessionStorage.getItem("token");
+    {
+      photo === null
+        ? await crudRequest("POST", `/student/add-student`, studentData)
+            .then(() => {
+              toast.success("Student added successfully");
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            })
+            .catch(() => {
+              toast.error("Failed to add student");
+            })
+        : await axios
+            .post(`${server}/student/add-student-photo`, studentData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: token,
+              },
+            })
+            .then(() => {
+              toast.success("Student added successfully");
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            })
+            .catch(() => {
+              toast.error("Failed to add student");
+            });
+    }
   };
 
   return (
@@ -285,7 +324,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New Student"}
         description={""}
-        className="py-4 space-y-2 text-center"
+        className="pb-3 space-y-2 text-center"
       />
       <form className="space-y-4" autoComplete="off">
         {/* first step */}
@@ -717,7 +756,13 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         )}
 
         {/* third step */}
-        {step === 3 && <></>}
+        {step === 3 && (
+          <>
+            <h2 className="text-lg font-medium">Upload Photo</h2>
+
+            <WebcamCapture onCapture={handleCapturePhoto} />
+          </>
+        )}
 
         {/* footer button */}
         <div className="grid justify-between grid-cols-2 gap-4">

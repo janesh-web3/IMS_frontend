@@ -1,5 +1,4 @@
 import {
-  Edit,
   File,
   ListFilter,
   MoreHorizontal,
@@ -8,7 +7,7 @@ import {
   Trash,
   View,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,9 +44,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PopupModal from "@/components/shared/popup-modal";
-import StudentCreateForm from "./StudentCreateForm";
 import { useEffect, useState } from "react";
 import { crudRequest } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
@@ -69,18 +67,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import StudentDetails from "./StudentDetails";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -89,23 +75,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Courses } from "@/types";
-import Error from "@/pages/not-found/error";
+import VisitStudentDetails from "./VisitStudentDetails";
+import VisitStudentCreateForm from "./VisitStudentCreateForm";
 import Loading from "@/pages/not-found/loading";
-
-type Bill = {
-  billNo: string;
-  dateSubmitted: string;
-  paid: string;
-  method: string;
-  _id: string;
-};
+import Error from "@/pages/not-found/error";
+import { toast } from "react-toastify";
 
 type SubjectEnroll = {
   subjectName: {
     subjectName: string;
   };
-  feeType: string;
-  discount: string;
   _id: string;
 };
 
@@ -118,85 +97,30 @@ type StudentCourse = {
   _id: string;
 };
 
-type PersonalInfo = {
-  studentName: string;
-  schoolName: string;
-  address: string;
-  dateOfBirth: string | null;
-  gender: string;
-  contactNo: string;
-  billNo: Bill[];
-  admissionNumber: string;
-  paymentDeadline: string;
-  guardianName: string;
-  guardianContact: string;
-  localGuardianName: string;
-  localGuardianContact: string;
-  paymentMethod: string;
-  referredBy: string;
-};
-
-type Student = {
+type VisitStudent = {
   _id: string;
-  personalInfo: PersonalInfo;
+  studentName: string;
+  studentNumber: string;
+  address: string;
+  gender: string;
+  schoolName: string;
+  dateOfVisit: string;
   courses: StudentCourse[];
-  admissionFee: number;
-  tshirtFee: number;
-  examFee: number;
-  document: string;
-  totalDiscount: number;
-  paid: number;
-  remaining: number;
-  totalAmount: number;
-  totalAfterDiscount: number;
-  dateOfAdmission: string;
   photo: string;
 };
 
-type Billing = {
-  amount: number;
-  billNo: number;
-  paymentMethod: string;
-};
-
-export function StudentTable() {
-  const navigate = useNavigate();
-  const [student, setStudent] = useState<Student[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+export function VisitStudentTable() {
+  const [student, setStudent] = useState<VisitStudent[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<VisitStudent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("all");
-  const [filterFeeComplete, setFilterFeeComplete] = useState<boolean | null>(
-    null
-  );
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
     null
   );
   const [courses, setCourses] = useState<Courses[]>([]);
-
-  //Update fee and billing
-  const [updateFee, setUpdateFee] = useState<Billing>({
-    amount: 0,
-    billNo: 0,
-    paymentMethod: "",
-  });
-
-  const handleBillingChange = (name: string, value: any) => {
-    setUpdateFee((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const submitBilling = async (id: string) => {
-    await crudRequest<Billing>(
-      "PUT",
-      `/student/update-student-cash/${id}`,
-      updateFee
-    ).then(() => {
-      alert("Fee Updated successfully");
-      window.location.reload();
-    });
-  };
 
   //pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -222,10 +146,11 @@ export function StudentTable() {
   const [columnVisibility, setColumnVisibility] = useState({
     photo: true,
     name: true,
-    status: true,
+    gender: true,
     contact: true,
     address: true,
-    dateOfBirth: true,
+    schoolName: true,
+    dateOfVisit: true,
   });
 
   const toggleColumnVisibility = (column: keyof typeof columnVisibility) => {
@@ -241,15 +166,16 @@ export function StudentTable() {
     try {
       await crudRequest(
         "DELETE",
-        `/student/delete-student/${selectedStudentId}`
+        `/visit/delete-visit/${selectedStudentId}`
       ).then(() => {
-        alert(`Successfully deleted student`);
+        toast.success(`Successfully deleted student`);
         setStudent((prev) => prev.filter((s) => s._id !== selectedStudentId));
         setFilteredStudents((prev) =>
           prev.filter((s) => s._id !== selectedStudentId)
         );
       });
     } catch (error) {
+      toast.error(`Failed to deleted student`);
       console.error("Error deleting student:", error);
     } finally {
       setOpen(false);
@@ -267,14 +193,11 @@ export function StudentTable() {
 
     try {
       const response = await crudRequest<{
-        result: Student[];
+        result: VisitStudent[];
         totalPages: number;
         pageCount: number;
         totalUser: number;
-      }>(
-        "GET",
-        `/student/get-pagination-students?page=${page}&limit=${limit}&search=${search}`
-      );
+      }>("GET", `/visit/visit?page=${page}&limit=${limit}&search=${search}`);
       if (response && Array.isArray(response.result)) {
         setStudent(response.result);
         setFilteredStudents(response.result);
@@ -320,16 +243,10 @@ export function StudentTable() {
     // Filter by gender
     if (selectedTab !== "all") {
       filtered = filtered.filter(
-        (s) => s.personalInfo.gender.toLowerCase() === selectedTab.toLowerCase()
+        (s) => s.gender.toLowerCase() === selectedTab.toLowerCase()
       );
     }
 
-    // Filter by fee status
-    if (filterFeeComplete !== null) {
-      filtered = filtered.filter((s) =>
-        filterFeeComplete ? s.remaining === 0 : s.remaining > 0
-      );
-    }
     // Filter by selected courses
     if (selectedCourses.length > 0) {
       filtered = filtered.filter((s) =>
@@ -340,18 +257,13 @@ export function StudentTable() {
     }
 
     setFilteredStudents(filtered);
-  }, [selectedTab, filterFeeComplete, selectedCourses, student]);
+  }, [selectedTab, selectedCourses, student]);
 
   useEffect(() => {
     setFilteredStudents(student);
   }, [student]);
 
-  // if (error)
-  //   return (
-  //     <div>
-  //       <Error />
-  //     </div>
-  //   );
+  // if (error) return <div>{error}</div>;
 
   const renderStudentTable = () => (
     <Card x-chunk="dashboard-06-chunk-0 " className="py-4">
@@ -368,21 +280,26 @@ export function StudentTable() {
               <TableRow>
                 {columnVisibility.photo && (
                   <TableHead className="w-[100px] sm:table-cell">
-                    <span className="sr-only">img</span>
+                    <span>Photo</span>
                   </TableHead>
                 )}
                 {columnVisibility.name && <TableHead>Name</TableHead>}
-                {columnVisibility.status && <TableHead>Status</TableHead>}
                 {columnVisibility.contact && (
                   <TableHead className="table-cell">Contact</TableHead>
+                )}
+                {columnVisibility.schoolName && (
+                  <TableHead className="table-cell">School</TableHead>
+                )}
+                {columnVisibility.gender && (
+                  <TableHead className="table-cell">Gender</TableHead>
                 )}
                 {columnVisibility.address && (
                   <TableHead className="table-cell">Address</TableHead>
                 )}
-                {columnVisibility.dateOfBirth && (
-                  <TableHead className="table-cell">Date of Birth</TableHead>
+                {columnVisibility.dateOfVisit && (
+                  <TableHead className="table-cell">Date of Visit</TableHead>
                 )}
-                <TableHead className="table-cell">Billing</TableHead>
+
                 <TableHead className="table-cell">
                   <span>Actions</span>
                 </TableHead>
@@ -399,7 +316,7 @@ export function StudentTable() {
                     {columnVisibility.photo && (
                       <TableCell className="hidden sm:table-cell">
                         <img
-                          alt="Product img"
+                          alt="Student Photo"
                           className="object-cover rounded-md aspect-square"
                           height="64"
                           src={student.photo}
@@ -409,124 +326,40 @@ export function StudentTable() {
                     )}
                     {columnVisibility.name && (
                       <TableCell className="font-medium">
-                        {student.personalInfo.studentName}
+                        {student.studentName}
                       </TableCell>
                     )}
-                    {columnVisibility.status && (
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {student.remaining === 0
-                            ? "Fee Complete"
-                            : "Fee Incomplete"}
-                        </Badge>
-                      </TableCell>
-                    )}
+
                     {columnVisibility.contact && (
                       <TableCell className="table-cell">
-                        {student.personalInfo.contactNo}
+                        {student.studentNumber}
+                      </TableCell>
+                    )}
+                    {columnVisibility.schoolName && (
+                      <TableCell className="table-cell">
+                        {student.schoolName}
+                      </TableCell>
+                    )}
+                    {columnVisibility.gender && (
+                      <TableCell className="table-cell">
+                        {student.gender}
                       </TableCell>
                     )}
                     {columnVisibility.address && (
                       <TableCell className="table-cell">
-                        {student.personalInfo.address}
+                        {student.address}
                       </TableCell>
                     )}
-                    {columnVisibility.dateOfBirth && (
+                    {columnVisibility.dateOfVisit && (
                       <TableCell className="table-cell">
-                        {student.personalInfo.dateOfBirth}
+                        <span>
+                          {new Date(student.dateOfVisit).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "long", day: "numeric" }
+                          )}
+                        </span>
                       </TableCell>
                     )}
-
-                    <Sheet>
-                      <TableCell>
-                        <SheetTrigger asChild>
-                          <Button variant="outline">Update Fee</Button>
-                        </SheetTrigger>
-                      </TableCell>
-
-                      <SheetContent>
-                        <SheetHeader>
-                          <SheetTitle>Update Fee</SheetTitle>
-                          <SheetDescription>
-                            Fill the data correctly to update fee.
-                          </SheetDescription>
-                        </SheetHeader>
-                        <div className="grid gap-4 py-4">
-                          <div className="items-center gap-4">
-                            <Label htmlFor="remaining" className="text-right">
-                              Total Remaining Amount
-                            </Label>
-                            <Input
-                              id="remaining"
-                              readOnly
-                              value={student.remaining}
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="items-center gap-4 ">
-                            <Label htmlFor="amount" className="text-right">
-                              Paid Amount
-                            </Label>
-                            <Input
-                              id="amount"
-                              value={updateFee.amount}
-                              name="amount"
-                              onChange={(e) =>
-                                handleBillingChange("amount", e.target.value)
-                              }
-                              placeholder="Enter paid amount"
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="items-center gap-4 ">
-                            <Label htmlFor="billNo" className="text-right">
-                              Bill No
-                            </Label>
-                            <Input
-                              id="billNo"
-                              value={updateFee.billNo}
-                              onChange={(e) =>
-                                handleBillingChange("billNo", e.target.value)
-                              }
-                              placeholder="Enter bill number"
-                              className="col-span-3"
-                            />
-                          </div>
-                          <div className="items-center gap-4">
-                            <Label htmlFor="billNo" className="text-right">
-                              Payment Method
-                            </Label>
-                            <Select
-                              onValueChange={(value) =>
-                                handleBillingChange("paymentMethod", value)
-                              }
-                              value={updateFee.paymentMethod}
-                            >
-                              <SelectTrigger
-                                id="paymentMethod"
-                                className="items-start [&_[data-description]]:hidden"
-                              >
-                                <SelectValue placeholder="Select Payment Method" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Cash">Cash</SelectItem>
-                                <SelectItem value="Online">Online</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <SheetFooter>
-                          <SheetClose asChild>
-                            <Button
-                              type="submit"
-                              onClick={() => submitBilling(student._id)}
-                            >
-                              Update Fee
-                            </Button>
-                          </SheetClose>
-                        </SheetFooter>
-                      </SheetContent>
-                    </Sheet>
 
                     <TableCell>
                       <Drawer>
@@ -543,14 +376,6 @@ export function StudentTable() {
                           >
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="flex justify-between cursor-pointer"
-                              onClick={() =>
-                                navigate(`/student/update/${student._id}`)
-                              }
-                            >
-                              Edit <Edit size={17} />
-                            </DropdownMenuItem>
                             <DrawerTrigger asChild>
                               <DropdownMenuItem className="flex justify-between cursor-pointer">
                                 View <View size={17} />
@@ -581,12 +406,11 @@ export function StudentTable() {
                             <DrawerHeader>
                               <DrawerTitle>Student Details</DrawerTitle>
                               <DrawerDescription>
-                                See details about{" "}
-                                {student.personalInfo.studentName}
+                                See details about {student.studentName}
                               </DrawerDescription>
                             </DrawerHeader>
                             <div className="p-4 pb-0">
-                              <StudentDetails {...student} />
+                              <VisitStudentDetails {...student} />
                             </div>
                             <DrawerFooter>
                               <DrawerClose asChild>
@@ -667,23 +491,21 @@ export function StudentTable() {
     const headers = [];
     if (columnVisibility.photo) headers.push("Photo");
     if (columnVisibility.name) headers.push("Name");
-    if (columnVisibility.status) headers.push("Status");
+    if (columnVisibility.gender) headers.push("Gender");
     if (columnVisibility.contact) headers.push("Contact");
     if (columnVisibility.address) headers.push("Address");
-    if (columnVisibility.dateOfBirth) headers.push("Date of Birth");
+    if (columnVisibility.dateOfVisit) headers.push("Date of Visit");
     csvRows.push(headers.join(","));
 
     // Add the rows of data
     filteredStudents.forEach((student) => {
       const row = [];
       if (columnVisibility.photo) row.push(student.photo);
-      if (columnVisibility.name) row.push(student.personalInfo.studentName);
-      if (columnVisibility.status)
-        row.push(student.remaining === 0 ? "Fee Complete" : "Fee Incomplete");
-      if (columnVisibility.contact) row.push(student.personalInfo.contactNo);
-      if (columnVisibility.address) row.push(student.personalInfo.address);
-      if (columnVisibility.dateOfBirth)
-        row.push(student.personalInfo.dateOfBirth);
+      if (columnVisibility.name) row.push(student.studentName);
+      if (columnVisibility.gender) row.push(student.gender);
+      if (columnVisibility.contact) row.push(student.studentNumber);
+      if (columnVisibility.address) row.push(student.address);
+      if (columnVisibility.dateOfVisit) row.push(student.dateOfVisit);
       csvRows.push(row.join(","));
     });
 
@@ -720,7 +542,7 @@ export function StudentTable() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>All Students</BreadcrumbPage>
+                <BreadcrumbPage>Visits Students</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -750,40 +572,6 @@ export function StudentTable() {
                 <TabsTrigger value="other">Other</TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-2 ml-auto">
-                {/* Filter by fee */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter by Fee
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by fee</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      checked={filterFeeComplete === null}
-                      onCheckedChange={() => setFilterFeeComplete(null)}
-                    >
-                      All
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={filterFeeComplete === true}
-                      onCheckedChange={() => setFilterFeeComplete(true)}
-                    >
-                      Fee Complete
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={filterFeeComplete === false}
-                      onCheckedChange={() => setFilterFeeComplete(false)}
-                    >
-                      Fee Incomplete
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 {/* filter by course */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -842,10 +630,10 @@ export function StudentTable() {
                       Name
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
-                      checked={columnVisibility.status}
-                      onCheckedChange={() => toggleColumnVisibility("status")}
+                      checked={columnVisibility.gender}
+                      onCheckedChange={() => toggleColumnVisibility("gender")}
                     >
-                      Status
+                      Gender
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
                       checked={columnVisibility.contact}
@@ -860,12 +648,20 @@ export function StudentTable() {
                       Address
                     </DropdownMenuCheckboxItem>
                     <DropdownMenuCheckboxItem
-                      checked={columnVisibility.dateOfBirth}
+                      checked={columnVisibility.schoolName}
                       onCheckedChange={() =>
-                        toggleColumnVisibility("dateOfBirth")
+                        toggleColumnVisibility("schoolName")
                       }
                     >
-                      Date of Birth
+                      School
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.dateOfVisit}
+                      onCheckedChange={() =>
+                        toggleColumnVisibility("dateOfVisit")
+                      }
+                    >
+                      Date of Visit
                     </DropdownMenuCheckboxItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -882,10 +678,10 @@ export function StudentTable() {
                   </span>
                 </Button>
                 <PopupModal
-                  text="Add Student"
+                  text="Add Visit Student"
                   icon={<Plus className="w-4 h-4 mr-2" />}
                   renderModal={(onClose) => (
-                    <StudentCreateForm modalClose={onClose} />
+                    <VisitStudentCreateForm modalClose={onClose} />
                   )}
                 />
               </div>

@@ -2,6 +2,8 @@ import React, { Suspense, lazy } from "react";
 import { Navigate, Outlet, useRoutes } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import StudentUpdateForm from "@/pages/students/components/StudentUpdateForm";
+import VisitPage from "@/pages/visit-student";
+import Loading from "@/pages/not-found/loading";
 
 // Lazy-loaded components
 const DashboardLayout = lazy(
@@ -30,7 +32,13 @@ const AppRouter: React.FC = () => {
       element: (
         <PrivateRoute>
           <DashboardLayout>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense
+              fallback={
+                <div>
+                  <Loading />
+                </div>
+              }
+            >
               <Outlet />
             </Suspense>
           </DashboardLayout>
@@ -39,6 +47,7 @@ const AppRouter: React.FC = () => {
       children: [
         { path: "/", element: <DashboardPage />, index: true },
         { path: "student", element: <StudentPage /> },
+        { path: "visit-student", element: <VisitPage /> },
         { path: "student/update/:id", element: <StudentUpdateForm /> },
         { path: "form", element: <FormPage /> },
         { path: "course", element: <CoursePage /> },

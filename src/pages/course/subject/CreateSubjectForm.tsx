@@ -12,6 +12,7 @@ import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 const courseFormSchema = z.object({
@@ -26,27 +27,32 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const form = useForm<CourseFormSchemaType>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
-      subjectName: "", 
-      monthlyFee: "", 
-      regularFee: "", 
+      subjectName: "",
+      monthlyFee: "",
+      regularFee: "",
     },
   });
 
-  const {id} = useParams();
-  
-  const onSubmit = async (values: CourseFormSchemaType) => {
+  const { id } = useParams();
 
+  const onSubmit = async (values: CourseFormSchemaType) => {
     const data = {
-      subjectName : values.subjectName,
-      monthlyFee : values.monthlyFee,
-      regularFee : values.regularFee,
-      courseId : id 
-    }
-    
-    await crudRequest('POST', '/subject/add-subject', data).then(()=>{
-      alert("Subject added successfully");
-      window.location.reload();
-    })
+      subjectName: values.subjectName,
+      monthlyFee: values.monthlyFee,
+      regularFee: values.regularFee,
+      courseId: id,
+    };
+
+    await crudRequest("POST", "/subject/add-subject", data)
+      .then(() => {
+        toast.success("Subject added successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      })
+      .then(() => {
+        toast.error("Failed to add subject");
+      });
   };
 
   return (
@@ -54,7 +60,7 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New Subject"}
         description={""}
-        className="space-y-2 py-4 text-center"
+        className="py-4 space-y-2 text-center"
       />
       <Form {...form}>
         <form
@@ -62,22 +68,22 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
           className="space-y-4"
           autoComplete="off"
         >
-            <FormField
-              control={form.control}
-              name="subjectName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter subject name"
-                      {...field}
-                      className=" px-4 py-6 shadow-inner drop-shadow-xl"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="subjectName"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="Enter subject name"
+                    {...field}
+                    className="px-4 py-6 shadow-inner drop-shadow-xl"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <FormField
               control={form.control}
@@ -88,7 +94,7 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <Input
                       placeholder="Enter monthly fee"
                       {...field}
-                      className=" px-4 py-6 shadow-inner drop-shadow-xl"
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
                     />
                   </FormControl>
                   <FormMessage />
@@ -104,7 +110,7 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <Input
                       placeholder="Enter regular fee"
                       {...field}
-                      className=" px-4 py-6 shadow-inner drop-shadow-xl"
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
                     />
                   </FormControl>
                   <FormMessage />

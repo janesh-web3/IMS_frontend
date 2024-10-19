@@ -1,27 +1,11 @@
+import { server } from "@/server";
 import axios, { AxiosRequestConfig, Method } from "axios";
-
-export async function getStudents(
-  offset: number,
-  pageLimit: number,
-  country: string
-) {
-  try {
-    const res = await axios.get(
-      `https://api.slingacademy.com/v1/sample-data/users?offset=${offset}&limit=${pageLimit}` +
-        (country ? `&search=${country}` : "")
-    );
-    return res.data;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-}
 
 // src/services/crudRequest.ts
 const token = sessionStorage.getItem("token");
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: server,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

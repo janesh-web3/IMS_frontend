@@ -102,7 +102,6 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({
   remaining,
   totalAmount,
   totalAfterDiscount,
-  dateOfAdmission,
 }) => {
   return (
     <div>

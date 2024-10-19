@@ -2,6 +2,7 @@ import PopupModal from "@/components/shared/popup-modal";
 import TableSearchInput from "@/components/shared/table-search-input";
 import ReciptCreateForm from "./ReciptCreateForm";
 import { ReciptTable } from "./Table";
+import { Plus } from "lucide-react";
 
 export default function ReciptLayout() {
   return (
@@ -12,11 +13,13 @@ export default function ReciptLayout() {
         </div>
         <div className="flex gap-3">
           <PopupModal
+            text="Add Recipt"
+            icon={<Plus className="w-4 h-4 mr-2" />}
             renderModal={(onClose) => <ReciptCreateForm modalClose={onClose} />}
           />
         </div>
       </div>
-      <ReciptTable/>
+      <ReciptTable />
     </>
   );
 }

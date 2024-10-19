@@ -4,6 +4,7 @@ import PopupModal from "@/components/shared/popup-modal";
 import TableSearchInput from "@/components/shared/table-search-input";
 import SubjectCreateForm from "./subject/CreateSubjectForm";
 import { Subject } from "./subject";
+import { Plus } from "lucide-react";
 
 const CourseDetail = () => {
   return (
@@ -24,6 +25,8 @@ const CourseDetail = () => {
           </div>
           <div className="flex gap-3">
             <PopupModal
+              text="Add Subject"
+              icon={<Plus className="w-4 h-4 mr-2" />}
               renderModal={(onClose) => (
                 <SubjectCreateForm modalClose={onClose} />
               )}

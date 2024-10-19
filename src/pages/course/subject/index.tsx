@@ -19,6 +19,8 @@ import {
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router-dom";
+import Loading from "@/pages/not-found/loading";
+import Error from "@/pages/not-found/error";
 
 type Subject = {
   _id: string;
@@ -64,8 +66,18 @@ export function Subject() {
     fetchCourses();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading)
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
+  if (error)
+    return (
+      <div>
+        <Error />
+      </div>
+    );
 
   return (
     <>
@@ -116,21 +128,21 @@ export function Subject() {
                   />
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="w-8 h-8 p-0">
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="mr-2 h-4 w-4" /> Update
+                        <Edit className="w-4 h-4 mr-2" /> Update
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => setOpen(true)}
                         className="cursor-pointer"
                       >
-                        <Trash className="mr-2 h-4 w-4" /> Delete
+                        <Trash className="w-4 h-4 mr-2" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

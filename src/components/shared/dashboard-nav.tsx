@@ -1,17 +1,17 @@
-'use client';
-import { Icons } from '@/components/ui/icons';
-import { cn } from '@/lib/utils';
-import { NavItem } from '@/types';
-import { Dispatch, SetStateAction } from 'react';
-import { useSidebar } from '@/hooks/use-sidebar';
+"use client";
+import { Icons } from "@/components/ui/icons";
+import { cn } from "@/lib/utils";
+import { NavItem } from "@/types";
+import { Dispatch, SetStateAction } from "react";
+import { useSidebar } from "@/hooks/use-sidebar";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger
-} from '@/components/ui/tooltip';
-import { usePathname } from '@/routes/hooks';
-import { Link } from 'react-router-dom';
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { usePathname } from "@/routes/hooks";
+import { Link } from "react-router-dom";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -22,7 +22,7 @@ interface DashboardNavProps {
 export default function DashboardNav({
   items,
   setOpen,
-  isMobileNav = false
+  isMobileNav = false,
 }: DashboardNavProps) {
   const path = usePathname();
   const { isMinimized } = useSidebar();
@@ -31,25 +31,25 @@ export default function DashboardNav({
     return null;
   }
 
-  console.log('isActive', isMobileNav, isMinimized);
+  console.log("isActive", isMobileNav, isMinimized);
 
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
         {items.map((item, index) => {
-          const Icon = Icons[item.icon || 'arrowRight'];
+          const Icon = Icons[item.icon || "arrowRight"];
           return (
             item.href && (
               <Tooltip key={index}>
                 <TooltipTrigger asChild>
                   <Link
-                    to={item.disabled ? '/' : item.href}
+                    to={item.disabled ? "/" : item.href}
                     className={cn(
-                      'flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:text-muted-foreground',
+                      "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:text-muted-foreground",
                       path === item.href
-                        ? 'bg-white text-black hover:text-black'
-                        : 'transparent',
-                      item.disabled && 'cursor-not-allowed opacity-80'
+                        ? "bg-white text-black hover:text-black"
+                        : "transparent",
+                      item.disabled && "cursor-not-allowed opacity-80"
                     )}
                     onClick={() => {
                       if (setOpen) setOpen(false);
@@ -60,7 +60,7 @@ export default function DashboardNav({
                     {isMobileNav || (!isMinimized && !isMobileNav) ? (
                       <span className="mr-2 truncate">{item.title}</span>
                     ) : (
-                      ''
+                      ""
                     )}
                   </Link>
                 </TooltipTrigger>
@@ -68,7 +68,7 @@ export default function DashboardNav({
                   align="center"
                   side="right"
                   sideOffset={8}
-                  className={!isMinimized ? 'hidden' : 'inline-block'}
+                  className={!isMinimized ? "hidden" : "inline-block"}
                 >
                   {item.title}
                 </TooltipContent>

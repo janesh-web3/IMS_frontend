@@ -5,6 +5,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { crudRequest } from "@/lib/api";
 import { Input } from "@/components/ui/input";
+import WebcamCapture from "@/components/shared/WebcamCapture";
+import { server } from "@/server";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [courses, setCourses] = useState<
@@ -22,6 +26,13 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [contactNo, setContactNo] = useState("");
   const [percentage, setPercentage] = useState("");
   const [monthlySalary, setMonthlySalary] = useState<number | "">(0);
+
+  const [photo, setPhoto] = useState<null | string | Blob>(null);
+
+  // Handle webcam capture
+  const handleCapturePhoto = (image: Blob) => {
+    setPhoto(image);
+  };
 
   const fetchCourses = async () => {
     try {
@@ -73,8 +84,8 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     );
   };
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
     const formattedCourses = selectedCourses.map((courseId) => ({
       courseEnroll: courseId,
@@ -93,12 +104,51 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       percentage,
       monthlySalary,
       courses: formattedCourses,
+      photo: photo,
     };
 
-    await crudRequest("POST", "/faculty/add-faculty", formData).then(() => {
-      alert("Faculty added successfully");
-      window.location.reload();
-    });
+    const token = sessionStorage.getItem("token");
+    {
+      photo === null
+        ? await crudRequest("POST", "/faculty/add-faculty", formData)
+            .then(() => {
+              toast.success("Teacher added successfully");
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            })
+            .catch((err) => {
+              console.error("Error adding teacher:", err);
+              toast.error("Failed to add teacher");
+            })
+        : await axios
+            .post(`${server}/faculty/add-faculty-photo`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: token,
+              },
+            })
+            .then(() => {
+              toast.success("Teacher added successfully");
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+            })
+            .catch(() => {
+              console.error("Error adding teacher with photo:");
+              toast.error("Failed to add teacher");
+            });
+    }
+  };
+
+  const [step, setStep] = useState(1);
+
+  const handleNext = () => {
+    setStep(step + 1);
+  };
+
+  const handlePrevious = () => {
+    setStep(step - 1);
   };
 
   return (
@@ -108,102 +158,145 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         description={""}
         className="py-4 space-y-2 text-center"
       />
-      <form onSubmit={onSubmit} className="space-y-4" autoComplete="off">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <form className="space-y-4" autoComplete="off">
+        {step === 1 && (
           <div>
-            <Label htmlFor="name">Teacher Name</Label>
-            <Input
-              id="name"
-              placeholder="Enter name"
-              value={name}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setName(e.target.value)
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="contactNo">Teacher Number</Label>
-            <Input
-              id="contactNo"
-              placeholder="Enter contact number"
-              value={contactNo}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setContactNo(e.target.value)
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="percentage">Teacher Percentage</Label>
-            <Input
-              id="percentage"
-              placeholder="Enter percentage"
-              value={percentage}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setPercentage(e.target.value)
-              }
-            />
-          </div>
-          <div>
-            <Label htmlFor="monthlySalary">Teacher Salary</Label>
-            <Input
-              id="monthlySalary"
-              placeholder="Enter monthly salary"
-              type="number"
-              value={monthlySalary}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setMonthlySalary(Number(e.target.value))
-              }
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label>Select Courses</Label>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {courses.map((course) => (
-              <div key={course._id}>
-                <Checkbox
-                  id={course._id}
-                  checked={selectedCourses.includes(course._id)}
-                  onCheckedChange={() => handleCourseChange(course._id)}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+              <div>
+                <Label htmlFor="name">Teacher Name</Label>
+                <Input
+                  id="name"
+                  placeholder="Enter name"
+                  value={name}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setName(e.target.value)
+                  }
                 />
-                <Label htmlFor={course._id}>{course.name}</Label>
-                {selectedCourses.includes(course._id) && (
-                  <div className="pl-6 space-y-2">
-                    {course.subjects.map((subject) => (
-                      <div key={subject._id}>
-                        <Checkbox
-                          id={subject._id}
-                          checked={selectedSubjects.includes(subject._id)}
-                          onCheckedChange={() =>
-                            handleSubjectChange(subject._id)
-                          }
-                        />
-                        <Label htmlFor={subject._id}>
-                          {subject.subjectName}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            ))}
-          </div>
-        </div>
+              <div>
+                <Label htmlFor="contactNo">Teacher Number</Label>
+                <Input
+                  id="contactNo"
+                  placeholder="Enter contact number"
+                  value={contactNo}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setContactNo(e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="percentage">Teacher Percentage</Label>
+                <Input
+                  id="percentage"
+                  placeholder="Enter percentage"
+                  value={percentage}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setPercentage(e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="monthlySalary">Teacher Salary</Label>
+                <Input
+                  id="monthlySalary"
+                  placeholder="Enter monthly salary"
+                  type="number"
+                  value={monthlySalary}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setMonthlySalary(Number(e.target.value))
+                  }
+                />
+              </div>
+            </div>
 
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            type="button"
-            variant="secondary"
-            className="rounded-full"
-            size="lg"
-            onClick={modalClose}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" className="rounded-full" size="lg">
-            Create Teacher
-          </Button>
+            <div className="space-y-4">
+              <Label>Select Courses</Label>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {courses.map((course) => (
+                  <div key={course._id} className="items-center space-x-3">
+                    <Checkbox
+                      id={course._id}
+                      checked={selectedCourses.includes(course._id)}
+                      onCheckedChange={() => handleCourseChange(course._id)}
+                    />
+                    <Label htmlFor={course._id}>{course.name}</Label>
+                    {selectedCourses.includes(course._id) && (
+                      <div className="items-center justify-center pl-6 space-y-2">
+                        {course.subjects.map((subject) => (
+                          <div
+                            key={subject._id}
+                            className="flex items-center gap-2"
+                          >
+                            <Checkbox
+                              id={subject._id}
+                              checked={selectedSubjects.includes(subject._id)}
+                              onCheckedChange={() =>
+                                handleSubjectChange(subject._id)
+                              }
+                            />
+                            <Label htmlFor={subject._id}>
+                              {subject.subjectName}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            <h2 className="text-lg font-medium">Upload Photo</h2>
+            <WebcamCapture onCapture={handleCapturePhoto} />
+          </div>
+        )}
+        <div className="grid justify-between grid-cols-2 gap-4">
+          {step === 1 && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="rounded-full max-w-40"
+              size="lg"
+              onClick={modalClose}
+            >
+              Cancel
+            </Button>
+          )}
+          {step > 1 && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="rounded-full max-w-40"
+              size="lg"
+              onClick={handlePrevious}
+            >
+              Previous
+            </Button>
+          )}
+
+          {step < 2 ? (
+            <Button
+              type="button"
+              className="rounded-full max-w-40"
+              size="lg"
+              onClick={handleNext}
+            >
+              Next
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="rounded-full max-w-40"
+              size="lg"
+              onClick={onSubmit}
+            >
+              Submit
+            </Button>
+          )}
         </div>
       </form>
     </div>

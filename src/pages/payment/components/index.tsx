@@ -2,6 +2,7 @@ import PopupModal from "@/components/shared/popup-modal";
 import TableSearchInput from "@/components/shared/table-search-input";
 import PaymentCreateForm from "./PaymentCreateForm";
 import { PaymentTable } from "./Table";
+import { Plus } from "lucide-react";
 
 export default function PaymentLayout() {
   return (
@@ -12,11 +13,15 @@ export default function PaymentLayout() {
         </div>
         <div className="flex gap-3">
           <PopupModal
-            renderModal={(onClose) => <PaymentCreateForm modalClose={onClose} />}
+            text="Add Payment"
+            icon={<Plus className="w-4 h-4 mr-2" />}
+            renderModal={(onClose) => (
+              <PaymentCreateForm modalClose={onClose} />
+            )}
           />
         </div>
       </div>
-      <PaymentTable/>
+      <PaymentTable />
     </>
   );
 }

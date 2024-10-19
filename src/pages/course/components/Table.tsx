@@ -19,9 +19,12 @@ import {
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import Loading from "@/pages/not-found/loading";
+import Error from "@/pages/not-found/error";
+import { toast } from "react-toastify";
 
 type Course = {
-  _id : string,
+  _id: string;
   name: string;
 };
 
@@ -30,7 +33,25 @@ export function CourseTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const onConfirm = async () => {};
+  const onConfirm = async (id: any) => {
+    try {
+      const response = await crudRequest<Course[]>(
+        "DELETE",
+        `/course/delete-course/${id}`
+      );
+      if (response) {
+        toast.info("Course deleted successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.error("Error deleting course");
+      }
+    } catch (error) {
+      toast.error("Error deleting course");
+      console.error("Error fetching course data:", error);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -52,8 +73,18 @@ export function CourseTable() {
     fetchCourses();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading)
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
+  if (error)
+    return (
+      <div>
+        <Error />
+      </div>
+    );
 
   return (
     <>
@@ -83,24 +114,27 @@ export function CourseTable() {
                   <AlertModal
                     isOpen={open}
                     onClose={() => setOpen(false)}
-                    onConfirm={onConfirm}
+                    onConfirm={() => onConfirm(course._id)}
                     loading={loading}
                   />
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
+                      <Button variant="ghost" className="w-8 h-8 p-0">
                         <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                       <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="mr-2 h-4 w-4" /> Update
+                        <Edit className="w-4 h-4 mr-2" /> Update
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setOpen(true)} className="cursor-pointer">
-                        <Trash className="mr-2 h-4 w-4" /> Delete
+                      <DropdownMenuItem
+                        onClick={() => setOpen(true)}
+                        className="cursor-pointer"
+                      >
+                        <Trash className="w-4 h-4 mr-2" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

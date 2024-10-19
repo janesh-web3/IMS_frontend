@@ -13,6 +13,7 @@ import { useRouter } from "@/routes/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import * as z from "zod";
 
 interface AuthResponse {
@@ -47,11 +48,12 @@ export default function UserAuthForm() {
         "/user/login-admin",
         data
       );
-      alert("Login successful");
+      toast.success("Login successful !");
       sessionStorage.setItem("token", response.token);
       router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
+      toast.error("Login Failed !");
     }
 
     console.log("data", data);

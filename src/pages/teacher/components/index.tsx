@@ -2,6 +2,7 @@ import PopupModal from "@/components/shared/popup-modal";
 import TableSearchInput from "@/components/shared/table-search-input";
 import TeacherCreateForm from "./TeacherCreateForm";
 import { TeacherTable } from "./Table";
+import { Plus } from "lucide-react";
 
 export default function TeacherLayout() {
   return (
@@ -12,11 +13,15 @@ export default function TeacherLayout() {
         </div>
         <div className="flex gap-3">
           <PopupModal
-            renderModal={(onClose) => <TeacherCreateForm modalClose={onClose} />}
+            text="Add Teacher"
+            icon={<Plus className="w-4 h-4 mr-2" />}
+            renderModal={(onClose) => (
+              <TeacherCreateForm modalClose={onClose} />
+            )}
           />
         </div>
       </div>
-      <TeacherTable/>
+      <TeacherTable />
     </>
   );
 }

@@ -43,12 +43,16 @@ export interface Courses {
 [];
 
 export interface StudentCourse {
-  courseEnroll: string;
+  courseEnroll: {
+    name: string;
+  };
   subjectsEnroll: {
-    subjectId: string;
-    subjectName: string;
+    subjectName: {
+      subjectName: string;
+    };
     feeType: string;
-    discount: number;
+    discount: string;
+    _id: string;
   }[];
 }
 

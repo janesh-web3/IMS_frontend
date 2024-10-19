@@ -33,6 +33,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Loading from "../not-found/loading";
+import Error from "../not-found/error";
+import { Control } from "./controls";
 
 type Dashboard = {
   totalAmount: string;
@@ -183,14 +186,14 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <>
-        <h1>Loading....</h1>
+        <Loading />
       </>
     );
   }
   if (error) {
     return (
       <div>
-        <h1>Failed to load data ! Please connect to internet... </h1>
+        <Error />
       </div>
     );
   }
@@ -203,12 +206,11 @@ export default function DashboardPage() {
             Hi, Welcome back 👋
           </h2>
         </div>
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs defaultValue="overview" className="space-y-4 ">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="analytics" disabled>
-              Analytics
-            </TabsTrigger>
+            <TabsTrigger value="accounting">Accounting</TabsTrigger>
+            <TabsTrigger value="control">Control</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -409,6 +411,11 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="accounting"></TabsContent>
+          <TabsContent value="control">
+            <Control />
           </TabsContent>
         </Tabs>
       </div>

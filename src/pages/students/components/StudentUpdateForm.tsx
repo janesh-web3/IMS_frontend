@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
 import { Courses, StudentDetails } from "@/types";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const StudentUpdateForm = () => {
   const [step, setStep] = useState(1);
@@ -346,12 +347,17 @@ const StudentUpdateForm = () => {
       totalAfterDiscount: feesInfo.totalAfterDiscount,
     };
 
-    await crudRequest("PUT", `/student/update-student/${id}`, studentData).then(
-      () => {
-        alert("Student updated successfully");
-        window.location.reload();
-      }
-    );
+    await crudRequest("PUT", `/student/update-student/${id}`, studentData)
+      .then(() => {
+        toast.success("Student updated successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      })
+      .catch((err) => {
+        toast.error("Error updating student");
+        console.error("Error updating student:", err);
+      });
   };
 
   return (

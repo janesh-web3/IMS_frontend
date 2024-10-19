@@ -18,6 +18,7 @@ import {
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 // Define your form schema using Zod
@@ -44,10 +45,13 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const onSubmit = async (values: StudentFormSchemaType) => {
     try {
       await crudRequest("POST", "/recipt/add-recipt", values);
-      alert("Receipt added successfully");
-      window.location.reload();
+      toast.success("Receipt added successfully");
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error("Error adding receipt:", error);
+      toast.error("Error adding receipt");
     }
   };
 
@@ -56,7 +60,7 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New Receipt"}
         description={""}
-        className="space-y-2 py-4 text-center"
+        className="py-4 space-y-2 text-center"
       />
       <Form {...form}>
         <form
@@ -110,9 +114,7 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                         {...field}
                         onValueChange={(value) => field.onChange(value)}
                       >
-                        <SelectTrigger
-                          className="items-start [&_[data-description]]:hidden"
-                        >
+                        <SelectTrigger className="items-start [&_[data-description]]:hidden">
                           <SelectValue placeholder="Select Payment Method" />
                         </SelectTrigger>
                         <SelectContent>

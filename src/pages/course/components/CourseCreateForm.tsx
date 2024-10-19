@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
 
 const courseFormSchema = z.object({
@@ -23,16 +24,22 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const form = useForm<CourseFormSchemaType>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
-      name: "", 
+      name: "",
     },
   });
 
   const onSubmit = async (values: CourseFormSchemaType) => {
     console.log(values);
-    await crudRequest('POST', '/course/add-course', values).then(()=>{
-      alert("Course added successfully");
-      window.location.reload();
-    })
+    await crudRequest("POST", "/course/add-course", values)
+      .then(() => {
+        toast.success("Course added successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      })
+      .catch(() => {
+        toast.error("Failed to add course");
+      });
   };
 
   return (
@@ -40,7 +47,7 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <Heading
         title={"Create New Course"}
         description={""}
-        className="space-y-2 py-4 text-center"
+        className="py-4 space-y-2 text-center"
       />
       <Form {...form}>
         <form
@@ -58,7 +65,7 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <Input
                       placeholder="Enter course name"
                       {...field}
-                      className=" px-4 py-6 shadow-inner drop-shadow-xl"
+                      className="px-4 py-6 shadow-inner drop-shadow-xl"
                     />
                   </FormControl>
                   <FormMessage />
