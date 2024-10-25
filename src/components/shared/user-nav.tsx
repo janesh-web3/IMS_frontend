@@ -10,22 +10,36 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { crudRequest } from "@/lib/api";
 
-export default function UserNav() {
-  const logout = () => {
-    sessionStorage.clear();
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+export default function UserNav({handleLogout} : any) {
+ 
+
+
+
+  const logout = async () => {
+    const logoutTime = new Date();
+    
+    // Capture logout event
+    const response =  await crudRequest('POST','/session/end', {
+      logoutTime,
+    });
+
+    if(response){
+      sessionStorage.clear();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative w-12 h-12 rounded-full">
-          <Avatar className="w-12 h-12">
+          <Avatar className="w-10 h-10">
             <AvatarImage
               src={
-                "https://png.pngtree.com/png-clipart/20230927/original/pngtree-man-avatar-image-for-profile-png-image_13001882.png"
+              "/profile.jpg"
               }
               alt={""}
             />
@@ -62,7 +76,7 @@ export default function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout}>
+        <DropdownMenuItem onClick={handleLogout}>
           Log out
           <DropdownMenuShortcut>⇧⌘L</DropdownMenuShortcut>
         </DropdownMenuItem>

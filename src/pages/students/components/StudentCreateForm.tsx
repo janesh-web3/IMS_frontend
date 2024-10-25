@@ -231,6 +231,19 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   }, []);
 
   const handleNext = () => {
+    if (step === 1) {
+      if (!personalInfo.studentName  || !personalInfo.address || !personalInfo.gender || !personalInfo.contactNo || personalInfo.billNo) {
+        toast.error('Please fill all the required fields');
+        return;
+      }
+    }
+    
+    if (step === 2) {
+      if (selectedCourses.length === 0) {
+        toast.error('Please select at least one course');
+        return;
+      }
+    }
     setStep(step + 1);
   };
 

@@ -397,12 +397,12 @@ export function StudentTable() {
                 filteredStudents.map((student, index) => (
                   <TableRow key={index}>
                     {columnVisibility.photo && (
-                      <TableCell className="hidden sm:table-cell">
+                      <TableCell>
                         <img
-                          alt="Product img"
+                          alt="/profile.jpg"
                           className="object-cover rounded-md aspect-square"
                           height="64"
-                          src={student.photo}
+                          src={student.photo ? student.photo : "/profile.jpg"}
                           width="64"
                         />
                       </TableCell>
@@ -414,7 +414,7 @@ export function StudentTable() {
                     )}
                     {columnVisibility.status && (
                       <TableCell>
-                        <Badge variant="secondary">
+                        <Badge variant={student.remaining === 0 ? "default" : "destructive"}>
                           {student.remaining === 0
                             ? "Fee Complete"
                             : "Fee Incomplete"}

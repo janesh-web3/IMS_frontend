@@ -41,22 +41,28 @@ export default function UserAuthForm() {
     defaultValues,
   });
 
-  const onSubmit = async (data: UserFormValue) => {
+  const onSubmit = async (formData: UserFormValue) => {
     try {
+      const loginTime = new Date();
+  
       const response: AuthResponse = await crudRequest(
         "POST",
         "/user/login-admin",
-        data
+        {...formData,loginTime}
       );
-      toast.success("Login successful !");
+  
+      toast.success("Login successful!");
       sessionStorage.setItem("token", response.token);
       router.push("/");
+      window.location.reload();
+
+  
     } catch (error) {
       console.error("Login failed:", error);
-      toast.error("Login Failed !");
+      toast.error("Login Failed!");
     }
-
-    console.log("data", data);
+  
+    console.log("formData", formData);
   };
 
   return (

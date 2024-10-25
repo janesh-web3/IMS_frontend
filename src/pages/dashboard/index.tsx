@@ -18,7 +18,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -36,6 +35,9 @@ import {
 import Loading from "../not-found/loading";
 import Error from "../not-found/error";
 import { Control } from "./controls";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import StudentDetails from "../students/components/StudentDetails";
+import { Button } from "@/components/ui/button";
 
 type Dashboard = {
   totalAmount: string;
@@ -44,52 +46,65 @@ type Dashboard = {
   totalRemainingAmount: string;
 };
 
-type Alert = {
-  personalInfo: {
-    name: string;
-    school: string;
-    address: string;
-    dob: string;
-    gender: string;
-    contactNo: string;
-    billNo: [
-      {
-        billNo: string;
-        dateSubmitted: string;
-        paid: string;
-        method: string;
-      },
-    ];
-    admissionNumber: {
-      type: string;
-    };
-    deadline: string;
-    guardianName: string;
-    guardianContact: string;
-    localGuardianName: string;
-    localGuardianContact: string;
-    paymentMethod: string;
-    referredBy: string;
+type Bill = {
+  billNo: string;
+  dateSubmitted: string;
+  paid: string;
+  method: string;
+  _id: string;
+};
+
+type SubjectEnroll = {
+  subjectName: {
+    subjectName: string;
   };
-  courses: [
-    {
-      courseEnroll: {};
-      subjectsEnroll: [{}];
-    },
-  ];
-  photo: string;
+  feeType: string;
+  discount: string;
+  _id: string;
+};
+
+type StudentCourse = {
+  courseEnroll: {
+    name: string;
+    _id: string;
+  };
+  subjectsEnroll: SubjectEnroll[];
+  _id: string;
+};
+
+type PersonalInfo = {
+  studentName: string;
+  schoolName: string;
+  address: string;
+  dateOfBirth: string | null;
+  gender: string;
+  contactNo: string;
+  billNo: Bill[];
+  admissionNumber: string;
+  paymentDeadline: string;
+  guardianName: string;
+  guardianContact: string;
+  localGuardianName: string;
+  localGuardianContact: string;
+  paymentMethod: string;
+  referredBy: string;
+};
+
+type Alert = {
+  _id: string;
+  personalInfo: PersonalInfo;
+  courses: StudentCourse[];
   admissionFee: number;
-  selectedBook: object;
   tshirtFee: number;
   examFee: number;
-  document: String;
+  document: string;
   totalDiscount: number;
   paid: number;
   remaining: number;
   totalAmount: number;
   totalAfterDiscount: number;
-  quizzes: {};
-  dateOfAdmission: {};
+  dateOfAdmission: string;
+  photo: string;
 };
 
 type Course = {
@@ -389,6 +404,9 @@ export default function DashboardPage() {
                   <div className="space-y-8 overflow-auto">
                     {alert &&
                       alert.map((data, index) => (
+                      <Drawer>
+                          <DrawerTrigger asChild className="cursor-pointer hover:bg-secondary hover:rounded-sm">
+                              
                         <div className="flex items-center" key={index}>
                           <Avatar className="h-9 w-9">
                             <AvatarImage src={data.photo} alt="Avatar" />
@@ -396,7 +414,7 @@ export default function DashboardPage() {
                           </Avatar>
                           <div className="ml-4 space-y-1">
                             <p className="text-sm font-medium leading-none">
-                              {data?.personalInfo?.name}
+                              {data?.personalInfo.studentName}
                             </p>
                             <p className="text-sm text-muted-foreground">
                               {data.personalInfo.contactNo}
@@ -406,6 +424,27 @@ export default function DashboardPage() {
                             {data?.remaining}
                           </div>
                         </div>
+                            </DrawerTrigger>
+                            <DrawerContent className="z-50">
+                          <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                            <DrawerHeader>
+                              <DrawerTitle>Student Details</DrawerTitle>
+                              <DrawerDescription>
+                                See details about{" "}
+                                {data?.personalInfo?.studentName}
+                              </DrawerDescription>
+                            </DrawerHeader>
+                            <div className="p-4 pb-0">
+                              <StudentDetails {...data} />
+                            </div>
+                            <DrawerFooter>
+                              <DrawerClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </DrawerClose>
+                            </DrawerFooter>
+                          </div>
+                        </DrawerContent>
+                      </Drawer>
                       ))}
                   </div>
                 </CardContent>
