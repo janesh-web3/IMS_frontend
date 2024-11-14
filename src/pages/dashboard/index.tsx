@@ -35,9 +35,19 @@ import {
 import Loading from "../not-found/loading";
 import Error from "../not-found/error";
 import { Control } from "./controls";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import StudentDetails from "../students/components/StudentDetails";
 import { Button } from "@/components/ui/button";
+import Accounting from "./accounting";
 
 type Dashboard = {
   totalAmount: string;
@@ -404,47 +414,49 @@ export default function DashboardPage() {
                   <div className="space-y-8 overflow-auto">
                     {alert &&
                       alert.map((data, index) => (
-                      <Drawer>
-                          <DrawerTrigger asChild className="cursor-pointer hover:bg-secondary hover:rounded-sm">
-                              
-                        <div className="flex items-center" key={index}>
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src={data.photo} alt="Avatar" />
-                            <AvatarFallback>OM</AvatarFallback>
-                          </Avatar>
-                          <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none">
-                              {data?.personalInfo.studentName}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {data.personalInfo.contactNo}
-                            </p>
-                          </div>
-                          <div className="ml-auto font-medium">
-                            {data?.remaining}
-                          </div>
-                        </div>
-                            </DrawerTrigger>
-                            <DrawerContent className="z-50">
-                          <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
-                            <DrawerHeader>
-                              <DrawerTitle>Student Details</DrawerTitle>
-                              <DrawerDescription>
-                                See details about{" "}
-                                {data?.personalInfo?.studentName}
-                              </DrawerDescription>
-                            </DrawerHeader>
-                            <div className="p-4 pb-0">
-                              <StudentDetails {...data} />
+                        <Drawer>
+                          <DrawerTrigger
+                            asChild
+                            className="cursor-pointer hover:bg-secondary hover:rounded-sm"
+                          >
+                            <div className="flex items-center" key={index}>
+                              <Avatar className="h-9 w-9">
+                                <AvatarImage src={data.photo} alt="Avatar" />
+                                <AvatarFallback>OM</AvatarFallback>
+                              </Avatar>
+                              <div className="ml-4 space-y-1">
+                                <p className="text-sm font-medium leading-none">
+                                  {data?.personalInfo.studentName}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {data.personalInfo.contactNo}
+                                </p>
+                              </div>
+                              <div className="ml-auto font-medium">
+                                {data?.remaining}
+                              </div>
                             </div>
-                            <DrawerFooter>
-                              <DrawerClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                              </DrawerClose>
-                            </DrawerFooter>
-                          </div>
-                        </DrawerContent>
-                      </Drawer>
+                          </DrawerTrigger>
+                          <DrawerContent className="z-50">
+                            <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                              <DrawerHeader>
+                                <DrawerTitle>Student Details</DrawerTitle>
+                                <DrawerDescription>
+                                  See details about{" "}
+                                  {data?.personalInfo?.studentName}
+                                </DrawerDescription>
+                              </DrawerHeader>
+                              <div className="p-4 pb-0">
+                                <StudentDetails {...data} />
+                              </div>
+                              <DrawerFooter>
+                                <DrawerClose asChild>
+                                  <Button variant="outline">Cancel</Button>
+                                </DrawerClose>
+                              </DrawerFooter>
+                            </div>
+                          </DrawerContent>
+                        </Drawer>
                       ))}
                   </div>
                 </CardContent>
@@ -452,7 +464,9 @@ export default function DashboardPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="accounting"></TabsContent>
+          <TabsContent value="accounting">
+            <Accounting />
+          </TabsContent>
           <TabsContent value="control">
             <Control />
           </TabsContent>

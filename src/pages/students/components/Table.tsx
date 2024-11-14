@@ -91,6 +91,7 @@ import {
 import { Courses } from "@/types";
 import Error from "@/pages/not-found/error";
 import Loading from "@/pages/not-found/loading";
+import { toast } from "react-toastify";
 
 type Bill = {
   billNo: string;
@@ -193,7 +194,7 @@ export function StudentTable() {
       `/student/update-student-cash/${id}`,
       updateFee
     ).then(() => {
-      alert("Fee Updated successfully");
+      toast.success("Fee Updated successfully");
       window.location.reload();
     });
   };
@@ -243,7 +244,7 @@ export function StudentTable() {
         "DELETE",
         `/student/delete-student/${selectedStudentId}`
       ).then(() => {
-        alert(`Successfully deleted student`);
+        toast.error(`Successfully deleted student`);
         setStudent((prev) => prev.filter((s) => s._id !== selectedStudentId));
         setFilteredStudents((prev) =>
           prev.filter((s) => s._id !== selectedStudentId)
@@ -414,7 +415,11 @@ export function StudentTable() {
                     )}
                     {columnVisibility.status && (
                       <TableCell>
-                        <Badge variant={student.remaining === 0 ? "default" : "destructive"}>
+                        <Badge
+                          variant={
+                            student.remaining === 0 ? "default" : "destructive"
+                          }
+                        >
                           {student.remaining === 0
                             ? "Fee Complete"
                             : "Fee Incomplete"}
