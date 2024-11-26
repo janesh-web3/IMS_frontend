@@ -232,15 +232,21 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (!personalInfo.studentName  || !personalInfo.address || !personalInfo.gender || !personalInfo.contactNo || personalInfo.billNo) {
-        toast.error('Please fill all the required fields');
+      if (
+        !personalInfo.studentName ||
+        !personalInfo.address ||
+        !personalInfo.gender ||
+        !personalInfo.contactNo ||
+        !personalInfo.billNo
+      ) {
+        toast.error("Please fill all the required fields");
         return;
       }
     }
-    
+
     if (step === 2) {
       if (selectedCourses.length === 0) {
-        toast.error('Please select at least one course');
+        toast.error("Please select at least one course");
         return;
       }
     }
@@ -345,7 +351,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
           <>
             <div className="grid grid-cols-2 uppercase gap-x-8 gap-y-4">
               <div>
-                <Label htmlFor="studentName">Student Name</Label>
+                <Label htmlFor="studentName">Student Name *</Label>
                 <Input
                   id="studentName"
                   placeholder="Enter student name"
@@ -363,7 +369,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div>
-                <Label htmlFor="address">Enter Address</Label>
+                <Label htmlFor="address">Enter Address *</Label>
                 <Input
                   id="address"
                   placeholder="Enter address"
@@ -397,7 +403,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </Popover>
               </div>
               <div>
-                <Label htmlFor="gender">Select Gender</Label>
+                <Label htmlFor="gender">Select Gender *</Label>
                 <Select
                   onValueChange={(value) => handleChange("gender", value)}
                   value={personalInfo.gender}
@@ -416,7 +422,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="contactNo">Enter Phone Number</Label>
+                <Label htmlFor="contactNo">Enter Phone Number *</Label>
                 <Input
                   id="contactNo"
                   placeholder="Enter phone number"
@@ -425,7 +431,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div>
-                <Label htmlFor="billNo">Enter Bill No</Label>
+                <Label htmlFor="billNo">Enter Bill No *</Label>
                 <Input
                   id="billNo"
                   placeholder="Enter bill number"

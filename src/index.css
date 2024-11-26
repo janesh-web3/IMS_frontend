@@ -95,7 +95,7 @@
 
 /* Customize the scrollbar width */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 9px;
 }
 
 /* Customize the track (background) of the scrollbar */

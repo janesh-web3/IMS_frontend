@@ -16,11 +16,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router-dom";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import UpdateSubjectForm from "./UpdateSubjectForm";
+import { toast } from "react-toastify";
 
 type Subject = {
   _id: string;
@@ -42,6 +52,26 @@ export function Subject() {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const { id } = useParams();
+
+  const onConfirm = async (id: any) => {
+    try {
+      const response = await crudRequest<Course[]>(
+        "DELETE",
+        `/subject/delete-subject/${id}`
+      );
+      if (response) {
+        toast.info("Subject deleted successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.error("Error deleting subject");
+      }
+    } catch (error) {
+      toast.error("Error deleting subject");
+      console.error("Error fetching subject data:", error);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -88,13 +118,14 @@ export function Subject() {
             <TableHead>Subject Name</TableHead>
             <TableHead>Monthly Fee</TableHead>
             <TableHead>Regular Fee</TableHead>
+            <TableHead>Update</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {!courses || courses.subjects.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={3}>No courses available</TableCell>
+              <TableCell colSpan={3}>No subject available</TableCell>
             </TableRow>
           ) : (
             courses.subjects.map((subject, index) => (
@@ -116,14 +147,28 @@ export function Subject() {
                   </Link>
                 </TableCell>
 
+                <Sheet>
+                  <TableCell>
+                    <SheetTrigger asChild>
+                      <Button variant="outline">Update</Button>
+                    </SheetTrigger>
+                  </TableCell>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Update Subject</SheetTitle>
+                      <SheetDescription>
+                        Fill the data correctly to update subject.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <UpdateSubjectForm id={subject._id} />
+                  </SheetContent>
+                </Sheet>
+
                 <TableCell>
                   <AlertModal
                     isOpen={open}
                     onClose={() => setOpen(false)}
-                    onConfirm={async () => {
-                      // Add delete logic here
-                      setOpen(false);
-                    }}
+                    onConfirm={() => onConfirm(subject._id)}
                     loading={loading}
                   />
                   <DropdownMenu modal={false}>
@@ -136,7 +181,7 @@ export function Subject() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="w-4 h-4 mr-2" /> Update
+                        <View className="w-4 h-4 mr-2" /> Details
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => setOpen(true)}

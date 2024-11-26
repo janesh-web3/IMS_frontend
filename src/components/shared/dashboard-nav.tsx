@@ -1,4 +1,5 @@
 "use client";
+
 import { Icons } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { NavItem } from "@/types";
@@ -11,7 +12,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePathname } from "@/routes/hooks";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import UpgradeToPro from "./upgrade-pro";
+import { usePackageContext } from "@/context/packageContext";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -27,16 +30,31 @@ export default function DashboardNav({
   const path = usePathname();
   const { isMinimized } = useSidebar();
 
-  if (!items?.length) {
+  // Access package details
+  const { packageDetails } = usePackageContext();
+  const userPlan = packageDetails?.plan || "Basic"; // Default to "Basic" if not defined
+
+  // Filter navigation items based on user plan
+  const filteredNavItems = items.filter(
+    (item) =>
+      item.tag === "Basic" ||
+      (userPlan === "Standard" && item.tag === "Standard")
+  );
+
+  if (!filteredNavItems.length) {
     return null;
   }
 
-  console.log("isActive", isMobileNav, isMinimized);
+  const navigate = useNavigate();
+
+  const handleUpgradeClick = () => {
+    navigate("/upgrade-to-pro");
+  };
 
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
-        {items.map((item, index) => {
+        {filteredNavItems.map((item, index) => {
           const Icon = Icons[item.icon || "arrowRight"];
           return (
             item.href && (
@@ -56,7 +74,6 @@ export default function DashboardNav({
                     }}
                   >
                     <Icon className={`ml-2.5 size-5`} />
-
                     {isMobileNav || (!isMinimized && !isMobileNav) ? (
                       <span className="mr-2 truncate">{item.title}</span>
                     ) : (
@@ -76,6 +93,11 @@ export default function DashboardNav({
             )
           );
         })}
+        <div className="mb-28">
+          {userPlan === "Basic" && (isMobileNav || !isMinimized) && (
+            <UpgradeToPro onClick={handleUpgradeClick} />
+          )}
+        </div>
       </TooltipProvider>
     </nav>
   );

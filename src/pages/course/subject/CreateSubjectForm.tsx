@@ -50,7 +50,7 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
           window.location.reload();
         }, 1000);
       })
-      .then(() => {
+      .catch(() => {
         toast.error("Failed to add subject");
       });
   };

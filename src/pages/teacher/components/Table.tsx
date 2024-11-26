@@ -16,10 +16,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { toast } from "react-toastify";
+import TeacherUpdateForm from "./TeacherUpdateForm";
 
 type Teacher = {
   _id: string;
@@ -34,7 +44,25 @@ export function TeacherTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const onConfirm = async () => {};
+  const onConfirm = async (id: any) => {
+    try {
+      const response = await crudRequest(
+        "DELETE",
+        `/faculty/delete-faculty/${id}`
+      );
+      if (response) {
+        toast.info("Teacher deleted successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.error("Error deleting teacher");
+      }
+    } catch (error) {
+      toast.error("Error deleting teacher");
+      console.error("Error fetching teacher data:", error);
+    }
+  };
 
   const fetchCourses = async () => {
     try {
@@ -84,6 +112,8 @@ export function TeacherTable() {
             <TableHead>Monthly Salary</TableHead>
             <TableHead>Percentage</TableHead>
             <TableHead>Courses</TableHead>
+            <TableHead>Update</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -102,12 +132,28 @@ export function TeacherTable() {
                 <TableCell>{teacher.contactNo}</TableCell>
                 <TableCell>{teacher.monthlySalary}</TableCell>
                 <TableCell>{teacher.percentage}</TableCell>
+                <Sheet>
+                  <TableCell>
+                    <SheetTrigger asChild>
+                      <Button variant="outline">Update</Button>
+                    </SheetTrigger>
+                  </TableCell>
+                  <SheetContent className="overflow-auto">
+                    <SheetHeader>
+                      <SheetTitle>Update Teacher</SheetTitle>
+                      <SheetDescription>
+                        Fill the data correctly to update teacher.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <TeacherUpdateForm id={teacher._id} />
+                  </SheetContent>
+                </Sheet>
 
                 <TableCell className="cursor-pointer">
                   <AlertModal
                     isOpen={open}
                     onClose={() => setOpen(false)}
-                    onConfirm={onConfirm}
+                    onConfirm={() => onConfirm(teacher._id)}
                     loading={loading}
                   />
                   <DropdownMenu modal={false}>
@@ -121,7 +167,7 @@ export function TeacherTable() {
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
                       <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="w-4 h-4 mr-2" /> Update
+                        <View className="w-4 h-4 mr-2" /> Details
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => setOpen(true)}

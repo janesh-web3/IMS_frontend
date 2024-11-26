@@ -4,6 +4,8 @@ import PrivateRoute from "./PrivateRoute";
 import StudentUpdateForm from "@/pages/students/components/StudentUpdateForm";
 import VisitPage from "@/pages/visit-student";
 import Loading from "@/pages/not-found/loading";
+import PremiumRoute from "./PremiumRoute";
+import ProPlanUpgrade from "@/components/shared/ProPlanUpgrade";
 
 // Lazy-loaded components
 const DashboardLayout = lazy(
@@ -57,7 +59,15 @@ const AppRouter: React.FC = () => {
         { path: "recipt", element: <ReciptPage /> },
         { path: "payment", element: <PaymentPage /> },
         { path: "handover", element: <HandOverPage /> },
-        { path: "quiz", element: <QuizPage /> },
+        { path: "upgrade-to-pro", element: <ProPlanUpgrade /> },
+        {
+          path: "quiz",
+          element: (
+            <PremiumRoute>
+              <QuizPage />
+            </PremiumRoute>
+          ),
+        },
       ],
     },
   ];

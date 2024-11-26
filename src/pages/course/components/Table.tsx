@@ -16,12 +16,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import { toast } from "react-toastify";
+import UpdateCourseForm from "./UpdateCourseForm";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 type Course = {
   _id: string;
@@ -93,6 +102,8 @@ export function CourseTable() {
           <TableRow>
             <TableHead className="w-[100px]">S.N</TableHead>
             <TableHead>Courses Name</TableHead>
+            <TableHead>Update</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -109,6 +120,22 @@ export function CourseTable() {
                 <Link to={`/course/${course._id}`}>
                   <TableCell>{course.name}</TableCell>
                 </Link>
+                <Sheet>
+                  <TableCell>
+                    <SheetTrigger asChild>
+                      <Button variant="outline">Update</Button>
+                    </SheetTrigger>
+                  </TableCell>
+                  <SheetContent>
+                    <SheetHeader>
+                      <SheetTitle>Update Course</SheetTitle>
+                      <SheetDescription>
+                        Fill the data correctly to update course.
+                      </SheetDescription>
+                    </SheetHeader>
+                    <UpdateCourseForm id={course._id} />
+                  </SheetContent>
+                </Sheet>
 
                 <TableCell className="cursor-pointer">
                   <AlertModal
@@ -126,10 +153,12 @@ export function CourseTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Edit className="w-4 h-4 mr-2" /> Update
-                      </DropdownMenuItem>
+                      <Link to={`${course._id}`}>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <View className="w-4 h-4 mr-2" />
+                          Details
+                        </DropdownMenuItem>
+                      </Link>
                       <DropdownMenuItem
                         onClick={() => setOpen(true)}
                         className="cursor-pointer"
