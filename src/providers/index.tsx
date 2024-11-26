@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Suspense } from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import ThemeProvider from "./theme-provider";
 import { SidebarProvider } from "@/hooks/use-sidebar";
 import PackageProvider from "@/context/packageContext";
@@ -40,18 +40,18 @@ export default function AppProvider({
   return (
     <Suspense>
       <HelmetProvider>
-        <BrowserRouter>
+        <HashRouter>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <QueryClientProvider client={queryClient}>
               <ReactQueryDevtools />
-              <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-                <PackageProvider>
+              <PackageProvider>
+                <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
                   <SidebarProvider>{children}</SidebarProvider>
-                </PackageProvider>
-              </ThemeProvider>
+                </ThemeProvider>
+              </PackageProvider>
             </QueryClientProvider>
           </ErrorBoundary>
-        </BrowserRouter>
+        </HashRouter>
       </HelmetProvider>
     </Suspense>
   );

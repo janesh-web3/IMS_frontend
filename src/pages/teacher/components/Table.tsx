@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash, View } from "lucide-react";
+import { MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";

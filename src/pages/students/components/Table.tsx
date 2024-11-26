@@ -92,6 +92,7 @@ import { Courses } from "@/types";
 import Error from "@/pages/not-found/error";
 import Loading from "@/pages/not-found/loading";
 import { toast } from "react-toastify";
+import PremiumComponent from "@/components/shared/PremiumComponent";
 
 type Bill = {
   billNo: string;
@@ -875,17 +876,19 @@ export function StudentTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 gap-1"
-                  onClick={exportToCSV}
-                >
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Export
-                  </span>
-                </Button>
+                <PremiumComponent>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1"
+                    onClick={exportToCSV}
+                  >
+                    <File className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Export
+                    </span>
+                  </Button>
+                </PremiumComponent>
                 <PopupModal
                   text="Add Student"
                   icon={<Plus className="w-4 h-4 mr-2" />}

@@ -13,7 +13,7 @@ const UpgradeToPro: React.FC<UpgradeToProProps> = ({ onClick }) => {
         <div className="flex flex-col items-center">
           {/* Icon with Glow */}
           <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 via-yellow-400 to-yellow-300 p-1 shadow-[0_0_15px_rgba(255,215,0,0.5)]">
-            <span className="flex items-center justify-center block w-full h-full text-lg font-bold text-yellow-400 bg-black rounded-full">
+            <span className="flex items-center justify-center w-full h-full text-lg font-bold text-yellow-400 bg-black rounded-full">
               🌟
             </span>
           </div>

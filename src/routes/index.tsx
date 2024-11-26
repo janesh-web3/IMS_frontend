@@ -26,6 +26,7 @@ const QuizPage = lazy(() => import("@/pages/quiz"));
 const ReciptPage = lazy(() => import("@/pages/recipt"));
 const TeacherPage = lazy(() => import("@/pages/teacher"));
 const NotFound = lazy(() => import("@/pages/not-found"));
+const SettingPage = lazy(() => import("@/pages/settings"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -65,6 +66,14 @@ const AppRouter: React.FC = () => {
           element: (
             <PremiumRoute>
               <QuizPage />
+            </PremiumRoute>
+          ),
+        },
+        {
+          path: "setting",
+          element: (
+            <PremiumRoute>
+              <SettingPage />
             </PremiumRoute>
           ),
         },

@@ -12,7 +12,6 @@ import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { z } from "zod";
 

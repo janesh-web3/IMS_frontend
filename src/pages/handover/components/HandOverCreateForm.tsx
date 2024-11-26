@@ -71,7 +71,7 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             <FormField
               control={control}
               name="reception"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormControl>
                     <Controller
@@ -112,7 +112,7 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             <FormField
               control={control}
               name="admin"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormControl>
                     <Controller

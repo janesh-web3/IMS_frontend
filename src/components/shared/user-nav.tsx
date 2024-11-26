@@ -10,39 +10,16 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { crudRequest } from "@/lib/api";
+import { Link } from "react-router-dom";
+import PremiumComponent from "./PremiumComponent";
 
-export default function UserNav({handleLogout} : any) {
- 
-
-
-
-  const logout = async () => {
-    const logoutTime = new Date();
-    
-    // Capture logout event
-    const response =  await crudRequest('POST','/session/end', {
-      logoutTime,
-    });
-
-    if(response){
-      sessionStorage.clear();
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
-  };
+export default function UserNav({ handleLogout }: any) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative w-12 h-12 rounded-full">
           <Avatar className="w-10 h-10">
-            <AvatarImage
-              src={
-              "/profile.jpg"
-              }
-              alt={""}
-            />
+            <AvatarImage src={"/profile.jpg"} alt={""} />
             <AvatarFallback>hello</AvatarFallback>
           </Avatar>
         </Button>
@@ -62,18 +39,22 @@ export default function UserNav({handleLogout} : any) {
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Notifications
-            <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Administration
-            <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <PremiumComponent>
+            <DropdownMenuItem>
+              Notifications
+              <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <Link to={"setting"}>
+              <DropdownMenuItem>
+                Settings
+                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </Link>
+            <DropdownMenuItem>
+              Administration
+              <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </PremiumComponent>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>

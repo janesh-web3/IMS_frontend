@@ -105,7 +105,7 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             <FormField
               control={form.control}
               name="paymentMethod"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <Controller
                     name="paymentMethod"

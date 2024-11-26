@@ -3,8 +3,6 @@ import { Card } from "@/components/ui/card";
 import { crudRequest } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
   PieChart,
   Pie,
   Cell,
@@ -77,6 +75,7 @@ const StudentDataVisualization: React.FC = () => {
   const [probalility, setProbalility] = useState<ProbalilityData | null>(null);
   const [advanced, setAdvanced] = useState<Advanced | null>(null);
 
+  console.log(descriptive);
   useEffect(() => {
     const loadData = async () => {
       const descriptiveData = await crudRequest<Descriptive>(

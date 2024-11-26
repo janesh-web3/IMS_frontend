@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import UserNav from './user-nav';
-import { crudRequest } from '@/lib/api';
+import { useState, useEffect } from "react";
+import UserNav from "./user-nav";
+import { crudRequest } from "@/lib/api";
+import PremiumComponent from "./PremiumComponent";
 
 const TimeTracker = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -9,24 +10,26 @@ const TimeTracker = () => {
 
   // Function to initialize the timer when the user logs in
   const initializeTimer = () => {
-    const token = sessionStorage.getItem('token');
+    const token = sessionStorage.getItem("token");
 
     if (token) {
-      const storedStartTime = sessionStorage.getItem('startTime');
+      const storedStartTime = sessionStorage.getItem("startTime");
       let start = storedStartTime ? new Date(storedStartTime) : new Date();
       if (!storedStartTime) {
-        sessionStorage.setItem('startTime', start.toISOString());
+        sessionStorage.setItem("startTime", start.toISOString());
       }
       setStartTime(start);
       setIsSessionActive(true); // Mark session as active
 
       // Calculate elapsed time since the last session start
-      const elapsedSeconds = Math.floor((new Date().getTime() - start.getTime()) / 1000);
+      const elapsedSeconds = Math.floor(
+        (new Date().getTime() - start.getTime()) / 1000
+      );
       setCurrentTime(elapsedSeconds);
 
       // Start the interval to update the timer on the UI
       const intervalId = setInterval(() => {
-        setCurrentTime(prevTime => prevTime + 1);
+        setCurrentTime((prevTime) => prevTime + 1);
       }, 1000);
 
       // Clean up the interval when component unmounts
@@ -45,19 +48,19 @@ const TimeTracker = () => {
 
       try {
         // Send the session data to the backend
-        await crudRequest('POST', '/session/start', {
+        await crudRequest("POST", "/session/start", {
           startTime,
           endTime,
           sessionDuration: sessionTime,
         });
 
         // Clean up session storage
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('startTime');
-        console.log('Session time saved:', sessionTime);
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("startTime");
+        console.log("Session time saved:", sessionTime);
         window.location.reload();
       } catch (error) {
-        console.error('Error saving session time:', error);
+        console.error("Error saving session time:", error);
       }
     }
   };
@@ -71,12 +74,13 @@ const TimeTracker = () => {
   };
 
   return (
-    <div className='flex justify-center items-center'>
-      <div className="px-2 font-semibold">
-        {Math.floor(currentTime / 60)} <b className='text-gray-400'>
-            MIN</b> {currentTime % 60} <b className='text-gray-400'>
-            SEC</b>
-      </div>
+    <div className="flex items-center justify-center">
+      <PremiumComponent>
+        <div className="px-2 font-semibold">
+          {Math.floor(currentTime / 60)} <b className="text-gray-400">MIN</b>{" "}
+          {currentTime % 60} <b className="text-gray-400">SEC</b>
+        </div>
+      </PremiumComponent>
       <div>
         <UserNav handleLogout={handleLogout} />
       </div>

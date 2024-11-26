@@ -15,6 +15,7 @@ import { usePathname } from "@/routes/hooks";
 import { Link, useNavigate } from "react-router-dom";
 import UpgradeToPro from "./upgrade-pro";
 import { usePackageContext } from "@/context/packageContext";
+import Billboard from "./Billboard";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -65,7 +66,9 @@ export default function DashboardNav({
                     className={cn(
                       "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:text-muted-foreground",
                       path === item.href
-                        ? "bg-white text-black hover:text-black"
+                        ? packageDetails.plan !== "Basic"
+                          ? "bg-primary text-white hover:text-gray-100"
+                          : "bg-primary text-black hover:text-black"
                         : "transparent",
                       item.disabled && "cursor-not-allowed opacity-80"
                     )}
@@ -96,6 +99,9 @@ export default function DashboardNav({
         <div className="mb-28">
           {userPlan === "Basic" && (isMobileNav || !isMinimized) && (
             <UpgradeToPro onClick={handleUpgradeClick} />
+          )}
+          {userPlan === "Standard" && (isMobileNav || !isMinimized) && (
+            <Billboard />
           )}
         </div>
       </TooltipProvider>

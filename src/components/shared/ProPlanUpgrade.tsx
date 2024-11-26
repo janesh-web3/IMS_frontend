@@ -6,32 +6,35 @@ import {
   CardFooter,
   CardContent,
 } from "@/components/ui/card";
-import axios from "axios";
-import { toast } from "../ui/use-toast";
+import { crudRequest } from "@/lib/api";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const ProPlanUpgrade: React.FC = () => {
+  const navigate = useNavigate();
+
   const handleSubscribe = async () => {
     try {
-      const response = await axios.post("/api/subscribe", { plan: "pro" });
-      toast({
-        title: "Success",
-        description: "You are now subscribed to Pro Plan!",
+      await crudRequest("PUT", "/packages/update-package", {
+        plan: "Standard",
+      }).then(() => {
+        toast.success("Package subscribed successfully");
+        navigate("/");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to subscribe. Please try again.",
-        variant: "destructive",
-      });
+      toast("Failed to subscribe. Please try again.");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
-      <Card className="w-full max-w-md rounded-lg shadow-xl bg-gradient-to-r from-yellow-700 via-yellow-600 to-yellow-300">
+      <Card className="w-full max-w-md rounded-lg shadow-xl bg-gradient-to-r from-yellow-900 via-yellow-700 to-yellow-400">
         <CardHeader className="text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900">Pro Plan</h2>
-          <p className="text-lg text-gray-800">
+          <h2 className="text-2xl font-extrabold text-gray-100">Pro Plan</h2>
+          <p className="text-lg text-gray-300">
             Take your experience to the next level
           </p>
         </CardHeader>

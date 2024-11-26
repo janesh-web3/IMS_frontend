@@ -2,7 +2,7 @@ import Heading from "@/components/shared/heading";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { crudRequest } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import WebcamCapture from "@/components/shared/WebcamCapture";
