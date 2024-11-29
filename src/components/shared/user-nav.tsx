@@ -40,10 +40,12 @@ export default function UserNav({ handleLogout }: any) {
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
           <PremiumComponent>
-            <DropdownMenuItem>
-              Notifications
-              <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
-            </DropdownMenuItem>
+            <Link to={"notification"}>
+              <DropdownMenuItem>
+                Notifications
+                <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </Link>
             <Link to={"setting"}>
               <DropdownMenuItem>
                 Settings

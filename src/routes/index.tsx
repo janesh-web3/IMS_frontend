@@ -27,6 +27,7 @@ const ReciptPage = lazy(() => import("@/pages/recipt"));
 const TeacherPage = lazy(() => import("@/pages/teacher"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const SettingPage = lazy(() => import("@/pages/settings"));
+const NotificationPage = lazy(() => import("@/pages/notification"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -74,6 +75,14 @@ const AppRouter: React.FC = () => {
           element: (
             <PremiumRoute>
               <SettingPage />
+            </PremiumRoute>
+          ),
+        },
+        {
+          path: "notification",
+          element: (
+            <PremiumRoute>
+              <NotificationPage />
             </PremiumRoute>
           ),
         },

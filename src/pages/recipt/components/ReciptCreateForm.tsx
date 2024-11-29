@@ -46,9 +46,27 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     try {
       await crudRequest("POST", "/recipt/add-recipt", values);
       toast.success("Receipt added successfully");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+
+      //  Prepare the notification payload
+      const notificationPayload = {
+        title: "New Receipt Added",
+        message: `A receipt of amount ${values.amount} has been created.`,
+        type: "Recipt",
+        forRoles: ["admin", "superadmin"],
+        push: true, // Enable push notifications
+        sound: true, // Enable sound notifications
+      };
+
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+      toast.success("Admins notified successfully!");
+
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 1000);
     } catch (error) {
       console.error("Error adding receipt:", error);
       toast.error("Error adding receipt");

@@ -52,10 +52,8 @@ export default function PackageProvider({ children }: PackageProviderProps) {
           "/packages/get-package"
         );
         setPackageDetails(response);
-        // console.log(response);
       } catch (error) {
         console.error("Failed to fetch package details:", error);
-        // Keep the default initialState if API call fails
       } finally {
         setIsLoading(false);
       }

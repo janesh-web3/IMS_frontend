@@ -9,6 +9,8 @@ import { HashRouter } from "react-router-dom";
 import ThemeProvider from "./theme-provider";
 import { SidebarProvider } from "@/hooks/use-sidebar";
 import PackageProvider from "@/context/packageContext";
+import NotificationProvider from "./notificationProvider";
+import AdminProvider from "@/context/adminContext";
 
 export const queryClient = new QueryClient();
 
@@ -45,9 +47,16 @@ export default function AppProvider({
             <QueryClientProvider client={queryClient}>
               <ReactQueryDevtools />
               <PackageProvider>
-                <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-                  <SidebarProvider>{children}</SidebarProvider>
-                </ThemeProvider>
+                <AdminProvider>
+                  <NotificationProvider>
+                    <ThemeProvider
+                      defaultTheme="dark"
+                      storageKey="vite-ui-theme"
+                    >
+                      <SidebarProvider>{children}</SidebarProvider>
+                    </ThemeProvider>
+                  </NotificationProvider>
+                </AdminProvider>
               </PackageProvider>
             </QueryClientProvider>
           </ErrorBoundary>
