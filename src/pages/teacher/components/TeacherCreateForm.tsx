@@ -87,6 +87,16 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "New Teacher Added",
+      message: `New Teacher ${name} has been added.`,
+      type: "Teacher",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     const formattedCourses = selectedCourses.map((courseId) => ({
       courseEnroll: courseId,
       subjectsEnroll:
@@ -113,9 +123,6 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         ? await crudRequest("POST", "/faculty/add-faculty", formData)
             .then(() => {
               toast.success("Teacher added successfully");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
             })
             .catch((err) => {
               console.error("Error adding teacher:", err);
@@ -130,15 +137,18 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             })
             .then(() => {
               toast.success("Teacher added successfully");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
             })
             .catch(() => {
               console.error("Error adding teacher with photo:");
               toast.error("Failed to add teacher");
             });
     }
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
+    modalClose();
   };
 
   const [step, setStep] = useState(1);

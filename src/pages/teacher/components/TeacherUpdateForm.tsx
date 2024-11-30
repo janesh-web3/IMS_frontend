@@ -132,6 +132,16 @@ const TeacherUpdateForm = ({ id }: { id: string }) => {
           })) || [],
     }));
 
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "Teacher Updated",
+      message: `Teacher named ${name} has been updated.`,
+      type: "Teacher",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     const formData = {
       name,
       contactNo,
@@ -143,14 +153,19 @@ const TeacherUpdateForm = ({ id }: { id: string }) => {
     await crudRequest("PUT", `/faculty/update-faculty/${id}`, formData)
       .then(() => {
         toast.success("Teacher updated successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
       })
       .catch((err) => {
         console.error("Error updating teacher:", err);
         toast.error("Failed to updating teacher");
       });
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (

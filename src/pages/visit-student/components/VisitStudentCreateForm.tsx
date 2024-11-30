@@ -85,6 +85,16 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "Visit Student Added",
+      message: `New Visit Student ${formData.studentName} has been added.`,
+      type: "VisitStudent",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     const updatedFormData = {
       ...formData,
       courses: coursesData
@@ -100,11 +110,14 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     };
 
     await crudRequest("POST", "/visit/add-visit", updatedFormData)
-      .then(() => {
+      .then(async () => {
         toast.success("Student added successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        await crudRequest(
+          "POST",
+          "/notification/add-notification",
+          notificationPayload
+        );
+        modalClose();
       })
       .catch(() => {
         toast.error("Failed to add student");

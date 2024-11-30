@@ -43,7 +43,21 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
   const onSubmit = async (values: StudentFormSchemaType) => {
     try {
+      const notificationPayload = {
+        title: "New Handover Added",
+        message: ` ${values.reception} handover ${values.amount} amount to ${values.admin}.`,
+        type: "Handover",
+        forRoles: ["admin", "superadmin"],
+        push: true,
+        sound: true,
+      };
+
       await crudRequest("POST", "/handover/add-handover", values);
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
       toast.success("Handover added successfully");
       setTimeout(() => {
         window.location.reload();

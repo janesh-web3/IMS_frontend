@@ -347,17 +347,32 @@ const StudentUpdateForm = () => {
       totalAfterDiscount: feesInfo.totalAfterDiscount,
     };
 
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "Student Updated",
+      message: `Student ${personalInfo.studentName} has been updated.`,
+      type: "Student",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     await crudRequest("PUT", `/student/update-student/${id}`, studentData)
       .then(() => {
         toast.success("Student updated successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
       })
       .catch((err) => {
         toast.error("Error updating student");
         console.error("Error updating student:", err);
       });
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (

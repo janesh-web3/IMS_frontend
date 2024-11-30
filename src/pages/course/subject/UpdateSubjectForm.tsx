@@ -63,6 +63,15 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
       courseId: id,
     };
 
+    const notificationPayload = {
+      title: "Subject Updated",
+      message: `A subject name ${values.subjectName} has been updated.`,
+      type: "Subject",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     await crudRequest("PUT", `/subject/update-subject/${id}`, data)
       .then(() => {
         toast.success("Subject updated successfully");
@@ -73,6 +82,12 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
       .catch(() => {
         toast.error("Failed to updated subject");
       });
+
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
   };
 
   return (

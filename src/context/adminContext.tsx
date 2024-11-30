@@ -5,11 +5,14 @@ interface Notification {
   message: string;
   title: string;
   type: string;
+  createdAt: string;
+  _id: string;
 }
 interface AdminDetails {
   role: string;
   username: string;
   notifications: {
+    isRead: boolean;
     notificationId: Notification;
   }[];
 }
@@ -25,6 +28,8 @@ const initialState: AdminDetails = {
 interface AdminContextType {
   adminDetails: AdminDetails;
   isLoading: boolean;
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  fetchAdminDetails: () => Promise<void>; // Corrected type
 }
 
 // Create the context
@@ -34,42 +39,72 @@ type AdminProviderProps = {
   children: React.ReactNode;
 };
 
-// Provider to fetch and store package details
+// Provider to fetch and store admin details
 export default function AdminProvider({ children }: AdminProviderProps) {
   const [adminDetails, setAdminDetails] = useState<AdminDetails>(initialState);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchAdminDetails = async () => {
+    try {
+      const response = await crudRequest<AdminDetails>("GET", "/user/get-role");
+      setAdminDetails(response);
+      console.log(response);
+    } catch (error) {
+      console.error("Failed to fetch admin details:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchAdminDetails = async () => {
-      try {
-        const response = await crudRequest<AdminDetails>(
-          "GET",
-          "/user/get-role"
-        );
-        setAdminDetails(response);
-        console.log(response);
-      } catch (error) {
-        console.error("Failed to fetch package details:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    const fetchData = async () => {
+      setIsLoading(true);
+      await fetchAdminDetails();
+      setIsLoading(false);
     };
 
-    fetchAdminDetails();
+    fetchData();
   }, []);
 
+  // Function to mark a notification as read
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      // API call to update the notification status
+      await crudRequest("PATCH", `/notification/mark-as-read`, {
+        notificationId,
+      });
+
+      // Update local state after a successful API call
+      const updatedNotifications = adminDetails.notifications.map((n) =>
+        n.notificationId._id === notificationId ? { ...n, isRead: true } : n
+      );
+
+      setAdminDetails({
+        ...adminDetails,
+        notifications: updatedNotifications,
+      });
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
+
   return (
-    <AdminContext.Provider value={{ adminDetails, isLoading }}>
+    <AdminContext.Provider
+      value={{
+        adminDetails,
+        isLoading,
+        markNotificationAsRead,
+        fetchAdminDetails,
+      }}
+    >
       {children}
     </AdminContext.Provider>
   );
 }
 
-// Custom hook for accessing the package context
+// Custom hook for accessing the admin context
 export const useAdminContext = () => {
   const context = useContext(AdminContext);
   if (!context) {
-    throw new Error("usePackageContext must be used within a PackageProvider");
+    throw new Error("useAdminContext must be used within an AdminProvider");
   }
   return context;
 };

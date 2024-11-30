@@ -189,15 +189,31 @@ export function StudentTable() {
     setUpdateFee((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submitBilling = async (id: string) => {
+  const submitBilling = async (id: string, name: string) => {
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "Student Billing",
+      message: `Rs. ${updateFee.amount} amount is billed by ${name}.`,
+      type: "Student",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
     await crudRequest<Billing>(
       "PUT",
       `/student/update-student-cash/${id}`,
       updateFee
     ).then(() => {
       toast.success("Fee Updated successfully");
-      window.location.reload();
     });
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   //pagination
@@ -525,7 +541,12 @@ export function StudentTable() {
                           <SheetClose asChild>
                             <Button
                               type="submit"
-                              onClick={() => submitBilling(student._id)}
+                              onClick={() =>
+                                submitBilling(
+                                  student._id,
+                                  student.personalInfo.studentName
+                                )
+                              }
                             >
                               Update Fee
                             </Button>

@@ -45,6 +45,15 @@ const UpdateCourseForm = ({ id }: { id: string }) => {
   }, [id, form]);
 
   const onSubmit = async (values: CourseFormSchemaType) => {
+    const notificationPayload = {
+      title: " Course Updated",
+      message: `A course name ${values.name} has been updated.`,
+      type: "Courses",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     await crudRequest("PUT", `/course/update-course/${id}`, values)
       .then(() => {
         toast.success("Course updated successfully");
@@ -55,6 +64,12 @@ const UpdateCourseForm = ({ id }: { id: string }) => {
       .catch(() => {
         toast.error("Failed to update course");
       });
+
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
   };
 
   return (

@@ -29,7 +29,15 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   });
 
   const onSubmit = async (values: CourseFormSchemaType) => {
-    console.log(values);
+    const notificationPayload = {
+      title: "New Course Added",
+      message: `A course name ${values.name} has been created.`,
+      type: "Courses",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     await crudRequest("POST", "/course/add-course", values)
       .then(() => {
         toast.success("Course added successfully");
@@ -40,6 +48,12 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       .catch(() => {
         toast.error("Failed to add course");
       });
+
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
   };
 
   return (

@@ -43,6 +43,15 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       courseId: id,
     };
 
+    const notificationPayload = {
+      title: "New Subject Added",
+      message: `A subject name ${values.subjectName} has been created.`,
+      type: "Subject",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     await crudRequest("POST", "/subject/add-subject", data)
       .then(() => {
         toast.success("Subject added successfully");
@@ -53,6 +62,12 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       .catch(() => {
         toast.error("Failed to add subject");
       });
+
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
   };
 
   return (

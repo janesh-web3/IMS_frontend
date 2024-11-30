@@ -90,8 +90,8 @@
   }
 
   .dark.premium {
-    --background: 20 14.3% 4.1%;
-    --foreground: 60 9.1% 97.8%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
     --card: 20 14.3% 4.1%;
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;

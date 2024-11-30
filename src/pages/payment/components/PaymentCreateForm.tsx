@@ -44,11 +44,23 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   // Handle form submission
   const onSubmit = async (values: StudentFormSchemaType) => {
     try {
+      const notificationPayload = {
+        title: "New Payment Added",
+        message: `A payment of ${values.amount} has been created.`,
+        type: "Payment",
+        forRoles: ["admin", "superadmin"],
+        push: true,
+        sound: true,
+      };
+
       await crudRequest("POST", "/payment/add-payment", values);
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
       toast.success("Payment added successfully");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      modalClose();
     } catch (error) {
       console.error("Error adding payment:", error);
       toast.error("Failed to add payment");

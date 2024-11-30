@@ -307,15 +307,22 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       photo: photo,
     };
 
+    //  Prepare the notification payload
+    const notificationPayload = {
+      title: "New Student Added",
+      message: `New Student ${personalInfo.studentName} has been added.`,
+      type: "Student",
+      forRoles: ["admin", "superadmin"],
+      push: true,
+      sound: true,
+    };
+
     const token = sessionStorage.getItem("token");
     {
       photo === null
         ? await crudRequest("POST", `/student/add-student`, studentData)
             .then(() => {
               toast.success("Student added successfully");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
             })
             .catch(() => {
               toast.error("Failed to add student");
@@ -329,14 +336,19 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             })
             .then(() => {
               toast.success("Student added successfully");
-              setTimeout(() => {
-                window.location.reload();
-              }, 1000);
             })
             .catch(() => {
               toast.error("Failed to add student");
             });
     }
+    await crudRequest(
+      "POST",
+      "/notification/add-notification",
+      notificationPayload
+    );
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (

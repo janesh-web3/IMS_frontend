@@ -64,6 +64,13 @@ export const navItems: NavItem[] = [
     icon: "user",
     label: "Quiz",
   },
+  {
+    title: "AI Model",
+    href: "/ai-model",
+    tag: "Standard",
+    icon: "user",
+    label: "AI Model",
+  },
 ];
 
 export const users = [
