@@ -93,6 +93,9 @@ import Error from "@/pages/not-found/error";
 import Loading from "@/pages/not-found/loading";
 import { toast } from "react-toastify";
 import PremiumComponent from "@/components/shared/PremiumComponent";
+import { Modal } from "@/components/ui/modal";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Zap } from "lucide-react";
 
 type Bill = {
   billNo: string;
@@ -243,7 +246,7 @@ export function StudentTable() {
     status: true,
     contact: true,
     address: true,
-    dateOfBirth: true,
+    dateOfBirth: false,
   });
 
   const toggleColumnVisibility = (column: keyof typeof columnVisibility) => {
@@ -371,6 +374,111 @@ export function StudentTable() {
   //     </div>
   //   );
 
+  // AI MODEL SETUP
+
+  const [response, setResponse] = useState<string>();
+  const [generate, setGenerate] = useState<boolean>(false);
+  const [generating, setGenerating] = useState<boolean>(false);
+  type ResponseElement = JSX.Element;
+
+  const formatResponse = (text: string): JSX.Element => {
+    const lines = text.split("\n"); // Split into lines for processing
+    const elements: ResponseElement[] = []; // Define as an array of JSX elements
+
+    lines.forEach((line, index) => {
+      if (line.startsWith("***")) {
+        // Handle `***` as a styled heading or separator
+        elements.push(
+          <h2 key={index} className="mt-4 text-xl font-semibold">
+            {line.replace("***", "").trim()}
+          </h2>
+        );
+      } else if (line.startsWith("*") || line.startsWith("-")) {
+        const bullet = line.replace(/^\*+|-+/, "").trim();
+        elements.push(
+          <li key={index} className="ml-6 list-disc">
+            {bullet}
+          </li>
+        );
+      } else if (line.startsWith("**")) {
+        {
+          line.replace("**", "").trim();
+        }
+      } else {
+        // Default handling for regular text
+        elements.push(
+          <p key={index} className="mb-2">
+            {line}
+          </p>
+        );
+      }
+    });
+
+    return <div>{elements}</div>;
+  };
+
+  const onClose = () => {
+    setGenerate(false);
+  };
+
+  const preparePrompt = (student: Student) => {
+    return `
+    Summarize the student record:
+    Name: ${student.personalInfo.studentName}
+    Gender: ${student.personalInfo.gender}
+    School: ${student.personalInfo.schoolName}
+    Address: ${student.personalInfo.address}
+    Contact: ${student.personalInfo.contactNo}
+    Guardian Name: ${student.personalInfo.guardianName}
+    Guardian Number: ${student.personalInfo.guardianContact}
+   Local Guardian Name: ${student.personalInfo.localGuardianName}
+   Local Guardian Number: ${student.personalInfo.localGuardianContact}
+    Admission Number: ${student.personalInfo.admissionNumber}
+    Total Paid: ${student.paid}
+    Outstanding Balance: ${student.remaining}
+    admissionFee: ${student.admissionFee}
+    tshirtFee: ${student.tshirtFee}
+    examFee: ${student.examFee}
+    totalDiscount: ${student.totalDiscount}
+    totalAmount: ${student.totalAmount}
+    totalAfterDiscount: ${student.totalAfterDiscount}
+    dateOfAdmission: ${student.dateOfAdmission}
+    Payment History:
+    ${student.personalInfo.billNo
+      .map(
+        (bill) =>
+          `- Bill No: ${bill.billNo}, Paid: ${bill.paid}, Method: ${bill.method}`
+      )
+      .join("\n")}
+      Courses Taken : ${student.courses.map(
+        (course) => `- Courses Enroll: ${course.courseEnroll.name}
+        - Subject Taken: ${course.subjectsEnroll.map(
+          (subject) => `- Subject Enroll : ${subject.subjectName?.subjectName}
+        -Discount : ${subject.discount}`
+        )}`
+      )}
+
+    Generate an overview and any insights.
+  `;
+  };
+
+  const handleGenerateReport = async (studentData: Student) => {
+    const prompt = preparePrompt(studentData);
+    setGenerate(true);
+    try {
+      setGenerating(true);
+      const response = await crudRequest<{ data: string }>(
+        "POST",
+        "/gemini/get-response",
+        { prompt }
+      );
+      setResponse(response.data);
+      setGenerating(false);
+    } catch (error) {
+      console.error("Error generating report:", error);
+    }
+  };
+
   const renderStudentTable = () => (
     <Card x-chunk="dashboard-06-chunk-0 " className="py-4">
       <CardHeader>
@@ -385,12 +493,16 @@ export function StudentTable() {
             <TableHeader>
               <TableRow>
                 {columnVisibility.photo && (
-                  <TableHead className="w-[100px] sm:table-cell">
-                    <span className="sr-only">img</span>
+                  <TableHead className="w-[100px] table-cell">
+                    <span>Photo</span>
                   </TableHead>
                 )}
-                {columnVisibility.name && <TableHead>Name</TableHead>}
-                {columnVisibility.status && <TableHead>Status</TableHead>}
+                {columnVisibility.name && (
+                  <TableHead className="table-cell">Name</TableHead>
+                )}
+                {columnVisibility.status && (
+                  <TableHead className="table-cell">Status</TableHead>
+                )}
                 {columnVisibility.contact && (
                   <TableHead className="table-cell">Contact</TableHead>
                 )}
@@ -401,6 +513,9 @@ export function StudentTable() {
                   <TableHead className="table-cell">Date of Birth</TableHead>
                 )}
                 <TableHead className="table-cell">Billing</TableHead>
+                <PremiumComponent>
+                  <TableHead className="table-cell">AI</TableHead>
+                </PremiumComponent>
                 <TableHead className="table-cell">
                   <span>Actions</span>
                 </TableHead>
@@ -408,14 +523,14 @@ export function StudentTable() {
             </TableHeader>
             <TableBody>
               {filteredStudents.length === 0 ? (
-                <TableRow>
+                <TableRow className="table-cell">
                   <TableCell colSpan={7}>No student a vailable</TableCell>
                 </TableRow>
               ) : (
                 filteredStudents.map((student, index) => (
                   <TableRow key={index}>
                     {columnVisibility.photo && (
-                      <TableCell>
+                      <TableCell className="table-cell">
                         <img
                           alt="/profile.jpg"
                           className="object-cover rounded-md aspect-square"
@@ -426,12 +541,12 @@ export function StudentTable() {
                       </TableCell>
                     )}
                     {columnVisibility.name && (
-                      <TableCell className="font-medium">
+                      <TableCell className="table-cell font-medium">
                         {student.personalInfo.studentName}
                       </TableCell>
                     )}
                     {columnVisibility.status && (
-                      <TableCell>
+                      <TableCell className="table-cell">
                         <Badge
                           variant={
                             student.remaining === 0 ? "default" : "destructive"
@@ -460,7 +575,7 @@ export function StudentTable() {
                     )}
 
                     <Sheet>
-                      <TableCell>
+                      <TableCell className="table-cell">
                         <SheetTrigger asChild>
                           <Button variant="outline">Update Fee</Button>
                         </SheetTrigger>
@@ -554,8 +669,19 @@ export function StudentTable() {
                         </SheetFooter>
                       </SheetContent>
                     </Sheet>
+                    <PremiumComponent>
+                      <TableCell className="table-cell">
+                        <button
+                          onClick={() => handleGenerateReport(student)}
+                          className="flex items-center gap-2 px-2 py-1 font-semibold text-white transition-all transform rounded-full shadow-lg bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 hover:from-indigo-500 hover:to-blue-500 hover:scale-105 hover:shadow-2xl"
+                        >
+                          <Zap className="w-5 h-5 text-teal-400" />
+                          Report
+                        </button>
+                      </TableCell>
+                    </PremiumComponent>
 
-                    <TableCell>
+                    <TableCell className="table-cell">
                       <Drawer>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -637,7 +763,7 @@ export function StudentTable() {
               <SelectTrigger id="itemsPerPage">
                 <SelectValue placeholder="Items per page" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="cursor-pointer">
                 <SelectItem value="5">5</SelectItem>
                 <SelectItem value="10">10</SelectItem>
                 <SelectItem value="20">20</SelectItem>
@@ -649,7 +775,7 @@ export function StudentTable() {
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    href="#"
+                    className="cursor-pointer"
                     isActive={currentPage === 1 ? false : true}
                     onClick={() =>
                       handlePageChange(Math.max(currentPage - 1, 1))
@@ -660,7 +786,7 @@ export function StudentTable() {
                 {[...Array(totalPages)].map((_, index) => (
                   <PaginationItem key={index}>
                     <PaginationLink
-                      href="#"
+                      className="cursor-pointer"
                       onClick={() => handlePageChange(index + 1)}
                       isActive={currentPage === index + 1}
                     >
@@ -670,7 +796,7 @@ export function StudentTable() {
                 ))}
                 <PaginationItem>
                   <PaginationNext
-                    href="#"
+                    className="cursor-pointer"
                     onClick={() =>
                       handlePageChange(Math.min(currentPage + 1, totalPages))
                     }
@@ -917,6 +1043,32 @@ export function StudentTable() {
                     <StudentCreateForm modalClose={onClose} />
                   )}
                 />
+                {generate && (
+                  <Modal
+                    isOpen={generate}
+                    onClose={onClose}
+                    className={
+                      "bg-card !px-1 w-full min-w-[300px] max-w-[1000px] overflow-y-auto"
+                    }
+                  >
+                    <ScrollArea>
+                      {generating ? (
+                        <div className="text-xl text-center">
+                          Report Generating ...
+                        </div>
+                      ) : (
+                        <>
+                          <h2 className="text-xl font-medium text-center">
+                            Student Report
+                          </h2>
+                          <div className="p-4 mt-4 max-h-[50vh]">
+                            {response && formatResponse(response)}
+                          </div>
+                        </>
+                      )}
+                    </ScrollArea>
+                  </Modal>
+                )}
               </div>
             </div>
 

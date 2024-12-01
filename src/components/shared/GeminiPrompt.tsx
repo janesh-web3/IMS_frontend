@@ -64,7 +64,6 @@ const GeminiPrompt: React.FC = () => {
 
   const handleSendPrompt = async () => {
     setLoading(true);
-    console.log(photoPreview);
     try {
       let result;
       if (file) {
