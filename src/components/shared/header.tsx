@@ -5,6 +5,7 @@ import { ModeToggle } from "./theme-toggle";
 import TimeTracker from "./Session";
 import Notification from "@/pages/notification/components/Notification";
 import { Link } from "react-router-dom";
+import PremiumComponent from "./PremiumComponent";
 
 // Custom hook to find the matched path
 const useMatchedPath = (pathname: string) => {
@@ -25,9 +26,11 @@ export default function Header() {
       <Heading title={headingText} />
       <div className="flex items-center ml-4 md:ml-6">
         <TimeTracker />
-        <Link to={"notification"}>
-          <Notification />
-        </Link>
+        <PremiumComponent>
+          <Link to={"notification"}>
+            <Notification />
+          </Link>
+        </PremiumComponent>
         <ModeToggle />
       </div>
     </div>

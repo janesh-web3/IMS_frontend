@@ -41,7 +41,7 @@ export const description = "A collection of health charts.";
 
 export function Control() {
   return (
-    <div className="flex flex-col flex-wrap items-start justify-center max-w-6xl gap-6 p-6 mx-auto chart-wrapper sm:flex-row sm:py-8">
+    <div className="flex flex-col flex-wrap items-start justify-center max-w-6xl gap-4 p-3 mx-auto mb-16 md:p-6 md:gap-6 chart-wrapper sm:flex-row sm:py-8 md:mb-10">
       <div className="grid w-full gap-6 sm:grid-cols-2 lg:max-w-[22rem] lg:grid-cols-1 xl:max-w-[25rem]">
         <Card className="lg:max-w-md" x-chunk="charts-01-chunk-0">
           <CardHeader className="pb-2 space-y-0">

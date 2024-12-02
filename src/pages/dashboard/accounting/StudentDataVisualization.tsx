@@ -133,7 +133,7 @@ const StudentDataVisualization: React.FC = () => {
   const colors = correlation.data.map(() => generateRandomColor());
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 p-2 mb-14 md:gap-6 md:p-6 md:grid-cols-3">
       {/* Distribution with Skewness Visualization */}
       <Card className="p-4 shadow-lg">
         <h3 className="mb-4 text-lg font-semibold text-center">

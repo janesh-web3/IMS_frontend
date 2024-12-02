@@ -87,9 +87,9 @@ export function HandOverTable() {
     );
 
   return (
-    <div className="w-full overflow-x-auto max-h-[500px] py-2 pb-16">
+    <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] md:py-2">
       <div className="w-full max-h-[200vh]">
-        <Table className="min-w-[800px] table-fixed">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">S.N</TableHead>

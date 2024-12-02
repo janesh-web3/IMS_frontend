@@ -150,7 +150,7 @@ export function VisitStudentTable() {
     gender: true,
     contact: true,
     address: true,
-    schoolName: true,
+    schoolName: false,
     dateOfVisit: true,
   });
 
@@ -267,7 +267,7 @@ export function VisitStudentTable() {
   // if (error) return <div>{error}</div>;
 
   const renderStudentTable = () => (
-    <Card x-chunk="dashboard-06-chunk-0 " className="py-4">
+    <Card x-chunk="dashboard-06-chunk-0 " className="py-2 md:py-4">
       <CardHeader>
         <CardTitle>Students</CardTitle>
         <CardDescription>
@@ -276,7 +276,7 @@ export function VisitStudentTable() {
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-[200vh]">
-          <Table className="min-w-[800px] table-fixed">
+          <Table>
             <TableHeader>
               <TableRow>
                 {columnVisibility.photo && (
@@ -427,7 +427,7 @@ export function VisitStudentTable() {
               )}
             </TableBody>
           </Table>
-          <div className="grid grid-cols-1 gap-10 mt-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-10 mt-3 md:mt-5 md:grid-cols-3">
             <Select
               onValueChange={(value) => setItemsPerPage(Number(value))}
               value={itemsPerPage.toString()}
@@ -699,7 +699,7 @@ export function VisitStudentTable() {
                 <Error />
               </div>
             ) : (
-              <div className="w-full overflow-x-auto max-h-[500px] py-2">
+              <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] py-2">
                 <TabsContent value="all">{renderStudentTable()}</TabsContent>
                 <TabsContent value="male">{renderStudentTable()}</TabsContent>
                 <TabsContent value="female">{renderStudentTable()}</TabsContent>

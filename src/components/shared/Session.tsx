@@ -76,7 +76,7 @@ const TimeTracker = () => {
   return (
     <div className="flex items-center justify-center">
       <PremiumComponent>
-        <div className="px-2 font-semibold">
+        <div className="px-2 text-[0.6rem] font-thin md:font-semibold md:text-lg ">
           {Math.floor(currentTime / 60)} <b className="text-gray-400">MIN</b>{" "}
           {currentTime % 60} <b className="text-gray-400">SEC</b>
         </div>

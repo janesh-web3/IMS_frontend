@@ -171,7 +171,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <form className="space-y-4" autoComplete="off">
         {step === 1 && (
           <div>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            <div className="grid gird-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <Label htmlFor="name">Teacher Name</Label>
                 <Input

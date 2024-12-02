@@ -96,7 +96,7 @@ export function CourseTable() {
     );
 
   return (
-    <>
+    <div className="w-full max-h-[200vh] overflow-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -173,6 +173,6 @@ export function CourseTable() {
           )}
         </TableBody>
       </Table>
-    </>
+    </div>
   );
 }

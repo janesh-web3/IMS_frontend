@@ -389,7 +389,7 @@ const StudentUpdateForm = () => {
         {/* first step */}
         {step === 1 && (
           <>
-            <div className="grid max-h-screen grid-cols-2 uppercase gap-x-8 gap-y-4">
+            <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <Label htmlFor="studentName">Student Name</Label>
                 <Input
@@ -562,7 +562,7 @@ const StudentUpdateForm = () => {
         {/* second step */}
         {step === 2 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 md:gap-x-8 md:gap-y-4">
               <div>
                 <Label htmlFor="admissionFee">Select Admission Fee</Label>
                 <Select
@@ -584,7 +584,7 @@ const StudentUpdateForm = () => {
                 </Select>
               </div>
 
-              <div className="flex flex-wrap gap-10">
+              <div className="grid grid-cols-1 gap-4 md:gap-10 md:grid-cols-3">
                 <div className="flex items-center justify-center gap-3 text-center">
                   <Label htmlFor="tShirtFee">T-Shirt Fee</Label>
                   <Checkbox
@@ -624,7 +624,7 @@ const StudentUpdateForm = () => {
                 <Label htmlFor="courses" className="mb-4">
                   Select Courses
                 </Label>
-                <div className="grid grid-cols-4 gap-x-10 gap-y-6">
+                <div className="grid md:grid-cols-4 md:gap-x-10 md:gap-y-6">
                   {coursesData &&
                     coursesData.map((course, index) => (
                       <div key={index}>

@@ -358,11 +358,11 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         description={""}
         className="pb-3 space-y-2 text-center"
       />
-      <form className="space-y-4" autoComplete="off">
+      <form className="space-y-2 md:space-y-4" autoComplete="off">
         {/* first step */}
         {step === 1 && (
           <>
-            <div className="grid grid-cols-2 uppercase gap-x-8 gap-y-4">
+            <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-8 gap-y-4">
               <div>
                 <Label htmlFor="studentName">Student Name *</Label>
                 <Input
@@ -535,7 +535,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         {/* second step */}
         {step === 2 && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 md:gap-x-8 md:gap-y-4">
               <div>
                 <Label htmlFor="admissionFee">Select Admission Fee</Label>
                 <Select
@@ -557,7 +557,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </Select>
               </div>
 
-              <div className="flex flex-wrap gap-10">
+              <div className="grid grid-cols-1 gap-4 md:gap-10 md:grid-cols-3">
                 <div className="flex items-center justify-center gap-3 text-center">
                   <Label htmlFor="tShirtFee">T-Shirt Fee</Label>
                   <Checkbox
@@ -593,11 +593,11 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               </div>
 
               {/* courses & subject */}
-              <div className="col-span-2 gap-10">
+              <div className="col-span-2 gap-10 pb-4">
                 <Label htmlFor="courses" className="mb-4">
                   Select Courses
                 </Label>
-                <div className="grid grid-cols-4 gap-x-10 gap-y-6">
+                <div className="grid md:grid-cols-4 md:gap-x-10 md:gap-y-6">
                   {coursesData &&
                     coursesData.map((course, index) => (
                       <div key={index}>
@@ -754,7 +754,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </Select>
               </div>
 
-              <div className="flex items-center justify-center gap-6 text-center">
+              <div className="grid items-center justify-center grid-cols-1 gap-2 pt-2 text-center md:gap-6 md:grid-cols-2">
                 <Label htmlFor="paymentDeadline">Payment Deadline</Label>
                 <Popover>
                   <PopoverTrigger asChild>

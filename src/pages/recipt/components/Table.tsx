@@ -119,9 +119,9 @@ export function ReciptTable() {
     );
 
   return (
-    <div className="w-full overflow-x-auto max-h-[500px] py-2 pb-16">
-      <div className="w-full max-h-[200vh] ">
-        <Table className="min-w-[800px] table-fixed">
+    <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
+      <div className="w-full max-h-[200vh]">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">S.N</TableHead>
@@ -134,7 +134,7 @@ export function ReciptTable() {
           <TableBody>
             {teachers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7}>No teachers available</TableCell>
+                <TableCell colSpan={7}>No receipt available</TableCell>
               </TableRow>
             ) : (
               teachers.map((teacher, index) => (
@@ -182,7 +182,7 @@ export function ReciptTable() {
         </Table>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 mt-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-10 mt-5 mb-10 md:mb-20 md:grid-cols-3">
         <Select
           onValueChange={(value) => setItemsPerPage(Number(value))}
           value={itemsPerPage.toString()}

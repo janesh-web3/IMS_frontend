@@ -480,7 +480,7 @@ export function StudentTable() {
   };
 
   const renderStudentTable = () => (
-    <Card x-chunk="dashboard-06-chunk-0 " className="py-4">
+    <Card x-chunk="dashboard-06-chunk-0 " className="py-2 md:py-4">
       <CardHeader>
         <CardTitle>Students</CardTitle>
         <CardDescription>
@@ -489,11 +489,11 @@ export function StudentTable() {
       </CardHeader>
       <CardContent>
         <div className="w-full max-h-[200vh]">
-          <Table className="min-w-[800px] table-fixed">
+          <Table>
             <TableHeader>
               <TableRow>
                 {columnVisibility.photo && (
-                  <TableHead className="w-[100px] table-cell">
+                  <TableHead className="table-cell">
                     <span>Photo</span>
                   </TableHead>
                 )}
@@ -755,7 +755,7 @@ export function StudentTable() {
               )}
             </TableBody>
           </Table>
-          <div className="grid grid-cols-1 gap-10 mt-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-10 mt-3 md:mt-5 md:grid-cols-3">
             <Select
               onValueChange={(value) => setItemsPerPage(Number(value))}
               value={itemsPerPage.toString()}
@@ -908,9 +908,7 @@ export function StudentTable() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
                       <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter by Fee
-                      </span>
+                      <span className="">Filter by Fee</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -942,9 +940,7 @@ export function StudentTable() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
                       <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter by Course
-                      </span>
+                      <span>Filter by Course</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -1081,7 +1077,7 @@ export function StudentTable() {
                 <Error />
               </div>
             ) : (
-              <div className="w-full overflow-x-auto max-h-[500px] py-2">
+              <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] md:py-2">
                 <TabsContent value="all">{renderStudentTable()}</TabsContent>
                 <TabsContent value="male">{renderStudentTable()}</TabsContent>
                 <TabsContent value="female">{renderStudentTable()}</TabsContent>

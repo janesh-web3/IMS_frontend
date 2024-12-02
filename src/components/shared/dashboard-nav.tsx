@@ -67,8 +67,8 @@ export default function DashboardNav({
                       "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:text-muted-foreground",
                       path === item.href
                         ? packageDetails.plan !== "Basic"
-                          ? "bg-primary text-white hover:text-gray-100"
-                          : "bg-primary text-black hover:text-black"
+                          ? "bg-primary text-primary-foreground hover:text-primary-foreground"
+                          : "bg-primary text-primary-foreground hover:text-primary-foreground "
                         : "transparent",
                       item.disabled && "cursor-not-allowed opacity-80"
                     )}

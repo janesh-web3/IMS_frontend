@@ -111,12 +111,12 @@ const GeminiPrompt: React.FC = () => {
   return (
     <div className="w-full h-screen overflow-y-auto">
       <div className="flex w-full max-w-6xl mx-auto">
-        <Card className="w-full mx-10 mt-10 mb-20 shadow-lg ">
+        <Card className="w-full mx-1 mt-5 mb-10 shadow-lg md:mt-10 md:mb-20 md:mx-10 ">
           <CardHeader>
             <CardTitle>Ask AI Anything</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {/* Textarea for prompt */}
               <Textarea
                 placeholder="Enter your detailed prompt here..."
@@ -126,8 +126,8 @@ const GeminiPrompt: React.FC = () => {
               />
 
               {/* File input with icon */}
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center space-x-2 cursor-pointer">
+              <div className="flex items-center space-x-1 md:space-x-4">
+                <label className="flex items-center space-x-1 cursor-pointer md:space-x-2">
                   <File className="w-5 h-5 text-blue-500" />
                   <span className="text-sm">Attach File</span>
                   <input
@@ -139,7 +139,7 @@ const GeminiPrompt: React.FC = () => {
                 </label>
 
                 {/* Photo input with icon */}
-                <label className="flex items-center space-x-2 cursor-pointer">
+                <label className="flex items-center space-x-1 cursor-pointer md:space-x-2">
                   <Image className="w-5 h-5 text-green-500" />
                   <span className="text-sm">Attach Photo</span>
                   <input
@@ -156,7 +156,7 @@ const GeminiPrompt: React.FC = () => {
                 <img
                   src={photoPreview}
                   alt="Uploaded preview"
-                  className="rounded-lg shadow-md max-h-32"
+                  className="rounded-lg shadow-md max-h-20 md:max-h-32"
                 />
               )}
 
@@ -167,7 +167,7 @@ const GeminiPrompt: React.FC = () => {
 
               {/* Response */}
               {response && (
-                <div className="p-4 mt-4 border rounded-lg bg-background">
+                <div className="p-2 mt-4 border rounded-lg md:p-4 bg-background">
                   <strong>Response:</strong>
                   <p className="my-2">
                     {" "}

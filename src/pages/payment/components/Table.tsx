@@ -118,9 +118,9 @@ export function PaymentTable() {
     );
 
   return (
-    <div className="w-full overflow-x-auto max-h-[500px] py-2 pb-16">
+    <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
       <div className="w-full max-h-[200vh]">
-        <Table className="min-w-[800px] table-fixed">
+        <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">S.N</TableHead>
@@ -181,7 +181,7 @@ export function PaymentTable() {
         </Table>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 mt-5 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-10 mt-3 mb-10 md:mb-20 md:mt-5 md:grid-cols-3">
         <Select
           onValueChange={(value) => setItemsPerPage(Number(value))}
           value={itemsPerPage.toString()}
