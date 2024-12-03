@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import PremiumComponent from "./PremiumComponent";
+import SuperAdminComponent from "./SuperAdminComponent";
 
 export default function UserNav({ handleLogout }: any) {
   return (
@@ -35,10 +36,12 @@ export default function UserNav({ handleLogout }: any) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
+          <Link to={"profile"}>
+            <DropdownMenuItem>
+              Profile
+              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
           <PremiumComponent>
             <Link to={"notification"}>
               <DropdownMenuItem>
@@ -46,16 +49,20 @@ export default function UserNav({ handleLogout }: any) {
                 <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
               </DropdownMenuItem>
             </Link>
-            <Link to={"setting"}>
-              <DropdownMenuItem>
-                Settings
-                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuItem>
-              Administration
-              <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
-            </DropdownMenuItem>
+            <SuperAdminComponent>
+              <Link to={"setting"}>
+                <DropdownMenuItem>
+                  Settings
+                  <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
+              <Link to={"administration"}>
+                <DropdownMenuItem>
+                  Administration
+                  <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
+            </SuperAdminComponent>
           </PremiumComponent>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

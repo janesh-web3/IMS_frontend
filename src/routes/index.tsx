@@ -29,6 +29,8 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 const SettingPage = lazy(() => import("@/pages/settings"));
 const NotificationPage = lazy(() => import("@/pages/notification"));
 const AIPage = lazy(() => import("@/pages/ai_model"));
+const ProfilePage = lazy(() => import("@/pages/profile"));
+const AdministrationPage = lazy(() => import("@/pages/administration"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -62,6 +64,7 @@ const AppRouter: React.FC = () => {
         { path: "recipt", element: <ReciptPage /> },
         { path: "payment", element: <PaymentPage /> },
         { path: "handover", element: <HandOverPage /> },
+        { path: "profile", element: <ProfilePage /> },
         { path: "upgrade-to-pro", element: <ProPlanUpgrade /> },
         {
           path: "quiz",
@@ -92,6 +95,14 @@ const AppRouter: React.FC = () => {
           element: (
             <PremiumRoute>
               <AIPage />
+            </PremiumRoute>
+          ),
+        },
+        {
+          path: "administration",
+          element: (
+            <PremiumRoute>
+              <AdministrationPage />
             </PremiumRoute>
           ),
         },
