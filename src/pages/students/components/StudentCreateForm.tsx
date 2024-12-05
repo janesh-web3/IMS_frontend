@@ -258,6 +258,99 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     setStep(step - 1);
   };
 
+  // bill print functionality
+  // Add this utility function to format currency
+  const formatCurrency = (amount: string) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "NPR",
+    }).format(Number(amount));
+  };
+
+  // ... existing imports ...
+
+  // Add these type definitions at the top of the file
+  type StudentBill = {
+    studentName: string;
+    billNo: string;
+    amount: number;
+    totalAmount: number;
+    method: string;
+    remaining: number;
+  };
+
+  // Update the generateBill function with proper typing
+  const generateBill = (studentData: StudentBill) => {
+    const billHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Fee Receipt</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .bill-container { max-width: 400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .bill-details { margin-bottom: 20px; }
+        .bill-row { display: flex; justify-content: space-between; margin: 5px 0; }
+        .footer { margin-top: 30px; text-align: center; }
+        @media print {
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="bill-container">
+        <div class="header">
+          <h2>Fee Receipt</h2>
+          <p>Date: ${new Date().toLocaleDateString()}</p>
+        </div>
+        
+        <div class="bill-details">
+          <div class="bill-row">
+            <strong>Student Name:</strong>
+            <span>${studentData.studentName}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Bill No:</strong>
+            <span>${studentData.billNo}</span>
+            <div class="bill-row">
+              <strong>Total Amount:</strong>
+              <span>${formatCurrency(studentData.totalAmount.toString())}</span>
+            </div>
+          </div>
+          <div class="bill-row">
+            <strong>Payment Method:</strong>
+            <span>${studentData.method}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Remaining Amount:</strong>
+            <span>${formatCurrency(studentData.remaining.toString())}</span>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Thank you for your payment!</p>
+        </div>
+      </div>
+      <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()">Print Receipt</button>
+      </div>
+    </body>
+    </html>
+  `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(billHTML);
+      printWindow.document.close();
+      // Automatically trigger print
+      printWindow.onload = function () {
+        printWindow.print();
+      };
+    }
+  };
+
+  // Update the onSubmit function to handle bill generation
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -307,7 +400,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       photo: photo,
     };
 
-    //  Prepare the notification payload
+    // Prepare the notification payload
     const notificationPayload = {
       title: "New Student Added",
       message: `New Student ${personalInfo.studentName} has been added.`,
@@ -318,38 +411,45 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     };
 
     const token = sessionStorage.getItem("token");
-    {
-      photo === null
-        ? await crudRequest("POST", `/student/add-student`, studentData)
-            .then(() => {
-              toast.success("Student added successfully");
-            })
-            .catch(() => {
-              toast.error("Failed to add student");
-            })
-        : await axios
-            .post(`${server}/student/add-student-photo`, studentData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: token,
-              },
-            })
-            .then(() => {
-              toast.success("Student added successfully");
-            })
-            .catch(() => {
-              toast.error("Failed to add student");
-            });
+    try {
+      if (photo === null) {
+        await crudRequest("POST", `/student/add-student`, studentData);
+        toast.success("Student added successfully");
+      } else {
+        await axios.post(`${server}/student/add-student-photo`, studentData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: token,
+          },
+        });
+        toast.success("Student added successfully");
+      }
+
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+
+      // Generate and print bill
+      const studentBill: StudentBill = {
+        studentName: personalInfo.studentName,
+        billNo: personalInfo.billNo,
+        totalAmount: feesInfo.totalAmount,
+        amount: feesInfo.paidAmount,
+        method: feesInfo.paymentMethod,
+        remaining: feesInfo.remainingAmount,
+      };
+      generateBill(studentBill);
+
+      modalClose();
+    } catch (error) {
+      toast.error("Failed to add student");
+      console.error("Error adding student:", error);
     }
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
   };
+
+  // ... rest of the component code ...
 
   return (
     <div className="px-2">

@@ -162,6 +162,7 @@ type Billing = {
   amount: number;
   billNo: number;
   paymentMethod: string;
+  remaining: number;
 };
 
 export function StudentTable() {
@@ -181,18 +182,144 @@ export function StudentTable() {
   );
   const [courses, setCourses] = useState<Courses[]>([]);
 
+  //bill print
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "NPR",
+    }).format(amount);
+  };
+
+  // Add the generateBill function
+  const generateBill = (studentData: {
+    studentName: string;
+    billNo: number;
+    amount: number;
+    method: string;
+    remaining: number;
+    date?: string;
+  }) => {
+    const billHTML = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Fee Receipt</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .bill-container { 
+          max-width: 400px; 
+          margin: 0 auto; 
+          padding: 20px;
+          border: 1px solid #ccc;
+        }
+        .header { 
+          text-align: center; 
+          margin-bottom: 20px;
+          border-bottom: 2px solid #333;
+          padding-bottom: 10px;
+        }
+        .bill-details { 
+          margin-bottom: 20px;
+          padding: 10px;
+          background-color: #f9f9f9;
+        }
+        .bill-row { 
+          display: flex; 
+          justify-content: space-between; 
+          margin: 10px 0;
+          padding: 5px 0;
+          border-bottom: 1px dashed #ccc;
+        }
+        .footer { 
+          margin-top: 30px; 
+          text-align: center;
+          border-top: 2px solid #333;
+          padding-top: 10px;
+        }
+        @media print {
+          .no-print { display: none; }
+          body { margin: 0; }
+          .bill-container { border: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="bill-container">
+        <div class="header">
+          <h2>Fee Receipt</h2>
+          <p>Date: ${studentData.date || new Date().toLocaleDateString()}</p>
+        </div>
+        
+        <div class="bill-details">
+          <div class="bill-row">
+            <strong>Student Name:</strong>
+            <span>${studentData.studentName}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Bill No:</strong>
+            <span>${studentData.billNo}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Amount Paid:</strong>
+            <span>${formatCurrency(studentData.amount)}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Payment Method:</strong>
+            <span>${studentData.method}</span>
+          </div>
+          <div class="bill-row">
+            <strong>Remaining Amount:</strong>
+            <span>${formatCurrency(studentData.remaining)}</span>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Thank you for your payment!</p>
+          <p>This is a computer generated receipt.</p>
+        </div>
+      </div>
+      <div class="no-print" style="text-align: center; margin-top: 20px;">
+        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer;">Print Receipt</button>
+      </div>
+    </body>
+    </html>
+  `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(billHTML);
+      printWindow.document.close();
+      // Automatically trigger print
+      printWindow.onload = function () {
+        printWindow.print();
+      };
+    }
+  };
+
   //Update fee and billing
   const [updateFee, setUpdateFee] = useState<Billing>({
     amount: 0,
     billNo: 0,
     paymentMethod: "",
+    remaining: 0,
   });
 
   const handleBillingChange = (name: string, value: any) => {
     setUpdateFee((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submitBilling = async (id: string, name: string) => {
+  const submitBilling = async (student: Student) => {
+    if (!updateFee.amount || !updateFee.billNo || !updateFee.paymentMethod) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    console.log(student.remaining, updateFee.amount);
+    if (updateFee.amount > student.remaining) {
+      toast.error("Paid amount cannot be greater than remaining amount");
+      return;
+    }
+
     //  Prepare the notification payload
     const notificationPayload = {
       title: "Student Billing",
@@ -202,21 +329,41 @@ export function StudentTable() {
       push: true,
       sound: true,
     };
-    await crudRequest<Billing>(
-      "PUT",
-      `/student/update-student-cash/${id}`,
-      updateFee
-    ).then(() => {
-      toast.success("Fee Updated successfully");
-    });
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+
+    try {
+      await crudRequest<Billing>(
+        "PUT",
+        `/student/update-student-cash/${student._id}`,
+        updateFee
+      ).then(() => {
+        toast.success("Fee Updated successfully");
+      });
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+      // Generate and print bill
+      const studentBillData = {
+        studentName: student.personalInfo.studentName,
+        billNo: updateFee.billNo,
+        amount: updateFee.amount,
+        method: updateFee.paymentMethod,
+        remaining: student.remaining,
+        date: new Date().toLocaleDateString(),
+      };
+
+      setUpdateFee({
+        amount: 0,
+        billNo: 0,
+        paymentMethod: "",
+        remaining: 0,
+      });
+
+      generateBill(studentBillData);
+    } catch (error) {
+      console.error("Error updating fee:", error);
+    }
   };
 
   //pagination
@@ -585,7 +732,7 @@ export function StudentTable() {
                         <SheetHeader>
                           <SheetTitle>Update Fee</SheetTitle>
                           <SheetDescription>
-                            Fill the data correctly to update fee.
+                            Update fee for {student.personalInfo.studentName}
                           </SheetDescription>
                         </SheetHeader>
                         <div className="grid gap-4 py-4">
@@ -600,38 +747,56 @@ export function StudentTable() {
                               className="col-span-3"
                             />
                           </div>
-                          <div className="items-center gap-4 ">
+                          <div className="items-center gap-4">
                             <Label htmlFor="amount" className="text-right">
-                              Paid Amount
+                              Paid Amount *
                             </Label>
                             <Input
                               id="amount"
-                              value={updateFee.amount}
-                              name="amount"
+                              type="number"
+                              value={updateFee.amount || ""}
                               onChange={(e) =>
-                                handleBillingChange("amount", e.target.value)
+                                handleBillingChange(
+                                  "amount",
+                                  Number(e.target.value)
+                                )
                               }
                               placeholder="Enter paid amount"
                               className="col-span-3"
+                              required
                             />
-                          </div>
-                          <div className="items-center gap-4 ">
-                            <Label htmlFor="billNo" className="text-right">
-                              Bill No
-                            </Label>
-                            <Input
-                              id="billNo"
-                              value={updateFee.billNo}
-                              onChange={(e) =>
-                                handleBillingChange("billNo", e.target.value)
-                              }
-                              placeholder="Enter bill number"
-                              className="col-span-3"
-                            />
+                            {updateFee.amount > student.remaining && (
+                              <p className="text-sm text-red-500">
+                                Amount cannot exceed remaining balance of{" "}
+                                {student.remaining}
+                              </p>
+                            )}
                           </div>
                           <div className="items-center gap-4">
                             <Label htmlFor="billNo" className="text-right">
-                              Payment Method
+                              Bill No *
+                            </Label>
+                            <Input
+                              id="billNo"
+                              type="number"
+                              value={updateFee.billNo || ""}
+                              onChange={(e) =>
+                                handleBillingChange(
+                                  "billNo",
+                                  Number(e.target.value)
+                                )
+                              }
+                              placeholder="Enter bill number"
+                              className="col-span-3"
+                              required
+                            />
+                          </div>
+                          <div className="items-center gap-4">
+                            <Label
+                              htmlFor="paymentMethod"
+                              className="text-right"
+                            >
+                              Payment Method *
                             </Label>
                             <Select
                               onValueChange={(value) =>
@@ -639,10 +804,7 @@ export function StudentTable() {
                               }
                               value={updateFee.paymentMethod}
                             >
-                              <SelectTrigger
-                                id="paymentMethod"
-                                className="items-start [&_[data-description]]:hidden"
-                              >
+                              <SelectTrigger id="paymentMethod">
                                 <SelectValue placeholder="Select Payment Method" />
                               </SelectTrigger>
                               <SelectContent>
@@ -656,11 +818,12 @@ export function StudentTable() {
                           <SheetClose asChild>
                             <Button
                               type="submit"
-                              onClick={() =>
-                                submitBilling(
-                                  student._id,
-                                  student.personalInfo.studentName
-                                )
+                              onClick={() => submitBilling(student)}
+                              disabled={
+                                !updateFee.amount ||
+                                !updateFee.billNo ||
+                                !updateFee.paymentMethod ||
+                                updateFee.amount > student.remaining
                               }
                             >
                               Update Fee
