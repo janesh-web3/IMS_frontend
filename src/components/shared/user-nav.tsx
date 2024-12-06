@@ -62,6 +62,12 @@ export default function UserNav({ handleLogout }: any) {
                   <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </Link>
+              <Link to={"recycle-bin"}>
+                <DropdownMenuItem>
+                  Recycle Bin
+                  <DropdownMenuShortcut>⌘R</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </Link>
             </SuperAdminComponent>
           </PremiumComponent>
         </DropdownMenuGroup>

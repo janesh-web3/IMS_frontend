@@ -1,5 +1,6 @@
 import { server } from "@/server";
 import axios, { AxiosRequestConfig, Method } from "axios";
+import { toast } from "react-toastify";
 
 // src/services/crudRequest.ts
 const token = sessionStorage.getItem("token");
@@ -29,5 +30,17 @@ export const crudRequest = async <T>(
     return response.data;
   } catch (error: any) {
     throw error.response ? error.response.data : error.message;
+  }
+};
+
+export const moveToRecycleBin = async (type: string, id: string) => {
+  try {
+    await crudRequest("PUT", `/recycle/move-to-bin/${type}/${id}`);
+    toast.success("Item moved to recycle bin");
+    return true;
+  } catch (error) {
+    toast.error("Failed to move item to recycle bin");
+    console.error("Error moving to recycle bin:", error);
+    return false;
   }
 };

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -35,7 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "react-toastify";
 
 type Recipt = {
   _id: string;
@@ -49,7 +48,6 @@ export function ReciptTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
 
   //pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -59,22 +57,15 @@ export function ReciptTable() {
     setCurrentPage(page);
   };
 
-  const onConfirm = async () => {
-    if (!selectedTeacher) return;
+  const onConfirm = async (id: string) => {
     try {
-      await crudRequest(
-        "DELETE",
-        `/recipt/delete-recipt/${selectedTeacher}`
-      ).then(() => {
-        setTeachers((prev) =>
-          prev.filter((teacher) => teacher._id !== selectedTeacher)
-        );
+      const success = await moveToRecycleBin("Recipt", id);
+      if (success) {
         setOpen(false);
-        toast.success("Recipt deleted successfully");
-      });
+      } else {
+        setOpen(false);
+      }
     } catch (error) {
-      setError("Error deleting recipt");
-      toast.error("Failed to delete recipt");
       console.error("Error deleting recipt:", error);
     }
   };
@@ -148,7 +139,7 @@ export function ReciptTable() {
                     <AlertModal
                       isOpen={open}
                       onClose={() => setOpen(false)}
-                      onConfirm={onConfirm}
+                      onConfirm={() => onConfirm(teacher._id)}
                       loading={loading}
                     />
                     <DropdownMenu modal={false}>
@@ -165,7 +156,6 @@ export function ReciptTable() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
-                            setSelectedTeacher(teacher._id);
                             setOpen(true);
                           }}
                           className="cursor-pointer"

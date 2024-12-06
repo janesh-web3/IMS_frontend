@@ -154,7 +154,7 @@ const StudentDataVisualization: React.FC = () => {
           </AreaChart>
         </ResponsiveContainer>
         <div className="mt-2 text-center text-gray-600">
-          Skewness Value: <strong>{advanced.skewness.toFixed(2)}</strong>
+          Skewness Value: <strong>{advanced?.skewness}</strong>
           <br />
           {advanced.skewness > 0
             ? "Right Skewed: More data points are on the lower side with fewer higher values."
@@ -251,8 +251,7 @@ const StudentDataVisualization: React.FC = () => {
           </ScatterChart>
         </ResponsiveContainer>
         <div className="mt-2 text-center text-gray-600">
-          Correlation coefficient:{" "}
-          <strong>{correlation.correlation.toFixed(2)}</strong>
+          Correlation coefficient: <strong>{correlation.correlation}</strong>
           <br />
           {correlation.correlation > 0.5
             ? "Positive Correlation"

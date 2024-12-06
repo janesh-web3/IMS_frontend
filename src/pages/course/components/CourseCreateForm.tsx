@@ -38,22 +38,24 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       sound: true,
     };
 
-    await crudRequest("POST", "/course/add-course", values)
-      .then(() => {
-        toast.success("Course added successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      })
-      .catch(() => {
-        toast.error("Failed to add course");
-      });
-
-    await crudRequest(
+    const response = await crudRequest<{ success: boolean }>(
       "POST",
-      "/notification/add-notification",
-      notificationPayload
+      "/course/add-course",
+      values
     );
+
+    if (response.success) {
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+      toast.success("Course added successfully");
+      modalClose();
+      window.location.reload();
+    } else {
+      toast.error("Failed to add course");
+    }
   };
 
   return (

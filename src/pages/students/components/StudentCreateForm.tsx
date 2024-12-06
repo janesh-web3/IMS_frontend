@@ -410,37 +410,52 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       sound: true,
     };
 
+    // Generate and print bill
+    const studentBill: StudentBill = {
+      studentName: personalInfo.studentName,
+      billNo: personalInfo.billNo,
+      totalAmount: feesInfo.totalAmount,
+      amount: feesInfo.paidAmount,
+      method: feesInfo.paymentMethod,
+      remaining: feesInfo.remainingAmount,
+    };
+
     const token = sessionStorage.getItem("token");
     try {
       if (photo === null) {
-        await crudRequest("POST", `/student/add-student`, studentData);
-        toast.success("Student added successfully");
+        await crudRequest("POST", `/student/add-student`, studentData).then(
+          async () => {
+            toast.success("Student added successfully");
+
+            await crudRequest(
+              "POST",
+              "/notification/add-notification",
+              notificationPayload
+            );
+
+            generateBill(studentBill);
+          }
+        );
       } else {
-        await axios.post(`${server}/student/add-student-photo`, studentData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: token,
-          },
-        });
-        toast.success("Student added successfully");
+        await axios
+          .post(`${server}/student/add-student-photo`, studentData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: token,
+            },
+          })
+          .then(async () => {
+            toast.success("Student added successfully");
+
+            await crudRequest(
+              "POST",
+              "/notification/add-notification",
+              notificationPayload
+            );
+
+            generateBill(studentBill);
+          });
       }
-
-      await crudRequest(
-        "POST",
-        "/notification/add-notification",
-        notificationPayload
-      );
-
-      // Generate and print bill
-      const studentBill: StudentBill = {
-        studentName: personalInfo.studentName,
-        billNo: personalInfo.billNo,
-        totalAmount: feesInfo.totalAmount,
-        amount: feesInfo.paidAmount,
-        method: feesInfo.paymentMethod,
-        remaining: feesInfo.remainingAmount,
-      };
-      generateBill(studentBill);
 
       modalClose();
     } catch (error) {

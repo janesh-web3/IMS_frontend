@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
-import { toast } from "react-toastify";
 import UpdateCourseForm from "./UpdateCourseForm";
 import {
   Sheet,
@@ -42,25 +41,6 @@ export function CourseTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const onConfirm = async (id: any) => {
-    try {
-      const response = await crudRequest<Course[]>(
-        "DELETE",
-        `/course/delete-course/${id}`
-      );
-      if (response) {
-        toast.info("Course deleted successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        toast.error("Error deleting course");
-      }
-    } catch (error) {
-      toast.error("Error deleting course");
-      console.error("Error fetching course data:", error);
-    }
-  };
 
   const fetchCourses = async () => {
     try {
@@ -76,6 +56,23 @@ export function CourseTable() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const onConfirm = async (id: string) => {
+    try {
+      const success = await moveToRecycleBin("Course", id);
+      if (success) {
+        setOpen(false);
+        fetchCourses();
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      setOpen(false);
+    }
+  };
+
+  const refreshCourses = () => {
+    fetchCourses();
   };
 
   useEffect(() => {
@@ -133,7 +130,10 @@ export function CourseTable() {
                         Fill the data correctly to update course.
                       </SheetDescription>
                     </SheetHeader>
-                    <UpdateCourseForm id={course._id} />
+                    <UpdateCourseForm
+                      id={course._id}
+                      onCourseUpdated={refreshCourses}
+                    />
                   </SheetContent>
                 </Sheet>
 

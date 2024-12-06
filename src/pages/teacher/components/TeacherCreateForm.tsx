@@ -121,8 +121,13 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     {
       photo === null
         ? await crudRequest("POST", "/faculty/add-faculty", formData)
-            .then(() => {
+            .then(async () => {
               toast.success("Teacher added successfully");
+              await crudRequest(
+                "POST",
+                "/notification/add-notification",
+                notificationPayload
+              );
             })
             .catch((err) => {
               console.error("Error adding teacher:", err);
@@ -135,19 +140,20 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 Authorization: token,
               },
             })
-            .then(() => {
+            .then(async () => {
               toast.success("Teacher added successfully");
+              await crudRequest(
+                "POST",
+                "/notification/add-notification",
+                notificationPayload
+              );
             })
             .catch(() => {
               console.error("Error adding teacher with photo:");
               toast.error("Failed to add teacher");
             });
     }
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
+
     modalClose();
   };
 

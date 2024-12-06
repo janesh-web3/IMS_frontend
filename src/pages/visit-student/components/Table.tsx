@@ -47,7 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
 import PopupModal from "@/components/shared/popup-modal";
 import { useEffect, useState } from "react";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   Pagination,
@@ -79,7 +79,6 @@ import VisitStudentDetails from "./VisitStudentDetails";
 import VisitStudentCreateForm from "./VisitStudentCreateForm";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
-import { toast } from "react-toastify";
 import PremiumComponent from "@/components/shared/PremiumComponent";
 
 type SubjectEnroll = {
@@ -118,9 +117,6 @@ export function VisitStudentTable() {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<string>("all");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null
-  );
   const [courses, setCourses] = useState<Courses[]>([]);
 
   //pagination
@@ -161,26 +157,18 @@ export function VisitStudentTable() {
     }));
   };
 
-  const onConfirm = async () => {
-    if (!selectedStudentId) return;
-
+  const onConfirm = async (id: string) => {
     try {
-      await crudRequest(
-        "DELETE",
-        `/visit/delete-visit/${selectedStudentId}`
-      ).then(() => {
-        toast.success(`Successfully deleted student`);
-        setStudent((prev) => prev.filter((s) => s._id !== selectedStudentId));
-        setFilteredStudents((prev) =>
-          prev.filter((s) => s._id !== selectedStudentId)
-        );
-      });
+      const success = await moveToRecycleBin("Visit", id);
+      if (success) {
+        setOpen(false);
+      } else {
+        setOpen(false);
+      }
     } catch (error) {
-      toast.error(`Failed to deleted student`);
       console.error("Error deleting student:", error);
     } finally {
       setOpen(false);
-      setSelectedStudentId(null);
     }
   };
 
@@ -384,7 +372,6 @@ export function VisitStudentTable() {
                             </DrawerTrigger>
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedStudentId(student._id);
                                 setOpen(true);
                               }}
                               className="flex justify-between cursor-pointer"
@@ -397,7 +384,7 @@ export function VisitStudentTable() {
                         <AlertModal
                           isOpen={open}
                           onClose={() => setOpen(false)}
-                          onConfirm={onConfirm}
+                          onConfirm={() => onConfirm(student._id)}
                           loading={loading}
                           title="Delete Student"
                           description="Are you sure you want to delete this student?"

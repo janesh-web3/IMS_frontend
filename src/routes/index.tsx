@@ -31,6 +31,7 @@ const NotificationPage = lazy(() => import("@/pages/notification"));
 const AIPage = lazy(() => import("@/pages/ai_model"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const AdministrationPage = lazy(() => import("@/pages/administration"));
+const RecycleBinPage = lazy(() => import("@/pages/recyclebin"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -103,6 +104,14 @@ const AppRouter: React.FC = () => {
           element: (
             <PremiumRoute>
               <AdministrationPage />
+            </PremiumRoute>
+          ),
+        },
+        {
+          path: "recycle-bin",
+          element: (
+            <PremiumRoute>
+              <RecycleBinPage />
             </PremiumRoute>
           ),
         },

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -34,19 +34,14 @@ export function HandOverTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
-  const onConfirm = async () => {
-    if (!selectedTeacher) return;
+  const onConfirm = async (id: string) => {
     try {
-      await crudRequest(
-        "DELETE",
-        `/handover/delete-handover/${selectedTeacher}`
-      );
-      setTeachers((prev) =>
-        prev.filter((teacher) => teacher._id !== selectedTeacher)
-      );
-      setOpen(false);
-      toast.success("Handover deleted");
+      const success = await moveToRecycleBin("HandOver", id);
+      if (success) {
+        setOpen(false);
+      } else {
+        setOpen(false);
+      }
     } catch (error) {
       setError("Error deleting teacher");
       console.error("Error deleting teacher:", error);
@@ -116,7 +111,7 @@ export function HandOverTable() {
                     <AlertModal
                       isOpen={open}
                       onClose={() => setOpen(false)}
-                      onConfirm={onConfirm}
+                      onConfirm={() => onConfirm(teacher._id)}
                       loading={loading}
                     />
                     <DropdownMenu modal={false}>
@@ -133,7 +128,6 @@ export function HandOverTable() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
-                            setSelectedTeacher(teacher._id);
                             setOpen(true);
                           }}
                           className="cursor-pointer"

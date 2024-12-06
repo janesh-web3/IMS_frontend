@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -28,7 +28,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { toast } from "react-toastify";
 import TeacherUpdateForm from "./TeacherUpdateForm";
 import {
   Drawer,
@@ -80,23 +79,15 @@ export function TeacherTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const onConfirm = async (id: any) => {
+  const onConfirm = async (id: string) => {
     try {
-      const response = await crudRequest(
-        "DELETE",
-        `/faculty/delete-faculty/${id}`
-      );
-      if (response) {
-        toast.info("Teacher deleted successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        toast.error("Error deleting teacher");
+      const success = await moveToRecycleBin("Faculty", id);
+      if (success) {
+        setTeacher((prev) => prev.filter((t) => t._id !== id));
+        setOpen(false);
       }
     } catch (error) {
-      toast.error("Error deleting teacher");
-      console.error("Error fetching teacher data:", error);
+      console.error("Error moving teacher to recycle bin:", error);
     }
   };
 
@@ -202,10 +193,12 @@ export function TeacherTable() {
                         </DrawerTrigger>
 
                         <DropdownMenuItem
-                          onClick={() => setOpen(true)}
+                          onClick={() => {
+                            setOpen(true);
+                          }}
                           className="cursor-pointer"
                         >
-                          <Trash className="w-4 h-4 mr-2" /> Delete
+                          <Trash className="w-4 h-4 mr-2" /> Move to Recycle Bin
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

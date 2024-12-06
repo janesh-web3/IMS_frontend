@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -55,18 +55,7 @@ export function Subject() {
 
   const onConfirm = async (id: any) => {
     try {
-      const response = await crudRequest<Course[]>(
-        "DELETE",
-        `/subject/delete-subject/${id}`
-      );
-      if (response) {
-        toast.info("Subject deleted successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        toast.error("Error deleting subject");
-      }
+      await moveToRecycleBin("Subject", id);
     } catch (error) {
       toast.error("Error deleting subject");
       console.error("Error fetching subject data:", error);

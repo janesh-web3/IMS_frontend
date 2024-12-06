@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   DropdownMenu,
@@ -20,7 +20,6 @@ import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
-import { toast } from "react-toastify";
 import {
   Pagination,
   PaginationContent,
@@ -49,7 +48,6 @@ export function PaymentTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedTeacher, setSelectedTeacher] = useState<string | null>(null);
 
   //pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -59,17 +57,15 @@ export function PaymentTable() {
     setCurrentPage(page);
   };
 
-  const onConfirm = async () => {
-    if (!selectedTeacher) return;
+  const onConfirm = async (id: string) => {
     try {
-      await crudRequest("DELETE", `/payment/delete-payment/${selectedTeacher}`);
-      setTeachers((prev) =>
-        prev.filter((teacher) => teacher._id !== selectedTeacher)
-      );
-      toast.success("Payment deleted successfully");
-      setOpen(false);
+      const success = await moveToRecycleBin("Payment", id);
+      if (success) {
+        setOpen(false);
+      } else {
+        setOpen(false);
+      }
     } catch (error) {
-      toast.error("Failed to delete payment");
       setError("Error deleting payment");
       console.error("Error deleting payment:", error);
     }
@@ -147,7 +143,7 @@ export function PaymentTable() {
                     <AlertModal
                       isOpen={open}
                       onClose={() => setOpen(false)}
-                      onConfirm={onConfirm}
+                      onConfirm={() => onConfirm(teacher._id)}
                       loading={loading}
                     />
                     <DropdownMenu modal={false}>
@@ -164,7 +160,6 @@ export function PaymentTable() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
-                            setSelectedTeacher(teacher._id);
                             setOpen(true);
                           }}
                           className="cursor-pointer"

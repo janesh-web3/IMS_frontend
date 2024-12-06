@@ -49,7 +49,7 @@ import { Link, useNavigate } from "react-router-dom";
 import PopupModal from "@/components/shared/popup-modal";
 import StudentCreateForm from "./StudentCreateForm";
 import { useEffect, useState } from "react";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
   Pagination,
@@ -177,9 +177,6 @@ export function StudentTable() {
     null
   );
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null
-  );
   const [courses, setCourses] = useState<Courses[]>([]);
 
   //bill print
@@ -403,25 +400,16 @@ export function StudentTable() {
     }));
   };
 
-  const onConfirm = async () => {
-    if (!selectedStudentId) return;
-
+  const onConfirm = async (id: string) => {
     try {
-      await crudRequest(
-        "DELETE",
-        `/student/delete-student/${selectedStudentId}`
-      ).then(() => {
-        toast.error(`Successfully deleted student`);
-        setStudent((prev) => prev.filter((s) => s._id !== selectedStudentId));
-        setFilteredStudents((prev) =>
-          prev.filter((s) => s._id !== selectedStudentId)
-        );
-      });
+      const success = await moveToRecycleBin("Student", id);
+      if (success) {
+        setStudent((prev) => prev.filter((s) => s._id !== id));
+        setFilteredStudents((prev) => prev.filter((s) => s._id !== id));
+        setOpen(false);
+      }
     } catch (error) {
-      console.error("Error deleting student:", error);
-    } finally {
-      setOpen(false);
-      setSelectedStudentId(null);
+      console.error("Error moving student to recycle bin:", error);
     }
   };
 
@@ -874,12 +862,12 @@ export function StudentTable() {
                             </DrawerTrigger>
                             <DropdownMenuItem
                               onClick={() => {
-                                setSelectedStudentId(student._id);
                                 setOpen(true);
                               }}
                               className="flex justify-between cursor-pointer"
                             >
-                              Delete <Trash size={17} />
+                              Delete
+                              <Trash size={17} />
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -887,7 +875,9 @@ export function StudentTable() {
                         <AlertModal
                           isOpen={open}
                           onClose={() => setOpen(false)}
-                          onConfirm={onConfirm}
+                          onConfirm={() => {
+                            onConfirm(student._id);
+                          }}
                           loading={loading}
                           title="Delete Student"
                           description="Are you sure you want to delete this student?"

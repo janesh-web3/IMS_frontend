@@ -24,7 +24,12 @@ type CourseResponse = {
   name: string;
 };
 
-const UpdateCourseForm = ({ id }: { id: string }) => {
+interface UpdateCourseFormProps {
+  id: string;
+  onCourseUpdated: () => void;
+}
+
+const UpdateCourseForm = ({ id, onCourseUpdated }: UpdateCourseFormProps) => {
   const form = useForm<CourseFormSchemaType>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -57,9 +62,7 @@ const UpdateCourseForm = ({ id }: { id: string }) => {
     await crudRequest("PUT", `/course/update-course/${id}`, values)
       .then(() => {
         toast.success("Course updated successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        onCourseUpdated();
       })
       .catch(() => {
         toast.error("Failed to update course");
