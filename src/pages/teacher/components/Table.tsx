@@ -30,13 +30,49 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "react-toastify";
 import TeacherUpdateForm from "./TeacherUpdateForm";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import TeacherDetails from "./TeacherDetails";
 
 type Teacher = {
   _id: string;
   name: string;
   contactNo: string;
-  monthlySalary: string;
+  monthlySalary: string | null;
   percentage: string;
+  photo: string[];
+  courses: Array<{
+    courseEnroll: {
+      _id: string;
+      name: string;
+      subjects: string[];
+      deleted: boolean;
+      enabled: boolean;
+    };
+    subjectsEnroll: Array<{
+      subjectName: {
+        _id: string;
+        subjectName: string;
+        monthlyFee: string;
+        regularFee: string;
+        deleted: boolean;
+        enabled: boolean;
+      };
+      _id: string;
+    }>;
+    _id: string;
+  }>;
+  enabled: boolean;
+  deleted: boolean;
+  invoices: any[];
 };
 
 export function TeacherTable() {
@@ -72,7 +108,6 @@ export function TeacherTable() {
       );
       if (response && Array.isArray(response)) {
         setTeacher(response);
-        console.log(response);
       } else {
         setError("Unexpected response format");
       }
@@ -111,7 +146,6 @@ export function TeacherTable() {
             <TableHead>Contact Number</TableHead>
             <TableHead>Monthly Salary</TableHead>
             <TableHead>Percentage</TableHead>
-            <TableHead>Courses</TableHead>
             <TableHead>Update</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -150,33 +184,67 @@ export function TeacherTable() {
                 </Sheet>
 
                 <TableCell className="cursor-pointer">
-                  <AlertModal
-                    isOpen={open}
-                    onClose={() => setOpen(false)}
-                    onConfirm={() => onConfirm(teacher._id)}
-                    loading={loading}
-                  />
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="w-8 h-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <Drawer>
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="w-8 h-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                      <DropdownMenuItem className="cursor-pointer">
-                        <View className="w-4 h-4 mr-2" /> Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setOpen(true)}
-                        className="cursor-pointer"
-                      >
-                        <Trash className="w-4 h-4 mr-2" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DrawerTrigger asChild>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <View className="w-4 h-4 mr-2" /> View
+                          </DropdownMenuItem>
+                        </DrawerTrigger>
+
+                        <DropdownMenuItem
+                          onClick={() => setOpen(true)}
+                          className="cursor-pointer"
+                        >
+                          <Trash className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <AlertModal
+                      isOpen={open}
+                      onClose={() => setOpen(false)}
+                      onConfirm={() => onConfirm(teacher._id)}
+                      loading={loading}
+                    />
+                    <DrawerContent className="z-50">
+                      <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                        <DrawerHeader>
+                          <DrawerTitle>Teacher Details</DrawerTitle>
+                          <DrawerDescription>
+                            See details about {teacher.name}
+                          </DrawerDescription>
+                        </DrawerHeader>
+                        <div className="p-4 pb-0">
+                          <TeacherDetails
+                            _id={teacher._id}
+                            name={teacher.name}
+                            contactNo={teacher.contactNo}
+                            monthlySalary={teacher.monthlySalary}
+                            percentage={teacher.percentage}
+                            photo={teacher.photo}
+                            courses={teacher.courses}
+                            enabled={teacher.enabled}
+                            deleted={teacher.deleted}
+                            invoices={teacher.invoices}
+                          />
+                        </div>
+                        <DrawerFooter>
+                          <DrawerClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                          </DrawerClose>
+                        </DrawerFooter>
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
                 </TableCell>
               </TableRow>
             ))
