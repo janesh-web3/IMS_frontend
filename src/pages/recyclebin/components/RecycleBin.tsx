@@ -35,7 +35,16 @@ interface DeletedItem {
   amount?: number;
   dateOfVisit?: string;
   createdAt?: string;
+  bookType?: string;
+  price?: number;
+  isFree?: boolean;
 }
+
+type Column = {
+  header: string;
+  accessor: string | string[];
+  render?: (value: any) => string;
+};
 
 const RecycleBin = () => {
   const [deletedItems, setDeletedItems] = useState<{
@@ -47,6 +56,7 @@ const RecycleBin = () => {
     visits: DeletedItem[];
     handovers: DeletedItem[];
     recipts: DeletedItem[];
+    books: DeletedItem[];
   }>({
     students: [],
     faculty: [],
@@ -56,6 +66,7 @@ const RecycleBin = () => {
     visits: [],
     handovers: [],
     recipts: [],
+    books: [],
   });
 
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -79,6 +90,7 @@ const RecycleBin = () => {
         visits: DeletedItem[];
         handovers: DeletedItem[];
         recipts: DeletedItem[];
+        books: DeletedItem[];
       };
       const response = await crudRequest<DeletedItemsResponse>(
         "GET",
@@ -127,7 +139,7 @@ const RecycleBin = () => {
 
   const renderTable = (
     items: DeletedItem[],
-    columns: { header: string; accessor: string | string[] }[],
+    columns: Column[],
     type: string
   ) => (
     <div className="border rounded-md">
@@ -151,7 +163,11 @@ const RecycleBin = () => {
                           (obj: any, key) => obj?.[key],
                           item
                         )
-                      : item[column.accessor as keyof DeletedItem]}
+                      : column.accessor === "isFree"
+                        ? item.isFree
+                          ? "Free"
+                          : "Paid"
+                        : item[column.accessor as keyof DeletedItem]}
                   </TableCell>
                 ))}
                 <TableCell>
@@ -219,6 +235,7 @@ const RecycleBin = () => {
               <TabsTrigger value="visits">Visits</TabsTrigger>
               <TabsTrigger value="handovers">Handovers</TabsTrigger>
               <TabsTrigger value="recipts">Recipts</TabsTrigger>
+              <TabsTrigger value="books">Books</TabsTrigger>
             </TabsList>
 
             <div className="mt-20 md:mt-4 overflow-y-auto max-h-[calc(100vh-300px)]">
@@ -232,7 +249,7 @@ const RecycleBin = () => {
                       accessor: ["personalInfo", "studentName"],
                     },
                   ],
-                  "students"
+                  "student"
                 )}
               </TabsContent>
 
@@ -265,7 +282,7 @@ const RecycleBin = () => {
                     { header: "ID", accessor: "_id" },
                     { header: "Name", accessor: "subjectName" },
                   ],
-                  "subjects"
+                  "subject"
                 )}
               </TabsContent>
 
@@ -278,7 +295,7 @@ const RecycleBin = () => {
                     { header: "Amount", accessor: "amount" },
                     { header: "Date", accessor: "createdAt" },
                   ],
-                  "payments"
+                  "payment"
                 )}
               </TabsContent>
 
@@ -290,7 +307,7 @@ const RecycleBin = () => {
                     { header: "Student Name", accessor: "studentName" },
                     { header: "Visit Date", accessor: "dateOfVisit" },
                   ],
-                  "visits"
+                  "visit"
                 )}
               </TabsContent>
 
@@ -301,7 +318,7 @@ const RecycleBin = () => {
                     { header: "ID", accessor: "_id" },
                     { header: "Name", accessor: "name" },
                   ],
-                  "handovers"
+                  "handover"
                 )}
               </TabsContent>
 
@@ -312,7 +329,25 @@ const RecycleBin = () => {
                     { header: "ID", accessor: "_id" },
                     { header: "Income", accessor: "income" },
                   ],
-                  "recipts"
+                  "recipt"
+                )}
+              </TabsContent>
+
+              <TabsContent value="books">
+                {renderTable(
+                  deletedItems?.books,
+                  [
+                    { header: "ID", accessor: "_id" },
+                    { header: "Name", accessor: "name" },
+                    { header: "Type", accessor: "bookType" },
+                    { header: "Price", accessor: "price" },
+                    {
+                      header: "Status",
+                      accessor: "isFree",
+                      render: (value: boolean) => (value ? "Free" : "Paid"),
+                    },
+                  ],
+                  "book"
                 )}
               </TabsContent>
             </div>

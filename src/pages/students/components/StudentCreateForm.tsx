@@ -21,7 +21,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
-import { Courses } from "@/types";
+import { Courses, Book } from "@/types";
 import WebcamCapture from "@/components/shared/WebcamCapture";
 import axios from "axios";
 import { server } from "@/server";
@@ -79,6 +79,10 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     [subjectId: string]: { discount: number; feeType: string };
   }>({});
   const [coursesData, setCourseData] = useState<Courses[]>([]);
+  const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
+  const [bookFees, setBookFees] = useState<{
+    [bookId: string]: { discount: number; price: number };
+  }>({});
 
   const handleCourseChange = (courseId: string) => {
     setSelectedCourses((prevSelectedCourses) => {
@@ -160,54 +164,76 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
   // Calculate Total Amount
   useEffect(() => {
-    const { totalSubjectFees, totalDiscount } = selectedSubjects.reduce(
-      (acc, subjectId) => {
-        const subject = coursesData
-          ?.flatMap((course) => course.subjects)
-          .find((sub) => sub._id === subjectId);
+    const { totalSubjectFees, totalDiscount: subjectDiscount } =
+      selectedSubjects.reduce(
+        (
+          acc: { totalSubjectFees: number; totalDiscount: number },
+          subjectId
+        ) => {
+          const subject = coursesData
+            ?.flatMap((course) => course.subjects)
+            .find((sub) => sub._id === subjectId);
 
-        if (subject) {
-          const feeType = subjectFees[subjectId]?.feeType ?? "monthly";
-          const discount = subjectFees[subjectId]?.discount ?? 0;
+          if (subject) {
+            const feeType = subjectFees[subjectId]?.feeType ?? "monthly";
+            const discount = subjectFees[subjectId]?.discount ?? 0;
+            const feeAmount =
+              feeType === "monthly"
+                ? Number(subject.monthlyFee)
+                : Number(subject.regularFee);
 
-          // Convert fee strings to numbers before calculation
-          const feeAmount =
-            feeType === "monthly"
-              ? parseFloat(subject.monthlyFee.toString())
-              : parseFloat(subject.regularFee.toString());
+            acc.totalSubjectFees += feeAmount;
+            acc.totalDiscount += discount;
+          }
+          return acc;
+        },
+        { totalSubjectFees: 0, totalDiscount: 0 }
+      );
 
-          acc.totalSubjectFees += feeAmount;
-          acc.totalDiscount += discount;
+    // Calculate book fees and discounts
+    const { totalBookFees, totalBookDiscount } = selectedBooks.reduce(
+      (acc: { totalBookFees: number; totalBookDiscount: number }, bookId) => {
+        const book = coursesData
+          ?.flatMap((course) => course.books)
+          .find((b) => b._id === bookId);
+
+        if (book && !book.isFree) {
+          const bookPrice = Number(book.price) || 0;
+          const bookDiscount = Number(bookFees[bookId]?.discount) || 0;
+
+          acc.totalBookFees += bookPrice;
+          acc.totalBookDiscount += bookDiscount;
         }
-
         return acc;
       },
-      { totalSubjectFees: 0, totalDiscount: 0 }
+      { totalBookFees: 0, totalBookDiscount: 0 }
     );
 
     const totalAmount =
-      feesInfo.admissionFee +
-      feesInfo.examFee +
-      feesInfo.tshirtFee +
-      totalSubjectFees;
+      Number(feesInfo.admissionFee) +
+      Number(feesInfo.tshirtFee) +
+      Number(feesInfo.examFee) +
+      totalSubjectFees +
+      totalBookFees;
 
-    const remainingAmount = feesInfo.totalAfterDiscount - feesInfo.paidAmount;
+    const totalDiscount = subjectDiscount + totalBookDiscount;
+    const totalAfterDiscount = totalAmount - totalDiscount;
 
     handleFeesInfoChange("totalAmount", totalAmount);
-    handleFeesInfoChange("remainingAmount", remainingAmount);
-    handleFeesInfoChange("totalDiscount", Number(totalDiscount));
+    handleFeesInfoChange("totalDiscount", totalDiscount);
+    handleFeesInfoChange("totalAfterDiscount", totalAfterDiscount);
     handleFeesInfoChange(
-      "totalAfterDiscount",
-      Number(totalAmount - totalDiscount)
+      "remainingAmount",
+      totalAfterDiscount - Number(feesInfo.paidAmount)
     );
   }, [
     feesInfo.admissionFee,
-    feesInfo.examFee,
     feesInfo.tshirtFee,
+    feesInfo.examFee,
     feesInfo.paidAmount,
-    feesInfo.remainingAmount,
-    feesInfo.totalAfterDiscount,
     selectedSubjects,
+    selectedBooks,
+    bookFees,
     subjectFees,
     coursesData,
   ]);
@@ -222,6 +248,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         );
         if (response && Array.isArray(response)) {
           setCourseData(response);
+          console.log(response);
         } else {
         }
       } catch (error) {
@@ -350,7 +377,25 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     }
   };
 
-  // Update the onSubmit function to handle bill generation
+  const handleBookChange = (bookId: string) => {
+    setSelectedBooks((prev) =>
+      prev.includes(bookId)
+        ? prev.filter((id) => id !== bookId)
+        : [...prev, bookId]
+    );
+  };
+
+  const handleBookDiscountChange = (bookId: string, value: number) => {
+    setBookFees((prev) => ({
+      ...prev,
+      [bookId]: {
+        ...prev[bookId],
+        discount: Number(value),
+      },
+    }));
+  };
+
+  // Update onSubmit to include books
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -387,6 +432,13 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               feeType: subjectFees[subject._id]?.feeType || "monthly",
               discount: subjectFees[subject._id]?.discount || 0,
             })),
+          booksEnroll: course.books
+            .filter((book) => selectedBooks.includes(book._id))
+            .map((book) => ({
+              bookName: book._id,
+              price: book.price,
+              discount: bookFees[book._id]?.discount || 0,
+            })),
         })),
       admissionFee: feesInfo.admissionFee,
       tshirtFee: feesInfo.tshirtFee,
@@ -399,6 +451,8 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       totalAfterDiscount: feesInfo.totalAfterDiscount,
       photo: photo,
     };
+
+    console.log("Student Data:", studentData);
 
     // Prepare the notification payload
     const notificationPayload = {
@@ -801,6 +855,49 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                                 )}
                               </div>
                             ))}
+                            {/* Books selection */}
+                            <div className="mt-4">
+                              <Label>Course Books</Label>
+                              {course.books?.map((book: Book) => (
+                                <div key={book._id} className="py-1">
+                                  <div className="flex items-center gap-2 ">
+                                    <Checkbox
+                                      id={`book-${book._id}`}
+                                      checked={selectedBooks.includes(book._id)}
+                                      onCheckedChange={() =>
+                                        handleBookChange(book._id)
+                                      }
+                                    />
+                                    <Label htmlFor={`book-${book._id}`}>
+                                      {book.name} -{" "}
+                                      {book.isFree
+                                        ? "Free"
+                                        : `Rs. ${book.price}`}
+                                    </Label>
+                                  </div>
+
+                                  {selectedBooks.includes(book._id) &&
+                                    !book.isFree && (
+                                      <div className="pl-6 mt-2">
+                                        <Label>Discount</Label>
+                                        <Input
+                                          type="text"
+                                          value={
+                                            bookFees[book._id]?.discount || 0
+                                          }
+                                          onChange={(e) =>
+                                            handleBookDiscountChange(
+                                              book._id,
+                                              Number(e.target.value)
+                                            )
+                                          }
+                                          className="w-24"
+                                        />
+                                      </div>
+                                    )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>

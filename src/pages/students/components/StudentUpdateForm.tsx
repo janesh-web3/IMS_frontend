@@ -77,6 +77,12 @@ const StudentUpdateForm = () => {
   }>({});
   const [coursesData, setCourseData] = useState<Courses[]>([]);
 
+  // Add state for books
+  const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
+  const [bookFees, setBookFees] = useState<{
+    [bookId: string]: { discount: number; price: number };
+  }>({});
+
   const handleCourseChange = (courseId: string) => {
     setSelectedCourses((prevSelectedCourses) => {
       const isSelected = prevSelectedCourses.includes(courseId);
@@ -224,6 +230,7 @@ const StudentUpdateForm = () => {
           `/student/get-student/${id}`
         );
         if (response) {
+          console.log(response);
           // Set personal information
           setPersonalInfo({
             studentName: response.personalInfo.studentName,
@@ -258,15 +265,14 @@ const StudentUpdateForm = () => {
           });
 
           // Set selected courses and subjects
-          const selectedCourses = response.courses.map(
-            (course) => course.courseEnroll
+          setSelectedCourses(
+            response.courses.map((course) => course.courseEnroll._id)
           );
-          const selectedSubjects = response.courses.flatMap((course) =>
-            course.subjectsEnroll.map((subject) => subject.subjectName)
+          setSelectedSubjects(
+            response.courses.flatMap((course) =>
+              course.subjectsEnroll.map((subject) => subject.subjectName._id)
+            )
           );
-
-          setSelectedCourses(selectedCourses);
-          setSelectedSubjects(selectedSubjects);
 
           // Set subject fees
           const subjectFeesData: {
@@ -274,13 +280,25 @@ const StudentUpdateForm = () => {
           } = {};
           response.courses.forEach((course) => {
             course.subjectsEnroll.forEach((subject) => {
-              subjectFeesData[subject.subjectName] = {
+              subjectFeesData[subject.subjectName._id] = {
                 discount: Number(subject.discount),
                 feeType: subject.feeType,
               };
             });
           });
           setSubjectFees(subjectFeesData);
+
+          // Debug the book IDs
+          const selectedBooks = response.courses.flatMap((course) => {
+            console.log("Books from API:", course.booksEnroll);
+            return course.booksEnroll.map((book) => {
+              console.log("Book ID:", book.bookName._id);
+              return book.bookName._id;
+            });
+          });
+
+          setSelectedBooks(selectedBooks);
+          console.log("Set Selected Books:", selectedBooks);
         }
       } catch (error) {
         console.error("Error fetching student details:", error);
@@ -335,6 +353,13 @@ const StudentUpdateForm = () => {
               feeType: subjectFees[subject._id]?.feeType || "monthly",
               discount: subjectFees[subject._id]?.discount || 0,
             })),
+          booksEnroll: course.books
+            .filter((book) => selectedBooks.includes(book._id))
+            .map((book) => ({
+              bookName: book._id,
+              price: book.price,
+              discount: bookFees[book._id]?.discount || 0,
+            })),
         })),
       admissionFee: feesInfo.admissionFee,
       tshirtFee: feesInfo.tshirtFee,
@@ -373,6 +398,25 @@ const StudentUpdateForm = () => {
     setTimeout(() => {
       window.location.reload();
     }, 1000);
+  };
+
+  // Add book handlers
+  const handleBookChange = (bookId: string) => {
+    setSelectedBooks((prev) =>
+      prev.includes(bookId)
+        ? prev.filter((id) => id !== bookId)
+        : [...prev, bookId]
+    );
+  };
+
+  const handleBookDiscountChange = (bookId: string, value: number) => {
+    setBookFees((prev) => ({
+      ...prev,
+      [bookId]: {
+        ...prev[bookId],
+        discount: Number(value),
+      },
+    }));
   };
 
   return (
@@ -713,6 +757,55 @@ const StudentUpdateForm = () => {
                                 )}
                               </div>
                             ))}
+
+                            {/* Books section */}
+                            <div className="mt-4">
+                              <Label>Course Books</Label>
+                              {course.books?.map((book) => (
+                                <div key={book._id} className="py-1">
+                                  <div className="flex items-center gap-2">
+                                    <Checkbox
+                                      id={`book-${book._id}`}
+                                      checked={selectedBooks.includes(book._id)}
+                                      onCheckedChange={() => {
+                                        console.log("Book ID:", book._id);
+                                        console.log(
+                                          "Selected Books:",
+                                          selectedBooks
+                                        );
+                                        handleBookChange(book._id);
+                                      }}
+                                    />
+                                    <Label htmlFor={`book-${book._id}`}>
+                                      {book.name} -{" "}
+                                      {book.isFree
+                                        ? "Free"
+                                        : `Rs. ${book.price}`}
+                                    </Label>
+                                  </div>
+
+                                  {selectedBooks.includes(book._id) &&
+                                    !book.isFree && (
+                                      <div className="pl-6 mt-2">
+                                        <Label>Discount</Label>
+                                        <Input
+                                          type="number"
+                                          value={
+                                            bookFees[book._id]?.discount || 0
+                                          }
+                                          onChange={(e) =>
+                                            handleBookDiscountChange(
+                                              book._id,
+                                              Number(e.target.value)
+                                            )
+                                          }
+                                          className="w-24"
+                                        />
+                                      </div>
+                                    )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>

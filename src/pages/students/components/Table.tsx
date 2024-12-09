@@ -114,12 +114,24 @@ type SubjectEnroll = {
   _id: string;
 };
 
+type BooksEnroll = {
+  bookName: {
+    name: string;
+    isFree: boolean;
+    bookType: string;
+  };
+  price: number;
+  discount: number;
+  _id: string;
+};
+
 type StudentCourse = {
   courseEnroll: {
     name: string;
     _id: string;
   };
   subjectsEnroll: SubjectEnroll[];
+  booksEnroll: BooksEnroll[];
   _id: string;
 };
 
@@ -172,6 +184,7 @@ export function StudentTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>("all");
   const [filterFeeComplete, setFilterFeeComplete] = useState<boolean | null>(
     null
@@ -399,14 +412,18 @@ export function StudentTable() {
       [column]: !prevState[column],
     }));
   };
+  const onConfirm = async () => {
+    if (!studentToDelete) return;
 
-  const onConfirm = async (id: string) => {
     try {
-      const success = await moveToRecycleBin("Student", id);
+      const success = await moveToRecycleBin("Student", studentToDelete);
       if (success) {
-        setStudent((prev) => prev.filter((s) => s._id !== id));
-        setFilteredStudents((prev) => prev.filter((s) => s._id !== id));
+        setStudent((prev) => prev.filter((s) => s._id !== studentToDelete));
+        setFilteredStudents((prev) =>
+          prev.filter((s) => s._id !== studentToDelete)
+        );
         setOpen(false);
+        setStudentToDelete(null);
       }
     } catch (error) {
       console.error("Error moving student to recycle bin:", error);
@@ -589,9 +606,20 @@ export function StudentTable() {
         (course) => `- Courses Enroll: ${course.courseEnroll.name}
         - Subject Taken: ${course.subjectsEnroll.map(
           (subject) => `- Subject Enroll : ${subject.subjectName?.subjectName}
+          
         -Discount : ${subject.discount}`
+        )}
+        - Book Taken : ${course.booksEnroll.map(
+          (book) =>
+            `- Book Name : ${book.bookName.name}
+            - Book Price : ${book.price}
+            - Book Type : ${book.bookName.bookType}
+            - Book Discount: ${book.discount}
+            - Book Status : ${book.bookName.isFree ? "Free" : "Paid"}`
         )}`
       )}
+        
+
 
     Generate an overview and any insights.
   `;
@@ -863,6 +891,7 @@ export function StudentTable() {
                             <DropdownMenuItem
                               onClick={() => {
                                 setOpen(true);
+                                setStudentToDelete(student._id);
                               }}
                               className="flex justify-between cursor-pointer"
                             >
@@ -874,10 +903,11 @@ export function StudentTable() {
 
                         <AlertModal
                           isOpen={open}
-                          onClose={() => setOpen(false)}
-                          onConfirm={() => {
-                            onConfirm(student._id);
+                          onClose={() => {
+                            setOpen(false);
+                            setStudentToDelete(null);
                           }}
+                          onConfirm={onConfirm}
                           loading={loading}
                           title="Delete Student"
                           description="Are you sure you want to delete this student?"

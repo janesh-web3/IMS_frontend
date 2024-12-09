@@ -29,19 +29,16 @@ export interface FooterItem {
 }
 
 export interface Courses {
-  name: string;
   _id: string;
-  subjects: [
-    {
-      monthlyFee: string;
-      regularFee: string;
-      subjectName: string;
-      subjectTeacher: string;
-      _id: string;
-    },
-  ];
+  name: string;
+  subjects: {
+    _id: string;
+    subjectName: string;
+    monthlyFee: string;
+    regularFee: string;
+  }[];
+  books: Book[];
 }
-[];
 
 export interface StudentCourse {
   courseEnroll: {
@@ -57,24 +54,24 @@ export interface StudentCourse {
   }[];
 }
 
-export interface StudentDetails {
+export interface Student {
+  _id: string;
   personalInfo: {
     studentName: string;
     schoolName: string;
     address: string;
-    dateOfBirth: null;
+    dateOfBirth: string | null;
     gender: string;
     contactNo: string;
-    billNo: [
-      {
-        billNo: string;
-        dateSubmitted: string;
-        paid: string;
-        method: string;
-      },
-    ];
+    billNo: Array<{
+      billNo: string;
+      dateSubmitted: string;
+      paid: string;
+      method: string;
+      _id: string;
+    }>;
     admissionNumber: string;
-    paymentDeadline: string;
+    paymentDeadline: string | null;
     guardianName: string;
     guardianContact: string;
     localGuardianName: string;
@@ -82,34 +79,70 @@ export interface StudentDetails {
     paymentMethod: string;
     referredBy: string;
   };
-  courses: [
-    {
-      courseEnroll: string;
-      subjectsEnroll: [
-        {
-          subjectName: string;
-          feeType: string;
-          discount: number;
-        },
-      ];
-    },
-  ];
-  photo: string;
+  courses: Array<{
+    courseEnroll: {
+      _id: string;
+      name: string;
+    };
+    subjectsEnroll: Array<{
+      subjectName: {
+        _id: string;
+        subjectName: string;
+        monthlyFee: string;
+        regularFee: string;
+      };
+      feeType: string;
+      discount: number;
+      _id: string;
+    }>;
+    booksEnroll: Array<{
+      bookName?: {
+        _id: string;
+        name: string;
+        price: number;
+        isFree: boolean;
+      };
+      price: number;
+      discount: number;
+      _id: string;
+    }>;
+    _id: string;
+  }>;
+  booksFee: number;
   admissionFee: number;
-  selectedBook: object;
   tshirtFee: number;
   examFee: number;
-  document: boolean;
+  document: string;
   totalDiscount: number;
-  paymentDeadline: null;
   paid: number;
   remaining: number;
   totalAmount: number;
   totalAfterDiscount: number;
-  quizzes: string;
   dateOfAdmission: string;
+  photo: string | null;
 }
 
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
+
+export interface Book {
+  _id: string;
+  name: string;
+  price: number;
+  bookType: string;
+  isFree: boolean;
+  course: string;
+}
+
+export interface SubjectEnroll {
+  subjectName: {
+    _id: string;
+    subjectName: string;
+    monthlyFee: string;
+    regularFee: string;
+  };
+  feeType: string;
+  discount: number;
+  _id: string;
+}

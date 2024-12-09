@@ -74,12 +74,22 @@ type SubjectEnroll = {
   _id: string;
 };
 
+type BookEnroll = {
+  bookName: {
+    name: string;
+  };
+  price: number;
+  discount: number;
+  _id: string;
+};
+
 type StudentCourse = {
   courseEnroll: {
     name: string;
     _id: string;
   };
   subjectsEnroll: SubjectEnroll[];
+  booksEnroll: BookEnroll[];
   _id: string;
 };
 
