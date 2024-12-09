@@ -31,7 +31,7 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const onSubmit = async (values: CourseFormSchemaType) => {
     const notificationPayload = {
       title: "New Course Added",
-      message: `A course name ${values.name} has been created.`,
+      message: `A course ${values.name} has been created.`,
       type: "Courses",
       forRoles: ["admin", "superadmin"],
       push: true,

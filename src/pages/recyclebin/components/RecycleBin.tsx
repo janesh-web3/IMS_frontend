@@ -11,6 +11,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { crudRequest } from "@/lib/api";
+import { toast } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DeletedItem {
   _id: string;
@@ -47,6 +58,16 @@ const RecycleBin = () => {
     recipts: [],
   });
 
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    itemId: string;
+    itemType: string;
+  }>({
+    isOpen: false,
+    itemId: "",
+    itemType: "",
+  });
+
   const fetchDeletedItems = async () => {
     try {
       type DeletedItemsResponse = {
@@ -71,29 +92,32 @@ const RecycleBin = () => {
 
   const handleRestore = async (id: string, type: string) => {
     try {
-      await crudRequest("POST", `/recycle/restore/${type}/${id}`);
-      // Refresh the list after restore
+      await crudRequest("PUT", `/recycle/restore/${type}/${id}`);
+      toast.success(`${type} restored successfully`);
       fetchDeletedItems();
     } catch (error) {
       console.error("Error restoring item:", error);
+      toast.error(`Failed to restore ${type}`);
     }
   };
 
   const handlePermanentDelete = async (id: string, type: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to permanently delete this item? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
+    setDeleteDialog({ isOpen: true, itemId: id, itemType: type });
+  };
 
+  const confirmDelete = async () => {
     try {
-      await crudRequest("DELETE", `/recycle/permanent-delete/${type}/${id}`);
-      // Refresh the list after delete
+      await crudRequest(
+        "DELETE",
+        `/recycle/delete/${deleteDialog.itemType}/${deleteDialog.itemId}`
+      );
+      toast.success(`${deleteDialog.itemType} permanently deleted`);
       fetchDeletedItems();
     } catch (error) {
       console.error("Error permanently deleting item:", error);
+      toast.error(`Failed to delete ${deleteDialog.itemType}`);
+    } finally {
+      setDeleteDialog({ isOpen: false, itemId: "", itemType: "" });
     }
   };
 
@@ -154,8 +178,32 @@ const RecycleBin = () => {
     </div>
   );
 
+  const DeleteConfirmDialog = () => (
+    <AlertDialog
+      open={deleteDialog.isOpen}
+      onOpenChange={(isOpen) =>
+        setDeleteDialog({ isOpen, itemId: "", itemType: "" })
+      }
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete this item
+            from the database.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   return (
     <div className="container py-6 mx-auto">
+      <DeleteConfirmDialog />
       <Card>
         <CardHeader>
           <CardTitle>Recycle Bin</CardTitle>
@@ -206,7 +254,7 @@ const RecycleBin = () => {
                     { header: "ID", accessor: "_id" },
                     { header: "Name", accessor: "name" },
                   ],
-                  "courses"
+                  "course"
                 )}
               </TabsContent>
 

@@ -30,7 +30,7 @@ const ProPlanUpgrade: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen text-white bg-gradient-to-b from-gray-900 to-black">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-background to-card">
       <Card className="w-full max-w-md rounded-lg shadow-xl bg-gradient-to-r from-yellow-900 via-yellow-700 to-yellow-400">
         <CardHeader className="text-center">
           <h2 className="text-2xl font-extrabold text-gray-100">Pro Plan</h2>

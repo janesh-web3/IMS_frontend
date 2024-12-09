@@ -1,870 +1,464 @@
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Label,
-  LabelList,
-  Line,
-  LineChart,
-  PolarAngleAxis,
-  RadialBar,
-  RadialBarChart,
-  Rectangle,
-  ReferenceLine,
-  XAxis,
-  YAxis,
-} from "recharts";
-
+import { useEffect, useState } from "react";
+import { crudRequest } from "@/lib/api";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import {
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-// } from "@/components/ui";
-
-import { Separator } from "@/components/ui/separator";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-export const description = "A collection of health charts.";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  Legend,
+} from "recharts";
+import { toast } from "react-toastify";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface SessionData {
+  _id: string;
+  userId: {
+    name: string;
+    email: string;
+  };
+  loginTime: string;
+  logoutTime: string;
+  duration: number;
+  userType: string;
+}
+
+interface SessionStats {
+  totalSessions: number;
+  averageDuration: number;
+  userTypeDistribution: Record<string, number>;
+  dailySessionCounts: Record<string, number>;
+}
+
+interface SessionResponse {
+  success: boolean;
+  message?: string;
+  sessions: SessionData[];
+  stats: SessionStats;
+}
+
+interface DetailedSessionData extends SessionData {
+  correlationData?: {
+    duration: number;
+    timeOfDay: number;
+    dayOfWeek: number;
+  };
+}
 
 export function Control() {
+  const [sessionData, setSessionData] = useState<DetailedSessionData[]>([]);
+  const [stats, setStats] = useState<SessionStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedSession, setSelectedSession] =
+    useState<DetailedSessionData | null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+
+  const fetchSessionData = async () => {
+    try {
+      const response = await crudRequest<SessionResponse>(
+        "GET",
+        "/session/all"
+      );
+
+      if (response.success) {
+        setSessionData(processSessionData(response.sessions));
+        setStats(response.stats);
+      } else {
+        toast.error("Failed to load session data");
+      }
+    } catch (error) {
+      toast.error("Error loading session data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSessionData();
+  }, []);
+
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
+  const processSessionData = (
+    sessions: SessionData[]
+  ): DetailedSessionData[] => {
+    return sessions.map((session) => ({
+      ...session,
+      correlationData: {
+        duration: session.duration,
+        timeOfDay: new Date(session.loginTime).getHours(),
+        dayOfWeek: new Date(session.loginTime).getDay(),
+      },
+    }));
+  };
+
+  const handleSessionClick = (session: DetailedSessionData) => {
+    setSelectedSession(session);
+    setShowDetailDialog(true);
+  };
+
+  // Calculate hourly distribution
+  const getHourlyDistribution = () => {
+    const hourly: Record<number, number> = {};
+    sessionData.forEach((session) => {
+      const hour = new Date(session.loginTime).getHours();
+      hourly[hour] = (hourly[hour] || 0) + 1;
+    });
+    return Object.entries(hourly).map(([hour, count]) => ({
+      hour: parseInt(hour),
+      count,
+    }));
+  };
+
+  // Correlation data for scatter plot
+  const getCorrelationData = () => {
+    return sessionData.map((session) => ({
+      duration: session.duration / 60, // Convert to minutes
+      timeOfDay: new Date(session.loginTime).getHours(),
+      userType: session.userType,
+    }));
+  };
+
+  const SessionDetailDialog = () => (
+    <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Session Details</DialogTitle>
+        </DialogHeader>
+        <Tabs defaultValue="overview">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="correlation">Correlation</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold">User</h4>
+                  <p>{selectedSession?.userId.name}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold">User Type</h4>
+                  <p className="capitalize">{selectedSession?.userType}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold">Login Time</h4>
+                  <p>
+                    {new Date(
+                      selectedSession?.loginTime || ""
+                    ).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold">Duration</h4>
+                  <p>{formatDuration(selectedSession?.duration || 0)}</p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="correlation">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <CartesianGrid />
+                  <XAxis
+                    type="number"
+                    dataKey="timeOfDay"
+                    name="Time of Day"
+                    unit="h"
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="duration"
+                    name="Duration"
+                    unit="min"
+                  />
+                  <ZAxis range={[100]} />
+                  <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                  <Legend />
+                  <Scatter
+                    name="Sessions"
+                    data={getCorrelationData()}
+                    fill="#8884d8"
+                  />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+
+  if (loading) {
+    return (
+      <div className="grid gap-4 p-4 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-8 w-[100px]" />
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-wrap items-start justify-center max-w-6xl gap-4 p-3 mx-auto mb-16 md:p-6 md:gap-6 chart-wrapper sm:flex-row sm:py-8 md:mb-10">
-      <div className="grid w-full gap-6 sm:grid-cols-2 lg:max-w-[22rem] lg:grid-cols-1 xl:max-w-[25rem]">
-        <Card className="lg:max-w-md" x-chunk="charts-01-chunk-0">
-          <CardHeader className="pb-2 space-y-0">
-            <CardDescription>Today</CardDescription>
-            <CardTitle className="text-4xl tabular-nums">
-              12,584{" "}
-              <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
-                steps
-              </span>
+    <div className="container p-2 mx-auto mb-10 space-y-6 md:p-4">
+      {/* Stats Overview */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-card">
+          <CardHeader className="pb-2">
+            <CardDescription>Total Sessions</CardDescription>
+            <CardTitle className="text-3xl font-bold">
+              {stats?.totalSessions.toLocaleString() || 0}
             </CardTitle>
+          </CardHeader>
+        </Card>
+
+        <Card className="bg-card backdrop-blur-sm">
+          <CardHeader className="pb-2">
+            <CardDescription>Average Duration</CardDescription>
+            <CardTitle className="text-3xl font-bold">
+              {stats ? formatDuration(stats.averageDuration) : "0h 0m"}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+
+        {/* Add more stat cards as needed */}
+      </div>
+
+      {/* Enhanced Charts Section */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* User Distribution Chart */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>User Distribution</CardTitle>
+            <CardDescription>Sessions by user type</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer
-              config={{
-                steps: {
-                  label: "Steps",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-            >
-              <BarChart
-                accessibilityLayer
-                margin={{
-                  left: -4,
-                  right: -4,
-                }}
-                data={[
-                  {
-                    date: "2024-01-01",
-                    steps: 2000,
-                  },
-                  {
-                    date: "2024-01-02",
-                    steps: 2100,
-                  },
-                  {
-                    date: "2024-01-03",
-                    steps: 2200,
-                  },
-                  {
-                    date: "2024-01-04",
-                    steps: 1300,
-                  },
-                  {
-                    date: "2024-01-05",
-                    steps: 1400,
-                  },
-                  {
-                    date: "2024-01-06",
-                    steps: 2500,
-                  },
-                  {
-                    date: "2024-01-07",
-                    steps: 1600,
-                  },
-                ]}
-              >
-                <Bar
-                  dataKey="steps"
-                  fill="var(--color-steps)"
-                  radius={5}
-                  fillOpacity={0.6}
-                  activeBar={<Rectangle fillOpacity={0.8} />}
-                />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={4}
-                  tickFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      weekday: "short",
-                    });
-                  }}
-                />
-                <ChartTooltip
-                  defaultIndex={2}
-                  content={
-                    <ChartTooltipContent
-                      hideIndicator
-                      labelFormatter={(value) => {
-                        return new Date(value).toLocaleDateString("en-US", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        });
-                      }}
-                    />
-                  }
-                  cursor={false}
-                />
-                <ReferenceLine
-                  y={1200}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeDasharray="3 3"
-                  strokeWidth={1}
-                >
-                  <Label
-                    position="insideBottomLeft"
-                    value="Average Steps"
-                    offset={10}
-                    fill="hsl(var(--foreground))"
-                  />
-                  <Label
-                    position="insideTopLeft"
-                    value="12,343"
-                    className="text-lg"
-                    fill="hsl(var(--foreground))"
-                    offset={10}
-                    startOffset={100}
-                  />
-                </ReferenceLine>
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-          <CardFooter className="flex-col items-start gap-1">
-            <CardDescription>
-              Over the past 7 days, you have walked{" "}
-              <span className="font-medium text-foreground">53,305</span> steps.
-            </CardDescription>
-            <CardDescription>
-              You need{" "}
-              <span className="font-medium text-foreground">12,584</span> more
-              steps to reach your goal.
-            </CardDescription>
-          </CardFooter>
-        </Card>
-        <Card className="flex flex-col lg:max-w-md" x-chunk="charts-01-chunk-1">
-          <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2 [&>div]:flex-1">
-            <div>
-              <CardDescription>Resting HR</CardDescription>
-              <CardTitle className="flex items-baseline gap-1 text-4xl tabular-nums">
-                62
-                <span className="text-sm font-normal tracking-normal text-muted-foreground">
-                  bpm
-                </span>
-              </CardTitle>
-            </div>
-            <div>
-              <CardDescription>Variability</CardDescription>
-              <CardTitle className="flex items-baseline gap-1 text-4xl tabular-nums">
-                35
-                <span className="text-sm font-normal tracking-normal text-muted-foreground">
-                  ms
-                </span>
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent className="flex items-center flex-1">
-            <ChartContainer
-              config={{
-                resting: {
-                  label: "Resting",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-              className="w-full"
-            >
-              <LineChart
-                accessibilityLayer
-                margin={{
-                  left: 14,
-                  right: 14,
-                  top: 10,
-                }}
-                data={[
-                  {
-                    date: "2024-01-01",
-                    resting: 62,
-                  },
-                  {
-                    date: "2024-01-02",
-                    resting: 72,
-                  },
-                  {
-                    date: "2024-01-03",
-                    resting: 35,
-                  },
-                  {
-                    date: "2024-01-04",
-                    resting: 62,
-                  },
-                  {
-                    date: "2024-01-05",
-                    resting: 52,
-                  },
-                  {
-                    date: "2024-01-06",
-                    resting: 62,
-                  },
-                  {
-                    date: "2024-01-07",
-                    resting: 70,
-                  },
-                ]}
-              >
-                <CartesianGrid
-                  strokeDasharray="4 4"
-                  vertical={false}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeOpacity={0.5}
-                />
-                <YAxis hide domain={["dataMin - 10", "dataMax + 10"]} />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      weekday: "short",
-                    });
-                  }}
-                />
-                <Line
-                  dataKey="resting"
-                  type="natural"
-                  fill="var(--color-resting)"
-                  stroke="var(--color-resting)"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{
-                    fill: "var(--color-resting)",
-                    stroke: "var(--color-resting)",
-                    r: 4,
-                  }}
-                />
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      indicator="line"
-                      labelFormatter={(value) => {
-                        return new Date(value).toLocaleDateString("en-US", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        });
-                      }}
-                    />
-                  }
-                  cursor={false}
-                />
-              </LineChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="grid w-full flex-1 gap-6 lg:max-w-[20rem]">
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-2">
-          <CardHeader>
-            <CardTitle>Progress</CardTitle>
-            <CardDescription>
-              You're average more steps a day this year than last year.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2 auto-rows-min">
-              <div className="flex items-baseline gap-1 text-2xl font-bold leading-none tabular-nums">
-                12,453
-                <span className="text-sm font-normal text-muted-foreground">
-                  steps/day
-                </span>
-              </div>
-              <ChartContainer
-                config={{
-                  steps: {
-                    label: "Steps",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}
-                className="aspect-auto h-[32px] w-full"
-              >
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  accessibilityLayer
-                  layout="vertical"
-                  margin={{
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                  }}
-                  data={[
-                    {
-                      date: "2024",
-                      steps: 12435,
-                    },
-                  ]}
-                >
-                  <Bar
-                    dataKey="steps"
-                    fill="var(--color-steps)"
-                    radius={4}
-                    barSize={32}
-                  >
-                    <LabelList
-                      position="insideLeft"
-                      dataKey="date"
-                      offset={8}
-                      fontSize={12}
-                      fill="white"
-                    />
-                  </Bar>
-                  <YAxis dataKey="date" type="category" tickCount={1} hide />
-                  <XAxis dataKey="steps" type="number" hide />
-                </BarChart>
-              </ChartContainer>
-            </div>
-            <div className="grid gap-2 auto-rows-min">
-              <div className="flex items-baseline gap-1 text-2xl font-bold leading-none tabular-nums">
-                10,103
-                <span className="text-sm font-normal text-muted-foreground">
-                  steps/day
-                </span>
-              </div>
-              <ChartContainer
-                config={{
-                  steps: {
-                    label: "Steps",
-                    color: "hsl(var(--muted))",
-                  },
-                }}
-                className="aspect-auto h-[32px] w-full"
-              >
-                <BarChart
-                  accessibilityLayer
-                  layout="vertical"
-                  margin={{
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    bottom: 0,
-                  }}
-                  data={[
-                    {
-                      date: "2023",
-                      steps: 10103,
-                    },
-                  ]}
-                >
-                  <Bar
-                    dataKey="steps"
-                    fill="var(--color-steps)"
-                    radius={4}
-                    barSize={32}
-                  >
-                    <LabelList
-                      position="insideLeft"
-                      dataKey="date"
-                      offset={8}
-                      fontSize={12}
-                      fill="hsl(var(--muted-foreground))"
-                    />
-                  </Bar>
-                  <YAxis dataKey="date" type="category" tickCount={1} hide />
-                  <XAxis dataKey="steps" type="number" hide />
-                </BarChart>
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-3">
-          <CardHeader className="p-4 pb-0">
-            <CardTitle>Walking Distance</CardTitle>
-            <CardDescription>
-              Over the last 7 days, your distance walked and run was 12.5 miles
-              per day.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-row items-baseline gap-4 p-4 pt-0">
-            <div className="flex items-baseline gap-1 text-3xl font-bold leading-none tabular-nums">
-              12.5
-              <span className="text-sm font-normal text-muted-foreground">
-                miles/day
-              </span>
-            </div>
-            <ChartContainer
-              config={{
-                steps: {
-                  label: "Steps",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-              className="ml-auto w-[72px]"
-            >
-              <BarChart
-                accessibilityLayer
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                }}
-                data={[
-                  {
-                    date: "2024-01-01",
-                    steps: 2000,
-                  },
-                  {
-                    date: "2024-01-02",
-                    steps: 2100,
-                  },
-                  {
-                    date: "2024-01-03",
-                    steps: 2200,
-                  },
-                  {
-                    date: "2024-01-04",
-                    steps: 1300,
-                  },
-                  {
-                    date: "2024-01-05",
-                    steps: 1400,
-                  },
-                  {
-                    date: "2024-01-06",
-                    steps: 2500,
-                  },
-                  {
-                    date: "2024-01-07",
-                    steps: 1600,
-                  },
-                ]}
-              >
-                <Bar
-                  dataKey="steps"
-                  fill="var(--color-steps)"
-                  radius={2}
-                  fillOpacity={0.2}
-                  activeIndex={6}
-                  activeBar={<Rectangle fillOpacity={0.8} />}
-                />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={4}
-                  hide
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-4">
-          <CardContent className="flex gap-4 p-4 pb-2">
-            <ChartContainer
-              config={{
-                move: {
-                  label: "Move",
-                  color: "hsl(var(--chart-1))",
-                },
-                stand: {
-                  label: "Stand",
-                  color: "hsl(var(--chart-2))",
-                },
-                exercise: {
-                  label: "Exercise",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
-              className="h-[140px] w-full"
-            >
-              <BarChart
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 10,
-                }}
-                data={[
-                  {
-                    activity: "stand",
-                    value: (8 / 12) * 100,
-                    label: "8/12 hr",
-                    fill: "var(--color-stand)",
-                  },
-                  {
-                    activity: "exercise",
-                    value: (46 / 60) * 100,
-                    label: "46/60 min",
-                    fill: "var(--color-exercise)",
-                  },
-                  {
-                    activity: "move",
-                    value: (245 / 360) * 100,
-                    label: "245/360 kcal",
-                    fill: "var(--color-move)",
-                  },
-                ]}
-                layout="vertical"
-                barSize={32}
-                barGap={2}
-              >
-                <XAxis type="number" dataKey="value" hide />
-                <YAxis
-                  dataKey="activity"
-                  type="category"
-                  tickLine={false}
-                  tickMargin={4}
-                  axisLine={false}
-                  className="capitalize"
-                />
-                <Bar dataKey="value" radius={5}>
-                  <LabelList
-                    position="insideLeft"
-                    dataKey="label"
-                    fill="white"
-                    offset={8}
-                    fontSize={12}
-                  />
-                </Bar>
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-          <CardFooter className="flex flex-row p-4 border-t">
-            <div className="flex items-center w-full gap-2">
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-xs text-muted-foreground">Move</div>
-                <div className="flex items-baseline gap-1 text-2xl font-bold leading-none tabular-nums">
-                  562
-                  <span className="text-sm font-normal text-muted-foreground">
-                    kcal
-                  </span>
-                </div>
-              </div>
-              <Separator orientation="vertical" className="w-px h-10 mx-2" />
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-xs text-muted-foreground">Exercise</div>
-                <div className="flex items-baseline gap-1 text-2xl font-bold leading-none tabular-nums">
-                  73
-                  <span className="text-sm font-normal text-muted-foreground">
-                    min
-                  </span>
-                </div>
-              </div>
-              <Separator orientation="vertical" className="w-px h-10 mx-2" />
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-xs text-muted-foreground">Stand</div>
-                <div className="flex items-baseline gap-1 text-2xl font-bold leading-none tabular-nums">
-                  14
-                  <span className="text-sm font-normal text-muted-foreground">
-                    hr
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardFooter>
-        </Card>
-      </div>
-      <div className="grid flex-1 w-full gap-6">
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-5">
-          <CardContent className="flex gap-4 p-4">
-            <div className="grid items-center gap-2">
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-sm text-muted-foreground">Move</div>
-                <div className="flex items-baseline gap-1 text-xl font-bold leading-none tabular-nums">
-                  562/600
-                  <span className="text-sm font-normal text-muted-foreground">
-                    kcal
-                  </span>
-                </div>
-              </div>
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-sm text-muted-foreground">Exercise</div>
-                <div className="flex items-baseline gap-1 text-xl font-bold leading-none tabular-nums">
-                  73/120
-                  <span className="text-sm font-normal text-muted-foreground">
-                    min
-                  </span>
-                </div>
-              </div>
-              <div className="grid flex-1 auto-rows-min gap-0.5">
-                <div className="text-sm text-muted-foreground">Stand</div>
-                <div className="flex items-baseline gap-1 text-xl font-bold leading-none tabular-nums">
-                  8/12
-                  <span className="text-sm font-normal text-muted-foreground">
-                    hr
-                  </span>
-                </div>
-              </div>
-            </div>
-            <ChartContainer
-              config={{
-                move: {
-                  label: "Move",
-                  color: "hsl(var(--chart-1))",
-                },
-                exercise: {
-                  label: "Exercise",
-                  color: "hsl(var(--chart-2))",
-                },
-                stand: {
-                  label: "Stand",
-                  color: "hsl(var(--chart-3))",
-                },
-              }}
-              className="mx-auto aspect-square w-full max-w-[80%]"
-            >
-              <RadialBarChart
-                margin={{
-                  left: -10,
-                  right: -10,
-                  top: -10,
-                  bottom: -10,
-                }}
-                data={[
-                  {
-                    activity: "stand",
-                    value: (8 / 12) * 100,
-                    fill: "var(--color-stand)",
-                  },
-                  {
-                    activity: "exercise",
-                    value: (46 / 60) * 100,
-                    fill: "var(--color-exercise)",
-                  },
-                  {
-                    activity: "move",
-                    value: (245 / 360) * 100,
-                    fill: "var(--color-move)",
-                  },
-                ]}
-                innerRadius="20%"
-                barSize={24}
-                startAngle={90}
-                endAngle={450}
-              >
-                <PolarAngleAxis
-                  type="number"
-                  domain={[0, 100]}
-                  dataKey="value"
-                  tick={false}
-                />
-                <RadialBar dataKey="value" background cornerRadius={5} />
-              </RadialBarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-6">
-          <CardHeader className="p-4 pb-0">
-            <CardTitle>Active Energy</CardTitle>
-            <CardDescription>
-              You're burning an average of 754 calories per day. Good job!
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-row items-baseline gap-4 p-4 pt-2">
-            <div className="flex items-baseline gap-2 text-3xl font-bold leading-none tabular-nums">
-              1,254
-              <span className="text-sm font-normal text-muted-foreground">
-                kcal/day
-              </span>
-            </div>
-            <ChartContainer
-              config={{
-                calories: {
-                  label: "Calories",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-              className="ml-auto w-[64px]"
-            >
-              <BarChart
-                accessibilityLayer
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                }}
-                data={[
-                  {
-                    date: "2024-01-01",
-                    calories: 354,
-                  },
-                  {
-                    date: "2024-01-02",
-                    calories: 514,
-                  },
-                  {
-                    date: "2024-01-03",
-                    calories: 345,
-                  },
-                  {
-                    date: "2024-01-04",
-                    calories: 734,
-                  },
-                  {
-                    date: "2024-01-05",
-                    calories: 645,
-                  },
-                  {
-                    date: "2024-01-06",
-                    calories: 456,
-                  },
-                  {
-                    date: "2024-01-07",
-                    calories: 345,
-                  },
-                ]}
-              >
-                <Bar
-                  dataKey="calories"
-                  fill="var(--color-calories)"
-                  radius={2}
-                  fillOpacity={0.2}
-                  activeIndex={6}
-                  activeBar={<Rectangle fillOpacity={0.8} />}
-                />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={4}
-                  hide
-                />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-        <Card className="max-w-xs" x-chunk="charts-01-chunk-7">
-          <CardHeader className="pb-0 space-y-0">
-            <CardDescription>Time in Bed</CardDescription>
-            <CardTitle className="flex items-baseline gap-1 text-4xl tabular-nums">
-              8
-              <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
-                hr
-              </span>
-              35
-              <span className="font-sans text-sm font-normal tracking-normal text-muted-foreground">
-                min
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ChartContainer
-              config={{
-                time: {
-                  label: "Time",
-                  color: "hsl(var(--chart-2))",
-                },
-              }}
-            >
-              <AreaChart
-                accessibilityLayer
-                data={[
-                  {
-                    date: "2024-01-01",
-                    time: 8.5,
-                  },
-                  {
-                    date: "2024-01-02",
-                    time: 7.2,
-                  },
-                  {
-                    date: "2024-01-03",
-                    time: 8.1,
-                  },
-                  {
-                    date: "2024-01-04",
-                    time: 6.2,
-                  },
-                  {
-                    date: "2024-01-05",
-                    time: 5.2,
-                  },
-                  {
-                    date: "2024-01-06",
-                    time: 8.1,
-                  },
-                  {
-                    date: "2024-01-07",
-                    time: 7.0,
-                  },
-                ]}
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                }}
-              >
-                <XAxis dataKey="date" hide />
-                <YAxis domain={["dataMin - 5", "dataMax + 2"]} hide />
-                <defs>
-                  <linearGradient id="fillTime" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-time)"
-                      stopOpacity={0.8}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-time)"
-                      stopOpacity={0.1}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  dataKey="time"
-                  type="natural"
-                  fill="url(#fillTime)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-time)"
-                />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
-                  formatter={(value) => (
-                    <div className="flex min-w-[120px] items-center text-xs text-muted-foreground">
-                      Time in bed
-                      <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
-                        {value}
-                        <span className="font-normal text-muted-foreground">
-                          hr
-                        </span>
-                      </div>
-                    </div>
+                  data={Object.entries(stats?.userTypeDistribution || {}).map(
+                    ([type, count]) => ({
+                      type: type.charAt(0).toUpperCase() + type.slice(1),
+                      count,
+                    })
                   )}
-                />
-              </AreaChart>
-            </ChartContainer>
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="type" tick={{ fontSize: 12 }} interval={0} />
+                  <YAxis />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "8px",
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Enhanced Daily Sessions Chart with click interaction */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Daily Sessions</CardTitle>
+            <CardDescription>Click on points to see details</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={Object.entries(stats?.dailySessionCounts || {}).map(
+                    ([date, count]) => ({
+                      date,
+                      sessions: count,
+                    })
+                  )}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12 }}
+                    interval={0}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "8px",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="sessions"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot={{ fill: "#22c55e", r: 4 }}
+                    activeDot={{
+                      r: 6,
+                      onClick: (event: any) => {
+                        const session = sessionData.find(
+                          (s) =>
+                            new Date(s.loginTime).toLocaleDateString() ===
+                            event.payload.date
+                        );
+                        if (session) handleSessionClick(session);
+                      },
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* New Hourly Distribution Chart */}
+        <Card className="col-span-1">
+          <CardHeader>
+            <CardTitle>Hourly Distribution</CardTitle>
+            <CardDescription>Session frequency by hour</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={getHourlyDistribution()}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="hour" tick={{ fontSize: 12 }} interval={0} />
+                  <YAxis />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(255, 255, 255, 0.8)",
+                      border: "none",
+                      borderRadius: "6px",
+                      padding: "8px",
+                    }}
+                    formatter={(value, _name, props) => [
+                      `${value} sessions`,
+                      `${props.payload.hour}:00`,
+                    ]}
+                  />
+                  <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Session Detail Dialog */}
+      <SessionDetailDialog />
+
+      {/* Recent Sessions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Sessions</CardTitle>
+          <CardDescription>Click on a row to see details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[400px] w-full">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Login Time</TableHead>
+                  <TableHead>Duration</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sessionData.map((session) => (
+                  <TableRow
+                    key={session._id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleSessionClick(session)}
+                  >
+                    <TableCell className="font-medium">
+                      {session.userId.name}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {session.userType}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(session.loginTime).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{formatDuration(session.duration)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </CardContent>
+      </Card>
     </div>
   );
 }
