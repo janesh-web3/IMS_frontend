@@ -177,6 +177,27 @@ type Billing = {
   remaining: number;
 };
 
+type StatsResponse = {
+  total: {
+    allStudents: number;
+    filteredStudents: number;
+  };
+  genderCounts: {
+    male: number;
+    female: number;
+    other: number;
+  };
+  feeStatus: {
+    complete: number;
+    incomplete: number;
+  };
+  financial: {
+    totalAmount: number;
+    totalPaid: number;
+    totalRemaining: number;
+  };
+};
+
 export function StudentTable() {
   const navigate = useNavigate();
   const [student, setStudent] = useState<Student[]>([]);
@@ -191,6 +212,26 @@ export function StudentTable() {
   );
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [courses, setCourses] = useState<Courses[]>([]);
+  const [stats, setStats] = useState({
+    total: {
+      allStudents: 0,
+      filteredStudents: 0,
+    },
+    genderCounts: {
+      male: 0,
+      female: 0,
+      other: 0,
+    },
+    feeStatus: {
+      complete: 0,
+      incomplete: 0,
+    },
+    financial: {
+      totalAmount: 0,
+      totalPaid: 0,
+      totalRemaining: 0,
+    },
+  });
 
   //bill print
   const formatCurrency = (amount: number) => {
@@ -229,7 +270,7 @@ export function StudentTable() {
           padding-bottom: 10px;
         }
         .bill-details { 
-          margin-bottom: 20px;
+          margin-bottom: 20px; 
           padding: 10px;
           background-color: #f9f9f9;
         }
@@ -642,8 +683,121 @@ export function StudentTable() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const params = new URLSearchParams();
+
+      if (selectedCourses.length > 0) {
+        selectedCourses.forEach((courseId) => {
+          params.append("courseIds", courseId);
+        });
+      }
+
+      if (selectedTab !== "all") {
+        params.append("gender", selectedTab);
+      }
+
+      if (filterFeeComplete !== null) {
+        params.append(
+          "feeStatus",
+          filterFeeComplete ? "complete" : "incomplete"
+        );
+      }
+
+      const response = await crudRequest<StatsResponse>(
+        "GET",
+        `/student/stats?${params.toString()}`
+      );
+      setStats(response);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [selectedTab, filterFeeComplete, selectedCourses]);
+
+  const renderStats = () => (
+    <div className="grid grid-cols-2 gap-4 p-2 md:grid-cols-4">
+      <Card className="p-4">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm text-muted-foreground">Total Students</p>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">{stats.total.allStudents}</h2>
+            <span className="text-xs text-muted-foreground">
+              ({stats.total.filteredStudents} filtered)
+            </span>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm text-muted-foreground">Gender Distribution</p>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <div>
+              <p className="font-semibold">{stats.genderCounts.male}</p>
+              <p className="text-xs text-muted-foreground">Male</p>
+            </div>
+            <div>
+              <p className="font-semibold">{stats.genderCounts.female}</p>
+              <p className="text-xs text-muted-foreground">Female</p>
+            </div>
+            <div>
+              <p className="font-semibold">{stats.genderCounts.other}</p>
+              <p className="text-xs text-muted-foreground">Other</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm text-muted-foreground">Fee Status</p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <p className="font-semibold">{stats.feeStatus.complete}</p>
+              <p className="text-xs text-muted-foreground">Complete</p>
+            </div>
+            <div>
+              <p className="font-semibold">{stats.feeStatus.incomplete}</p>
+              <p className="text-xs text-muted-foreground">Pending</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm text-muted-foreground">Financial Overview</p>
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Total:</span>
+              <span className="font-semibold">
+                ₹{stats.financial.totalAmount.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Paid:</span>
+              <span className="font-semibold text-green-600">
+                ₹{stats.financial.totalPaid.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-muted-foreground">Due:</span>
+              <span className="font-semibold text-red-600">
+                ₹{stats.financial.totalRemaining.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+
   const renderStudentTable = () => (
-    <Card x-chunk="dashboard-06-chunk-0 " className="py-2 md:py-4">
+    <Card className="py-2 md:py-4">
       <CardHeader>
         <CardTitle>Students</CardTitle>
         <CardDescription>
@@ -991,7 +1145,9 @@ export function StudentTable() {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between"></CardFooter>
+      <CardFooter className="flex justify-between">
+        {/* ... any footer content ... */}
+      </CardFooter>
     </Card>
   );
 
@@ -1038,8 +1194,8 @@ export function StudentTable() {
   };
 
   return (
-    <div className="flex flex-col w-full bg-muted/40">
-      <div className="flex flex-col sm:gap-4 sm:py-4 ">
+    <div className="flex flex-col w-full h-full">
+      <div className="flex flex-col flex-1 sm:gap-4 sm:py-4">
         <header className="sticky top-0 z-30 flex items-center gap-4 px-4 border-b h-14 bg-background sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <Breadcrumb className="hidden md:flex">
             <BreadcrumbList>
@@ -1071,19 +1227,32 @@ export function StudentTable() {
             />
           </div>
         </header>
-        <main className="grid items-start flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs
-            defaultValue="all"
-            value={selectedTab}
-            className="p-2"
-            onValueChange={(value) => setSelectedTab(value)}
-          >
-            <div className="flex items-center">
+        <main className="flex-1 overflow-auto">
+          {renderStats()}
+          <Tabs defaultValue="all" value={selectedTab} className="p-2">
+            <div className="flex flex-wrap items-center gap-2">
               <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="male">Male</TabsTrigger>
-                <TabsTrigger value="female">Female</TabsTrigger>
-                <TabsTrigger value="other">Other</TabsTrigger>
+                <TabsTrigger value="all" onClick={() => setSelectedTab("all")}>
+                  All
+                </TabsTrigger>
+                <TabsTrigger
+                  value="male"
+                  onClick={() => setSelectedTab("male")}
+                >
+                  Male
+                </TabsTrigger>
+                <TabsTrigger
+                  value="female"
+                  onClick={() => setSelectedTab("female")}
+                >
+                  Female
+                </TabsTrigger>
+                <TabsTrigger
+                  value="other"
+                  onClick={() => setSelectedTab("other")}
+                >
+                  Other
+                </TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-2 ml-auto">
                 {/* Filter by fee */}
@@ -1119,6 +1288,35 @@ export function StudentTable() {
                 </DropdownMenu>
 
                 {/* filter by course */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                      <ListFilter className="h-3.5 w-3.5" />
+                      <span>Filter by Course</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {courses &&
+                      courses.map((course, index) => (
+                        <DropdownMenuCheckboxItem
+                          key={index}
+                          checked={selectedCourses.includes(course._id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedCourses((prev) =>
+                              checked
+                                ? [...prev, course._id]
+                                : prev.filter((id) => id !== course._id)
+                            );
+                          }}
+                        >
+                          {course.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -1260,11 +1458,10 @@ export function StudentTable() {
                 <Error />
               </div>
             ) : (
-              <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] md:py-2">
-                <TabsContent value="all">{renderStudentTable()}</TabsContent>
-                <TabsContent value="male">{renderStudentTable()}</TabsContent>
-                <TabsContent value="female">{renderStudentTable()}</TabsContent>
-                <TabsContent value="other">{renderStudentTable()}</TabsContent>
+              <div className="overflow-auto">
+                <TabsContent value={selectedTab}>
+                  {renderStudentTable()}
+                </TabsContent>
               </div>
             )}
           </Tabs>

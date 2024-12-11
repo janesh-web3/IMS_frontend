@@ -134,7 +134,7 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       <form className="space-y-4" autoComplete="off">
         {/* first step */}
         <>
-          <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-8 gap-y-4">
+          <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-3 md:gap-x-8 gap-y-2 md:gap-y-4">
             <div>
               <Label htmlFor="studentName">Student Name</Label>
               <Input

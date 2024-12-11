@@ -3,10 +3,12 @@ import TableSearchInput from "@/components/shared/table-search-input";
 import ReciptCreateForm from "./ReciptCreateForm";
 import { ReciptTable } from "./Table";
 import { Plus } from "lucide-react";
+import ReciptStats from "./ReciptStats";
 
 export default function ReciptLayout() {
   return (
-    <div className="mb-40">
+    <div className="flex flex-col gap-4">
+      <ReciptStats />
       <div className="flex items-center justify-between gap-2 py-5">
         <div className="flex flex-1 gap-4">
           <TableSearchInput placeholder="Search Recipt Here" />

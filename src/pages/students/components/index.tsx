@@ -2,8 +2,10 @@ import { StudentTable } from "./Table";
 
 export default function StudentLayout() {
   return (
-    <div className="flex justify-center w-auto h-auto mx-auto overflow-auto">
-      <StudentTable />
+    <div className="flex h-full overflow-auto">
+      <div className="flex-1 overflow-auto">
+        <StudentTable />
+      </div>
     </div>
   );
 }

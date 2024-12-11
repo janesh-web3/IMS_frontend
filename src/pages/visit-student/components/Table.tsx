@@ -255,220 +255,121 @@ export function VisitStudentTable() {
   // if (error) return <div>{error}</div>;
 
   const renderStudentTable = () => (
-    <Card x-chunk="dashboard-06-chunk-0 " className="py-2 md:py-4">
-      <CardHeader>
-        <CardTitle>Students</CardTitle>
-        <CardDescription>
-          Manage your students and view their details.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="w-full max-h-[200vh]">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columnVisibility.photo && (
-                  <TableHead className="w-[100px] sm:table-cell">
-                    <span>Photo</span>
-                  </TableHead>
-                )}
-                {columnVisibility.name && <TableHead>Name</TableHead>}
-                {columnVisibility.contact && (
-                  <TableHead className="table-cell">Contact</TableHead>
-                )}
-                {columnVisibility.schoolName && (
-                  <TableHead className="table-cell">School</TableHead>
-                )}
-                {columnVisibility.gender && (
-                  <TableHead className="table-cell">Gender</TableHead>
-                )}
-                {columnVisibility.address && (
-                  <TableHead className="table-cell">Address</TableHead>
-                )}
-                {columnVisibility.dateOfVisit && (
-                  <TableHead className="table-cell">Date of Visit</TableHead>
-                )}
-
-                <TableHead className="table-cell">
-                  <span>Actions</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredStudents.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7}>No student a vailable</TableCell>
-                </TableRow>
-              ) : (
-                filteredStudents.map((student, index) => (
-                  <TableRow key={index}>
-                    {columnVisibility.photo && (
-                      <TableCell className="hidden sm:table-cell">
-                        <img
-                          alt="Student Photo"
-                          className="object-cover rounded-md aspect-square"
-                          height="64"
-                          src={student.photo}
-                          width="64"
-                        />
-                      </TableCell>
-                    )}
-                    {columnVisibility.name && (
-                      <TableCell className="font-medium">
-                        {student.studentName}
-                      </TableCell>
-                    )}
-
-                    {columnVisibility.contact && (
-                      <TableCell className="table-cell">
-                        {student.studentNumber}
-                      </TableCell>
-                    )}
-                    {columnVisibility.schoolName && (
-                      <TableCell className="table-cell">
-                        {student.schoolName}
-                      </TableCell>
-                    )}
-                    {columnVisibility.gender && (
-                      <TableCell className="table-cell">
-                        {student.gender}
-                      </TableCell>
-                    )}
-                    {columnVisibility.address && (
-                      <TableCell className="table-cell">
-                        {student.address}
-                      </TableCell>
-                    )}
-                    {columnVisibility.dateOfVisit && (
-                      <TableCell className="table-cell">
-                        <span>
-                          {new Date(student.dateOfVisit).toLocaleDateString(
-                            "en-US",
-                            { year: "numeric", month: "long", day: "numeric" }
-                          )}
-                        </span>
-                      </TableCell>
-                    )}
-
-                    <TableCell>
-                      <Drawer>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-8 h-8 p-0">
-                              <MoreHorizontal className="w-6 h-6" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="cursor-pointer"
-                          >
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DrawerTrigger asChild>
-                              <DropdownMenuItem className="flex justify-between cursor-pointer">
-                                View <View size={17} />
-                              </DropdownMenuItem>
-                            </DrawerTrigger>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setOpen(true);
-                              }}
-                              className="flex justify-between cursor-pointer"
-                            >
-                              Delete <Trash size={17} />
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        <AlertModal
-                          isOpen={open}
-                          onClose={() => setOpen(false)}
-                          onConfirm={() => onConfirm(student._id)}
-                          loading={loading}
-                          title="Delete Student"
-                          description="Are you sure you want to delete this student?"
-                        />
-                        <DrawerContent className="z-50">
-                          <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
-                            <DrawerHeader>
-                              <DrawerTitle>Student Details</DrawerTitle>
-                              <DrawerDescription>
-                                See details about {student.studentName}
-                              </DrawerDescription>
-                            </DrawerHeader>
-                            <div className="p-4 pb-0">
-                              <VisitStudentDetails {...student} />
-                            </div>
-                            <DrawerFooter>
-                              <DrawerClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                              </DrawerClose>
-                            </DrawerFooter>
-                          </div>
-                        </DrawerContent>
-                      </Drawer>
-                    </TableCell>
-                  </TableRow>
-                ))
+    <Table>
+      <TableHeader className="sticky top-0 bg-background">
+        <TableRow>
+          {columnVisibility.name && <TableHead>Name</TableHead>}
+          {columnVisibility.gender && <TableHead>Gender</TableHead>}
+          {columnVisibility.contact && <TableHead>Contact</TableHead>}
+          {columnVisibility.address && <TableHead>Address</TableHead>}
+          {columnVisibility.schoolName && <TableHead>School</TableHead>}
+          {columnVisibility.dateOfVisit && <TableHead>Visit Date</TableHead>}
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {filteredStudents.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={7}>No student a vailable</TableCell>
+          </TableRow>
+        ) : (
+          filteredStudents.map((student, index) => (
+            <TableRow key={index}>
+              {columnVisibility.name && (
+                <TableCell className="font-medium">
+                  {student.studentName}
+                </TableCell>
               )}
-            </TableBody>
-          </Table>
-          <div className="grid grid-cols-1 gap-10 mt-3 md:mt-5 md:grid-cols-3">
-            <Select
-              onValueChange={(value) => setItemsPerPage(Number(value))}
-              value={itemsPerPage.toString()}
-            >
-              <SelectTrigger id="itemsPerPage">
-                <SelectValue placeholder="Items per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectContent>
-            </Select>
 
-            <Pagination className=" columns-2">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    isActive={currentPage === 1 ? false : true}
-                    onClick={() =>
-                      handlePageChange(Math.max(currentPage - 1, 1))
-                    }
-                    // disabled={currentPage === 1}
+              {columnVisibility.contact && (
+                <TableCell className="table-cell">
+                  {student.studentNumber}
+                </TableCell>
+              )}
+              {columnVisibility.schoolName && (
+                <TableCell className="table-cell">
+                  {student.schoolName}
+                </TableCell>
+              )}
+              {columnVisibility.gender && (
+                <TableCell className="table-cell">{student.gender}</TableCell>
+              )}
+              {columnVisibility.address && (
+                <TableCell className="table-cell">{student.address}</TableCell>
+              )}
+              {columnVisibility.dateOfVisit && (
+                <TableCell className="table-cell">
+                  <span>
+                    {new Date(student.dateOfVisit).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </TableCell>
+              )}
+
+              <TableCell>
+                <Drawer>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="w-8 h-8 p-0">
+                        <MoreHorizontal className="w-6 h-6" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="cursor-pointer">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DrawerTrigger asChild>
+                        <DropdownMenuItem className="flex justify-between cursor-pointer">
+                          View <View size={17} />
+                        </DropdownMenuItem>
+                      </DrawerTrigger>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setOpen(true);
+                        }}
+                        className="flex justify-between cursor-pointer"
+                      >
+                        Delete <Trash size={17} />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <AlertModal
+                    isOpen={open}
+                    onClose={() => setOpen(false)}
+                    onConfirm={() => onConfirm(student._id)}
+                    loading={loading}
+                    title="Delete Student"
+                    description="Are you sure you want to delete this student?"
                   />
-                </PaginationItem>
-                {[...Array(totalPages)].map((_, index) => (
-                  <PaginationItem key={index}>
-                    <PaginationLink
-                      href="#"
-                      onClick={() => handlePageChange(index + 1)}
-                      isActive={currentPage === index + 1}
-                    >
-                      {index + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={() =>
-                      handlePageChange(Math.min(currentPage + 1, totalPages))
-                    }
-                    isActive={currentPage === totalPages ? false : true}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between"></CardFooter>
-    </Card>
+                  <DrawerContent className="z-50">
+                    <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                      <DrawerHeader>
+                        <DrawerTitle>Student Details</DrawerTitle>
+                        <DrawerDescription>
+                          See details about {student.studentName}
+                        </DrawerDescription>
+                      </DrawerHeader>
+                      <div className="p-4 pb-0">
+                        <VisitStudentDetails {...student} />
+                      </div>
+                      <DrawerFooter>
+                        <DrawerClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DrawerClose>
+                      </DrawerFooter>
+                    </div>
+                  </DrawerContent>
+                </Drawer>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
   );
 
   // Function to convert data to CSV and download
@@ -512,189 +413,219 @@ export function VisitStudentTable() {
   };
 
   return (
-    <div className="flex flex-col w-full bg-muted/40">
-      <div className="flex flex-col sm:gap-4 sm:py-4 ">
-        <header className="sticky top-0 z-30 flex items-center gap-4 px-4 border-b h-14 bg-background sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="#">Dashboard</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link to="#">Students</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Visits Students</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="relative flex-1 mx-2 ml-auto md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-            />
-          </div>
-        </header>
-        <main className="grid items-start flex-1 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs
-            defaultValue="all"
-            value={selectedTab}
-            className="p-2"
-            onValueChange={(value) => setSelectedTab(value)}
-          >
-            <div className="flex items-center">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="male">Male</TabsTrigger>
-                <TabsTrigger value="female">Female</TabsTrigger>
-                <TabsTrigger value="other">Other</TabsTrigger>
-              </TabsList>
-              <div className="flex items-center gap-2 ml-auto">
-                {/* filter by course */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Filter by Course
-                      </span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {courses &&
-                      courses.map((course, index) => (
-                        <DropdownMenuCheckboxItem
-                          key={index}
-                          checked={selectedCourses.includes(course._id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedCourses((prev) =>
-                              checked
-                                ? [...prev, course._id]
-                                : prev.filter((id) => id !== course._id)
-                            );
-                          }}
-                        >
-                          {course.name}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <Breadcrumb className="hidden md:flex">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="#">Dashboard</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="#">Students</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Visits Students</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="relative flex-1 mx-2 ml-auto md:grow-0">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+          />
+        </div>
+      </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 ml-2 md:h-9"
-                    >
-                      Columns
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[200px]">
-                    <DropdownMenuLabel>Select Columns</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.photo}
-                      onCheckedChange={() => toggleColumnVisibility("photo")}
-                    >
-                      Photo
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.name}
-                      onCheckedChange={() => toggleColumnVisibility("name")}
-                    >
-                      Name
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.gender}
-                      onCheckedChange={() => toggleColumnVisibility("gender")}
-                    >
-                      Gender
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.contact}
-                      onCheckedChange={() => toggleColumnVisibility("contact")}
-                    >
-                      Contact
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.address}
-                      onCheckedChange={() => toggleColumnVisibility("address")}
-                    >
-                      Address
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.schoolName}
-                      onCheckedChange={() =>
-                        toggleColumnVisibility("schoolName")
-                      }
-                    >
-                      School
-                    </DropdownMenuCheckboxItem>
-                    <DropdownMenuCheckboxItem
-                      checked={columnVisibility.dateOfVisit}
-                      onCheckedChange={() =>
-                        toggleColumnVisibility("dateOfVisit")
-                      }
-                    >
-                      Date of Visit
-                    </DropdownMenuCheckboxItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+      <div className="rounded-md border">
+        <Tabs defaultValue="all" value={selectedTab}>
+          <div className="flex items-center justify-between p-2">
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="male">Male</TabsTrigger>
+              <TabsTrigger value="female">Female</TabsTrigger>
+              <TabsTrigger value="other">Other</TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2 ml-auto">
+              {/* filter by course */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1">
+                    <ListFilter className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Filter by Course
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {courses &&
+                    courses.map((course, index) => (
+                      <DropdownMenuCheckboxItem
+                        key={index}
+                        checked={selectedCourses.includes(course._id)}
+                        onCheckedChange={(checked) => {
+                          setSelectedCourses((prev) =>
+                            checked
+                              ? [...prev, course._id]
+                              : prev.filter((id) => id !== course._id)
+                          );
+                        }}
+                      >
+                        {course.name}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                <PremiumComponent>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 gap-1"
-                    onClick={exportToCSV}
+                    className="h-8 ml-2 md:h-9"
                   >
-                    <File className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Export
-                    </span>
+                    Columns
                   </Button>
-                </PremiumComponent>
-                <PopupModal
-                  text="Add Visit Student"
-                  icon={<Plus className="w-4 h-4 mr-2" />}
-                  renderModal={(onClose) => (
-                    <VisitStudentCreateForm modalClose={onClose} />
-                  )}
-                />
-              </div>
-            </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  <DropdownMenuLabel>Select Columns</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.photo}
+                    onCheckedChange={() => toggleColumnVisibility("photo")}
+                  >
+                    Photo
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.name}
+                    onCheckedChange={() => toggleColumnVisibility("name")}
+                  >
+                    Name
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.gender}
+                    onCheckedChange={() => toggleColumnVisibility("gender")}
+                  >
+                    Gender
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.contact}
+                    onCheckedChange={() => toggleColumnVisibility("contact")}
+                  >
+                    Contact
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.address}
+                    onCheckedChange={() => toggleColumnVisibility("address")}
+                  >
+                    Address
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.schoolName}
+                    onCheckedChange={() => toggleColumnVisibility("schoolName")}
+                  >
+                    School
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={columnVisibility.dateOfVisit}
+                    onCheckedChange={() =>
+                      toggleColumnVisibility("dateOfVisit")
+                    }
+                  >
+                    Date of Visit
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-            {loading ? (
-              <div>
-                <Loading />
-              </div>
-            ) : error ? (
-              <div>
-                <Error />
-              </div>
-            ) : (
-              <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] py-2">
+              <PremiumComponent>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 gap-1"
+                  onClick={exportToCSV}
+                >
+                  <File className="h-3.5 w-3.5" />
+                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Export
+                  </span>
+                </Button>
+              </PremiumComponent>
+              <PopupModal
+                text="Add Visit Student"
+                icon={<Plus className="w-4 h-4 mr-2" />}
+                renderModal={(onClose) => (
+                  <VisitStudentCreateForm modalClose={onClose} />
+                )}
+              />
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="p-8 flex justify-center">
+              <Loading />
+            </div>
+          ) : error ? (
+            <div className="p-8 flex justify-center">
+              <Error />
+            </div>
+          ) : (
+            <div className="relative overflow-auto ">
+              <div className="max-h-[calc(100vh-300px)] overflow-auto">
                 <TabsContent value="all">{renderStudentTable()}</TabsContent>
                 <TabsContent value="male">{renderStudentTable()}</TabsContent>
                 <TabsContent value="female">{renderStudentTable()}</TabsContent>
                 <TabsContent value="other">{renderStudentTable()}</TabsContent>
               </div>
-            )}
-          </Tabs>
-        </main>
+            </div>
+          )}
+        </Tabs>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                isActive={currentPage === 1 ? false : true}
+                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                // disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            {[...Array(totalPages)].map((_, index) => (
+              <PaginationItem key={index}>
+                <PaginationLink
+                  href="#"
+                  onClick={() => handlePageChange(index + 1)}
+                  isActive={currentPage === index + 1}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={() =>
+                  handlePageChange(Math.min(currentPage + 1, totalPages))
+                }
+                isActive={currentPage === totalPages ? false : true}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

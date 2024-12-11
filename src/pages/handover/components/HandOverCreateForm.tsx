@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import { useEffect, useState } from "react";
 
 const studentFormSchema = z.object({
   reception: z.string().nonempty({ message: "Reception is required" }),
@@ -29,7 +30,42 @@ const studentFormSchema = z.object({
 
 type StudentFormSchemaType = z.infer<typeof studentFormSchema>;
 
+type AdminUser = {
+  _id: string;
+  username: string;
+  role: string;
+};
+
 const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [receptions, setReceptions] = useState<AdminUser[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await crudRequest<AdminUser[]>(
+          "GET",
+          "/user/get-admin"
+        );
+        if (response) {
+          // Filter admins (including superadmins)
+          setAdmins(
+            response.filter(
+              (user) => user.role === "admin" || user.role === "superadmin"
+            )
+          );
+          // Filter receptions
+          setReceptions(response.filter((user) => user.role === "reception"));
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Failed to fetch users");
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
   const form = useForm<StudentFormSchemaType>({
     resolver: zodResolver(studentFormSchema),
     defaultValues: {
@@ -105,15 +141,15 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                           </SelectTrigger>
 
                           <SelectContent>
-                            <SelectItem value="Reception A">
-                              Reception A
-                            </SelectItem>
-                            <SelectItem value="Reception B">
-                              Reception B
-                            </SelectItem>
-                            <SelectItem value="Reception C">
-                              Reception C
-                            </SelectItem>
+                            {receptions.map((reception) => (
+                              <SelectItem
+                                key={reception._id}
+                                value={reception.username}
+                                className="capitalize"
+                              >
+                                {reception.username}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       )}
@@ -146,9 +182,15 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                           </SelectTrigger>
 
                           <SelectContent>
-                            <SelectItem value="Admin A">Admin A</SelectItem>
-                            <SelectItem value="Admin B">Admin B</SelectItem>
-                            <SelectItem value="Admin C">Admin C</SelectItem>
+                            {admins.map((admin) => (
+                              <SelectItem
+                                key={admin._id}
+                                value={admin.username}
+                                className="capitalize"
+                              >
+                                {admin.username}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       )}

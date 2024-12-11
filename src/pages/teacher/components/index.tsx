@@ -3,10 +3,12 @@ import TableSearchInput from "@/components/shared/table-search-input";
 import TeacherCreateForm from "./TeacherCreateForm";
 import { TeacherTable } from "./Table";
 import { Plus } from "lucide-react";
+import TeacherStats from "./TeacherStats";
 
 export default function TeacherLayout() {
   return (
     <>
+      <TeacherStats />
       <div className="flex items-center justify-between gap-2 py-5">
         <div className="flex flex-1 gap-4">
           <TableSearchInput placeholder="Search Teacher Here" />

@@ -3,10 +3,12 @@ import TableSearchInput from "@/components/shared/table-search-input";
 import HandOverCreateForm from "./HandOverCreateForm";
 import { HandOverTable } from "./Table";
 import { Plus } from "lucide-react";
+import HandOverStats from "./HandOverStats";
 
 export default function HandOverLayout() {
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      <HandOverStats />
       <div className="flex items-center justify-between gap-2 py-5">
         <div className="flex flex-1 gap-4">
           <TableSearchInput placeholder="Search HandOver Here" />
@@ -22,6 +24,6 @@ export default function HandOverLayout() {
         </div>
       </div>
       <HandOverTable />
-    </>
+    </div>
   );
 }

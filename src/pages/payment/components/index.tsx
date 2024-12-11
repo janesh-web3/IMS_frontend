@@ -3,10 +3,12 @@ import TableSearchInput from "@/components/shared/table-search-input";
 import PaymentCreateForm from "./PaymentCreateForm";
 import { PaymentTable } from "./Table";
 import { Plus } from "lucide-react";
+import PaymentStats from "./PaymentStats";
 
 export default function PaymentLayout() {
   return (
-    <>
+    <div className="flex flex-col gap-4">
+      <PaymentStats />
       <div className="flex items-center justify-between gap-2 py-5">
         <div className="flex flex-1 gap-4">
           <TableSearchInput placeholder="Search Payment Here" />
@@ -22,6 +24,6 @@ export default function PaymentLayout() {
         </div>
       </div>
       <PaymentTable />
-    </>
+    </div>
   );
 }
