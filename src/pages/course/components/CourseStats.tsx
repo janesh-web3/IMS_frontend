@@ -33,31 +33,35 @@ const CourseStats = () => {
   if (!stats) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2 md:space-y-4">
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="p-4">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-3">
+        <Card className="p-2 md:p-4">
           <div className="flex flex-col">
-            <span className="text-sm text-muted-foreground">Total Courses</span>
-            <span className="text-2xl font-bold">
+            <span className="text-xs md:text-sm text-muted-foreground">
+              Total Courses
+            </span>
+            <span className="font-bold text-md md:text-xl">
               {stats.overview.totalCourses}
             </span>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-2 md:p-4">
           <div className="flex flex-col">
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs md:text-sm text-muted-foreground">
               Total Subjects
             </span>
-            <span className="text-2xl font-bold">
+            <span className="font-bold text-md md:text-xl">
               {stats.overview.totalSubjects}
             </span>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card className="p-2 md:p-4">
           <div className="flex flex-col">
-            <span className="text-sm text-muted-foreground">Total Books</span>
-            <span className="text-2xl font-bold">
+            <span className="text-xs md:text-sm text-muted-foreground">
+              Total Books
+            </span>
+            <span className="font-bold text-md md:text-xl">
               {stats.overview.totalBooks}
             </span>
           </div>
@@ -67,7 +71,7 @@ const CourseStats = () => {
       {/* Course-wise Stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.courseStats.map((course, index) => (
-          <Card key={index} className="p-4">
+          <Card key={index} className="p-2 md:p-4">
             <div className="space-y-2">
               <h3 className="font-semibold">{course.courseName}</h3>
               <div className="grid grid-cols-2 gap-2 text-sm">

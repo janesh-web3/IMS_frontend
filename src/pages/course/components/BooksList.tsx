@@ -14,6 +14,7 @@ import { AlertModal } from "@/components/shared/alert-modal";
 import { toast } from "react-toastify";
 import PopupModal from "@/components/shared/popup-modal";
 import BookUpdateForm from "./BookUpdateForm";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 interface Book {
   _id: string;
@@ -72,7 +73,9 @@ const BooksList = ({ courseId }: { courseId: string }) => {
             <TableHead>Type</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
+            <AdminComponent>
+              <TableHead>Actions</TableHead>
+            </AdminComponent>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -84,39 +87,41 @@ const BooksList = ({ courseId }: { courseId: string }) => {
                 {book.isFree ? "Free" : `Rs. ${book.price}`}
               </TableCell>
               <TableCell>{book.isFree ? "Free" : "Paid"}</TableCell>
-              <TableCell>
-                <span className="px-2">
-                  <PopupModal
-                    text="Edit"
-                    icon={<Edit className="w-4 h-4 mr-2" />}
-                    renderModal={(onClose) => (
-                      <BookUpdateForm
-                        bookId={book._id}
-                        initialData={{
-                          name: book.name,
-                          price: book.price,
-                          bookType: book.bookType,
-                          isFree: book.isFree,
-                        }}
-                        modalClose={() => {
-                          onClose();
-                          fetchBooks();
-                        }}
-                      />
-                    )}
-                  />
-                </span>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    setDeleteModalOpen(true);
-                    setBookToDelete(book._id);
-                  }}
-                >
-                  <Trash className="w-4 h-4" />
-                </Button>
-              </TableCell>
+              <AdminComponent>
+                <TableCell>
+                  <span className="px-2">
+                    <PopupModal
+                      text="Edit"
+                      icon={<Edit className="w-4 h-4 mr-2" />}
+                      renderModal={(onClose) => (
+                        <BookUpdateForm
+                          bookId={book._id}
+                          initialData={{
+                            name: book.name,
+                            price: book.price,
+                            bookType: book.bookType,
+                            isFree: book.isFree,
+                          }}
+                          modalClose={() => {
+                            onClose();
+                            fetchBooks();
+                          }}
+                        />
+                      )}
+                    />
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      setDeleteModalOpen(true);
+                      setBookToDelete(book._id);
+                    }}
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </AdminComponent>
             </TableRow>
           ))}
         </TableBody>

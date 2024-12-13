@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { useParams } from "react-router-dom";
 import BooksList from "./components/BooksList";
 import BookCreateForm from "./components/BookCreateForm";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -28,22 +29,24 @@ const CourseDetail = () => {
           <div className="flex flex-1 gap-4">
             <TableSearchInput placeholder="Search Subject/Book Here" />
           </div>
-          <div className="flex gap-3">
-            <PopupModal
-              text="Add Subject"
-              icon={<Plus className="w-4 h-4 mr-2" />}
-              renderModal={(onClose) => (
-                <SubjectCreateForm modalClose={onClose} />
-              )}
-            />
-            <PopupModal
-              text="Add Book"
-              icon={<Plus className="w-4 h-4 mr-2" />}
-              renderModal={(onClose) => (
-                <BookCreateForm courseId={id!} modalClose={onClose} />
-              )}
-            />
-          </div>
+          <AdminComponent>
+            <div className="flex gap-3">
+              <PopupModal
+                text="Add Subject"
+                icon={<Plus className="w-4 h-4 mr-2" />}
+                renderModal={(onClose) => (
+                  <SubjectCreateForm modalClose={onClose} />
+                )}
+              />
+              <PopupModal
+                text="Add Book"
+                icon={<Plus className="w-4 h-4 mr-2" />}
+                renderModal={(onClose) => (
+                  <BookCreateForm courseId={id!} modalClose={onClose} />
+                )}
+              />
+            </div>
+          </AdminComponent>
         </div>
       </div>
 

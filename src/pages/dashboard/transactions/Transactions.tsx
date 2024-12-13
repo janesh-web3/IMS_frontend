@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "../accounting/components/DateRangePicker";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Transaction {
   id: string;
@@ -44,6 +45,76 @@ interface TransactionSummary {
   };
 }
 
+const TransactionsSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      {/* Date Range Filter Skeleton */}
+      <div className="flex justify-end">
+        <Skeleton className="h-10 w-[240px]" />
+      </div>
+
+      {/* Summary Cards Skeleton */}
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-4 w-[120px]" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-[100px] mb-2" />
+              <Skeleton className="h-4 w-[80px]" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Transactions Table Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-[180px]" />
+        </CardHeader>
+        <CardContent>
+          <div className="border rounded-md">
+            {/* Table Header Skeleton */}
+            <div className="border-b">
+              <div className="grid grid-cols-6 p-4">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-4 w-[100px]" />
+                ))}
+              </div>
+            </div>
+
+            {/* Table Body Skeleton */}
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                <div
+                  key={i}
+                  className="grid grid-cols-6 p-4 border-b last:border-0"
+                >
+                  {[1, 2, 3, 4, 5, 6].map((j) => (
+                    <Skeleton key={j} className="h-4 w-[100px]" />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pagination Skeleton */}
+          <div className="flex justify-center mt-4">
+            <div className="flex items-center space-x-2">
+              <Skeleton className="h-8 w-[32px]" /> {/* Previous */}
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-8 w-[32px]" />
+              ))}
+              <Skeleton className="h-8 w-[32px]" /> {/* Next */}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 export function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
@@ -53,9 +124,15 @@ export function Transactions() {
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
 
+  // Separate loading states for different sections
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+
   const fetchTransactions = async () => {
     try {
-      setLoading(true);
+      setTransactionsLoading(true);
+      setSummaryLoading(true);
+
       const response = await crudRequest<{
         data: Transaction[];
         summary: TransactionSummary;
@@ -75,7 +152,8 @@ export function Transactions() {
     } catch (error) {
       console.error("Error fetching transactions:", error);
     } finally {
-      setLoading(false);
+      setTransactionsLoading(false);
+      setSummaryLoading(false);
     }
   };
 
@@ -85,64 +163,114 @@ export function Transactions() {
 
   return (
     <div className="space-y-6">
-      {loading ? (
-        <div>Loading transactions...</div>
-      ) : (
-        <>
-          {/* Date Range Filter */}
-          <div className="flex justify-end">
-            <DateRangePicker date={dateRange} setDate={setDateRange} />
-          </div>
+      {/* Date Range Filter */}
+      <div className="flex justify-end">
+        <DateRangePicker date={dateRange} setDate={setDateRange} />
+      </div>
 
-          {/* Summary Cards */}
-          {summary && (
-            <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Total Transactions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">{summary.totalCount}</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    Total Amount
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">
-                    {formatCurrency(summary.totalAmount)}
-                  </div>
-                </CardContent>
-              </Card>
-              {Object.entries(summary.byReferenceModel).map(([model, data]) => (
-                <Card key={model}>
-                  <CardHeader>
-                    <CardTitle className="text-sm font-medium">
-                      {model} Transactions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-xl font-bold">{data.count}</div>
-                    <p className="text-xs text-muted-foreground">
-                      {formatCurrency(data.amount)}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Transactions Table */}
+      {/* Summary Cards */}
+      {summaryLoading ? (
+        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-[120px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-[100px] mb-2" />
+                <Skeleton className="h-4 w-[80px]" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : summary ? (
+        <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Transactions
+              </CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="text-xl font-bold">{summary.totalCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">
+                Total Amount
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-bold">
+                {formatCurrency(summary.totalAmount)}
+              </div>
+            </CardContent>
+          </Card>
+          {Object.entries(summary.byReferenceModel).map(([model, data]) => (
+            <Card key={model}>
+              <CardHeader>
+                <CardTitle className="text-sm font-medium">
+                  {model} Transactions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xl font-bold">{data.count}</div>
+                <p className="text-xs text-muted-foreground">
+                  {formatCurrency(data.amount)}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : null}
+
+      {/* Transactions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {transactionsLoading ? (
+            <>
+              <div className="border rounded-md">
+                {/* Table Header Skeleton */}
+                <div className="border-b">
+                  <div className="grid grid-cols-6 p-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <Skeleton key={i} className="h-4 w-[100px]" />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Table Body Skeleton */}
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-6 p-4 border-b last:border-0"
+                    >
+                      {[1, 2, 3, 4, 5, 6].map((j) => (
+                        <Skeleton key={j} className="h-4 w-[100px]" />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pagination Skeleton */}
+              <div className="flex justify-center mt-4">
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-8 w-[32px]" />
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-8 w-[32px]" />
+                  ))}
+                  <Skeleton className="h-8 w-[32px]" />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -226,10 +354,10 @@ export function Transactions() {
                   </PaginationContent>
                 </Pagination>
               </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

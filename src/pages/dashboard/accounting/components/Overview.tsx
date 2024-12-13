@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "./DateRangePicker";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OverviewStats {
   totalRevenue: number;
@@ -33,19 +34,83 @@ interface DashboardStats {
 
 const COLORS = ["#22c55e", "#ef4444", "#3b82f6"];
 
+const OverviewSkeleton = () => {
+  return (
+    <div className="space-y-6">
+      {/* Period Selection Skeleton */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-10 w-[100px]" />
+          ))}
+        </div>
+        <Skeleton className="h-10 w-[240px]" />
+      </div>
+
+      {/* Overview Cards Skeleton */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <Skeleton className="h-4 w-[120px]" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-[150px]" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Charts Skeleton */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Overview Pie Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[150px]" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+
+        {/* Category Bar Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[150px]" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+
+        {/* Payment Method Chart Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[150px]" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-[300px] w-full rounded-lg" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
 export function Overview() {
-  const [period, setPeriod] = useState("today");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [dashboardStatsLoading, setDashboardStatsLoading] = useState(true);
   const [stats, setStats] = useState<OverviewStats | null>(null);
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
     null
   );
-  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("today");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        setStatsLoading(true);
         let endpoint = `/daybook/overview?period=${period}`;
 
         if (period === "custom" && dateRange?.from) {
@@ -69,7 +134,8 @@ export function Overview() {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false);
+        setStatsLoading(false);
+        setDashboardStatsLoading(false);
       }
     };
 
@@ -81,8 +147,8 @@ export function Overview() {
     setPeriod("custom");
   };
 
-  if (loading || !stats || !dashboardStats) {
-    return <div>Loading...</div>;
+  if (statsLoading || !stats || !dashboardStats) {
+    return <OverviewSkeleton />;
   }
 
   // Prepare data for charts
@@ -110,7 +176,7 @@ export function Overview() {
 
   return (
     <div className="space-y-6">
-      {/* Period Selection with Date Range Picker */}
+      {/* Period Selection */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           <Button
@@ -163,115 +229,148 @@ export function Overview() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(stats.totalRevenue)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Expenses
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(stats.totalExpenses)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(stats.netProfit)}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {statsLoading ? (
+        <div className="grid gap-4 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <Skeleton className="h-4 w-[120px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-[150px]" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">
+                Total Revenue
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(stats.totalRevenue)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">
+                Total Expenses
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(stats.totalExpenses)}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-sm font-medium">Net Profit</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">
+                {formatCurrency(stats.netProfit)}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Charts */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Overview Pie Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={overviewData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label
-                >
-                  {overviewData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value) => formatCurrency(value as number)}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {statsLoading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Chart skeletons */}
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-[150px]" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full rounded-lg" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Overview Pie Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={overviewData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {overviewData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value as number)}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-        {/* Category Bar Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Category Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={categoryData}>
-                <XAxis dataKey="category" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value) => formatCurrency(value as number)}
-                />
-                <Legend />
-                <Bar dataKey="income" name="Income" fill={COLORS[0]} />
-                <Bar dataKey="expenses" name="Expenses" fill={COLORS[1]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          {/* Category Bar Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={categoryData}>
+                  <XAxis dataKey="category" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value as number)}
+                  />
+                  <Legend />
+                  <Bar dataKey="income" name="Income" fill={COLORS[0]} />
+                  <Bar dataKey="expenses" name="Expenses" fill={COLORS[1]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-        {/* Payment Method Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Methods</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={paymentMethodData}>
-                <XAxis dataKey="method" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value) => formatCurrency(value as number)}
-                />
-                <Legend />
-                <Bar dataKey="income" name="Income" fill={COLORS[0]} />
-                <Bar dataKey="expenses" name="Expenses" fill={COLORS[1]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+          {/* Payment Method Chart */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Methods</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={paymentMethodData}>
+                  <XAxis dataKey="method" />
+                  <YAxis />
+                  <Tooltip
+                    formatter={(value) => formatCurrency(value as number)}
+                  />
+                  <Legend />
+                  <Bar dataKey="income" name="Income" fill={COLORS[0]} />
+                  <Bar dataKey="expenses" name="Expenses" fill={COLORS[1]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

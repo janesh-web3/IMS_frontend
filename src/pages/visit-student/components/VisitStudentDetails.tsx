@@ -33,7 +33,7 @@ type VisitStudent = {
   gender: string;
   dateOfVisit: string;
   courses: StudentCourse[];
-  photo: string;
+  photo?: string;
   schoolName: string;
 };
 

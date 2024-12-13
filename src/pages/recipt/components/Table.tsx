@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import {
   Pagination,
@@ -35,6 +34,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import AdminComponent from "@/components/shared/AdminComponent";
+import { UpdateModal } from "./UpdateModal";
 
 type Recipt = {
   _id: string;
@@ -48,6 +50,8 @@ export function ReciptTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedRecipt, setSelectedRecipt] = useState<Recipt | null>(null);
 
   //pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -96,131 +100,179 @@ export function ReciptTable() {
     fetchTeachers();
   }, []);
 
-  if (loading)
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
-  if (error)
-    return (
-      <div>
-        <Error />
-      </div>
-    );
+  const handleUpdate = async (values: Partial<Recipt>) => {
+    try {
+      await crudRequest(
+        "PUT",
+        `/recipt/update-recipt/${selectedRecipt?._id}`,
+        values
+      );
+      setIsUpdateModalOpen(false);
+      fetchTeachers(currentPage, itemsPerPage);
+    } catch (error) {
+      console.error("Error updating receipt:", error);
+    }
+  };
+
+  if (error) return <Error />;
 
   return (
-    <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
-      <div className="w-full max-h-[200vh]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">S.N</TableHead>
-              <TableHead>Recipt Statement</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Payment Method</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {teachers.length === 0 ? (
+    <>
+      <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
+        <div className="w-full max-h-[200vh]">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={7}>No receipt available</TableCell>
+                <TableHead className="w-[100px]">S.N</TableHead>
+                <TableHead>Recipt Statement</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Payment Method</TableHead>
+                <AdminComponent>
+                  <TableHead>Actions</TableHead>
+                </AdminComponent>
               </TableRow>
-            ) : (
-              teachers.map((teacher, index) => (
-                <TableRow key={teacher._id}>
-                  <TableCell className="font-medium">{index + 1}</TableCell>
-                  <TableCell>{teacher.income}</TableCell>
-                  <TableCell>{teacher.amount}</TableCell>
-                  <TableCell>{teacher.paymentMethod}</TableCell>
-                  {/* <TableCell>{teacher.courses.join(", ")}</TableCell> */}
-                  <TableCell className="cursor-pointer">
-                    <AlertModal
-                      isOpen={open}
-                      onClose={() => setOpen(false)}
-                      onConfirm={() => onConfirm(teacher._id)}
-                      loading={loading}
-                    />
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="w-8 h-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <Edit className="w-4 h-4 mr-2" /> Update
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setOpen(true);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <Trash className="w-4 h-4 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                [...Array(5)].map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Skeleton className="w-8 h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[250px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[100px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[100px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="w-8 h-8 rounded-full" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : teachers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7}>No receipt available</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ) : (
+                teachers.map((teacher, index) => (
+                  <TableRow key={teacher._id}>
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell>{teacher.income}</TableCell>
+                    <TableCell>{teacher.amount}</TableCell>
+                    <TableCell>{teacher.paymentMethod}</TableCell>
+                    <AdminComponent>
+                      <TableCell className="cursor-pointer">
+                        <AlertModal
+                          isOpen={open}
+                          onClose={() => setOpen(false)}
+                          onConfirm={() => onConfirm(teacher._id)}
+                          loading={loading}
+                        />
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="w-8 h-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedRecipt({
+                                  _id: teacher._id,
+                                  income: teacher.income,
+                                  amount: teacher.amount,
+                                  paymentMethod: teacher.paymentMethod,
+                                });
+                                setIsUpdateModalOpen(true);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <Edit className="w-4 h-4 mr-2" /> Update
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setOpen(true);
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <Trash className="w-4 h-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </AdminComponent>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      <div className="grid grid-cols-1 gap-10 mt-5 mb-10 md:mb-20 md:grid-cols-3">
-        <Select
-          onValueChange={(value) => setItemsPerPage(Number(value))}
-          value={itemsPerPage.toString()}
-        >
-          <SelectTrigger id="itemsPerPage">
-            <SelectValue placeholder="Items per page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">5</SelectItem>
-            <SelectItem value="10">10</SelectItem>
-            <SelectItem value="20">20</SelectItem>
-            <SelectItem value="50">50</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-1 gap-10 mt-5 mb-10 md:mb-20 md:grid-cols-3">
+          <Select
+            onValueChange={(value) => setItemsPerPage(Number(value))}
+            value={itemsPerPage.toString()}
+          >
+            <SelectTrigger id="itemsPerPage">
+              <SelectValue placeholder="Items per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Pagination className=" columns-2">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                isActive={currentPage === 1 ? false : true}
-                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-                // disabled={currentPage === 1}
-              />
-            </PaginationItem>
-            {[...Array(totalPages)].map((_, index) => (
-              <PaginationItem key={index}>
-                <PaginationLink
+          <Pagination className=" columns-2">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
                   href="#"
-                  onClick={() => handlePageChange(index + 1)}
-                  isActive={currentPage === index + 1}
-                >
-                  {index + 1}
-                </PaginationLink>
+                  isActive={currentPage === 1 ? false : true}
+                  onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                  // disabled={currentPage === 1}
+                />
               </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() =>
-                  handlePageChange(Math.min(currentPage + 1, totalPages))
-                }
-                isActive={currentPage === totalPages ? false : true}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+              {[...Array(totalPages)].map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    href="#"
+                    onClick={() => handlePageChange(index + 1)}
+                    isActive={currentPage === index + 1}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={() =>
+                    handlePageChange(Math.min(currentPage + 1, totalPages))
+                  }
+                  isActive={currentPage === totalPages ? false : true}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
-    </div>
+      <UpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedRecipt(null);
+        }}
+        onSubmit={handleUpdate}
+        initialData={selectedRecipt || undefined}
+      />
+    </>
   );
 }

@@ -43,12 +43,6 @@ export default function UserNav({ handleLogout }: any) {
             </DropdownMenuItem>
           </Link>
           <PremiumComponent>
-            <Link to={"notification"}>
-              <DropdownMenuItem>
-                Notifications
-                <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
             <SuperAdminComponent>
               <Link to={"setting"}>
                 <DropdownMenuItem>

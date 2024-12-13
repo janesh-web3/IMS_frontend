@@ -8,8 +8,8 @@ type AdminComponentProps = {
 const AdminComponent: React.FC<AdminComponentProps> = ({ children }) => {
   const { adminDetails } = useAdminContext();
 
-  // Check if the current plan is premium (e.g., 'standard')
-  if (adminDetails.role !== "admin" || "superadmin") {
+  // Check if role is not "admin" AND not "superadmin"
+  if (adminDetails.role !== "admin" && adminDetails.role !== "superadmin") {
     return null; // Render nothing if the user doesn't have access
   }
 

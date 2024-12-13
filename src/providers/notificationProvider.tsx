@@ -9,7 +9,10 @@ import { io, Socket } from "socket.io-client";
 import { toast } from "react-toastify";
 
 interface Notification {
+  id: string;
   message: string;
+  isRead?: boolean;
+  createdAt?: Date;
 }
 
 interface NotificationContextProps {
@@ -30,32 +33,74 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [countNotifications, setCountNotifications] = useState(0);
-  const token = sessionStorage.getItem("token"); // Token is assumed to be stored in sessionStorage
+  const token = sessionStorage.getItem("token");
 
+  // Fetch previous notifications on mount
+  useEffect(() => {
+    const fetchPreviousNotifications = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/user/get-role",
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        const data = await response.json();
+
+        if (data.notifications) {
+          setNotifications(
+            data.notifications.map((n: any) => ({
+              message: n.notificationId.message,
+              isRead: n.isRead,
+              id: n.notificationId._id,
+              createdAt: n.notificationId.createdAt,
+            }))
+          );
+
+          // Set count of unread notifications
+          setCountNotifications(
+            data.notifications.filter((n: any) => !n.isRead).length
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching previous notifications:", error);
+      }
+    };
+
+    fetchPreviousNotifications();
+  }, [token]);
+
+  // Socket connection effect
   useEffect(() => {
     if (!token) {
       console.log("No token found in sessionStorage");
       return;
     }
 
-    // Connect to the WebSocket server
-    const socket: Socket = io("http://localhost:5000");
-
-    // Emit authentication event with the token
-    socket.emit("authenticate", { token });
-
-    socket.on("new-notification", (notification: Notification) => {
-      console.log("New notification received:", notification);
-      setNotifications((prevNotifications) => [
-        ...prevNotifications,
-        notification,
-      ]);
-      setCountNotifications((prevCount) => prevCount + 1); // Increment count
-      toast.info(notification.message);
+    const socket: Socket = io("http://localhost:5000", {
+      auth: { token }, // Send token in connection
     });
 
     socket.on("connect", () => {
       console.log("Connected to WebSocket server:", socket.id);
+    });
+
+    socket.on("new-notification", (notification: Notification) => {
+      console.log("New notification received:", notification);
+      setNotifications((prev) => [notification, ...prev]);
+      setCountNotifications((prev) => prev + 1);
+      toast.info(notification.message);
+    });
+
+    socket.on("notification-read", (notificationId: string) => {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
+      );
+      setCountNotifications((prev) => Math.max(0, prev - 1));
     });
 
     socket.on("disconnect", () => {

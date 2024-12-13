@@ -90,7 +90,6 @@ import {
 } from "@/components/ui/select";
 import { Courses } from "@/types";
 import Error from "@/pages/not-found/error";
-import Loading from "@/pages/not-found/loading";
 import { toast } from "react-toastify";
 import PremiumComponent from "@/components/shared/PremiumComponent";
 import { Modal } from "@/components/ui/modal";
@@ -98,6 +97,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Zap } from "lucide-react";
 import { generateBill } from "@/components/shared/BillGenerator";
 import { formatCurrency } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 type Bill = {
   billNo: string;
@@ -198,6 +199,32 @@ type StatsResponse = {
     totalPaid: number;
     totalRemaining: number;
   };
+};
+
+const TableSkeleton = () => {
+  return (
+    <div className="border rounded-md">
+      {/* Table Header Skeleton */}
+      <div className="border-b">
+        <div className="grid grid-cols-6 p-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-4 w-[100px]" />
+          ))}
+        </div>
+      </div>
+
+      {/* Table Body Skeleton */}
+      <div className="space-y-2">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+          <div key={i} className="grid grid-cols-6 p-4 border-b last:border-0">
+            {[1, 2, 3, 4, 5, 6].map((j) => (
+              <Skeleton key={j} className="h-4 w-[100px]" />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export function StudentTable() {
@@ -948,16 +975,18 @@ export function StudentTable() {
                                 View <View size={17} />
                               </DropdownMenuItem>
                             </DrawerTrigger>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setOpen(true);
-                                setStudentToDelete(student._id);
-                              }}
-                              className="flex justify-between cursor-pointer"
-                            >
-                              Delete
-                              <Trash size={17} />
-                            </DropdownMenuItem>
+                            <AdminComponent>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setOpen(true);
+                                  setStudentToDelete(student._id);
+                                }}
+                                className="flex justify-between cursor-pointer"
+                              >
+                                Delete
+                                <Trash size={17} />
+                              </DropdownMenuItem>
+                            </AdminComponent>
                           </DropdownMenuContent>
                         </DropdownMenu>
 
@@ -1133,8 +1162,8 @@ export function StudentTable() {
             />
           </div>
         </header>
+
         <main className="flex-1 overflow-auto">
-          {renderStats()}
           <Tabs defaultValue="all" value={selectedTab} className="p-2">
             <div className="flex flex-wrap items-center gap-2">
               <TabsList>
@@ -1160,7 +1189,7 @@ export function StudentTable() {
                   Other
                 </TabsTrigger>
               </TabsList>
-              <div className="flex flex-wrap  items-center gap-2 ml-auto">
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
                 {/* Filter by fee */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1278,17 +1307,19 @@ export function StudentTable() {
                 </DropdownMenu>
 
                 <PremiumComponent>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 gap-1"
-                    onClick={exportToCSV}
-                  >
-                    <File className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Export
-                    </span>
-                  </Button>
+                  <AdminComponent>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 gap-1"
+                      onClick={exportToCSV}
+                    >
+                      <File className="h-3.5 w-3.5" />
+                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                        Export
+                      </span>
+                    </Button>
+                  </AdminComponent>
                 </PremiumComponent>
                 <PopupModal
                   text="Add Student"
@@ -1325,10 +1356,13 @@ export function StudentTable() {
                 )}
               </div>
             </div>
+            <PremiumComponent>
+              <AdminComponent>{renderStats()}</AdminComponent>
+            </PremiumComponent>
 
             {loading ? (
               <div>
-                <Loading />
+                <TableSkeleton />
               </div>
             ) : error ? (
               <div>

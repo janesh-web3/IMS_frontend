@@ -32,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Loading from "../not-found/loading";
 import Error from "../not-found/error";
 import { Control } from "./controls";
 import {
@@ -51,6 +50,8 @@ import Accounting from "./accounting";
 import PremiumComponent from "@/components/shared/PremiumComponent";
 import StudentDataVisualization from "./statistics/StudentDataVisualization";
 import { Transactions } from "./transactions/Transactions";
+import { Skeleton } from "@/components/ui/skeleton";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 type Dashboard = {
   totalAmount: string;
@@ -130,24 +131,143 @@ type Alert = {
   photo: string;
 };
 
+type CourseData = {
+  course: string;
+  totalStudents: number;
+  totalAdmission: number;
+  totalPaidAmount: number;
+  totalVisit: number;
+};
+
 type Course = {
-  studentsData: number;
+  period: string;
+  dateRange: {
+    start: string;
+    end: string;
+  };
   totalAdmissionData: number;
+  studentsData: number;
   totalPaidAmount: number;
   totalVisitData: number;
-  coursesData: [
-    {
-      totalVisit: string;
-      totalAdmission: string;
-      totalPaidAmount: string;
-      totalVisitData: string;
-      course: string;
-    },
-  ];
+  coursesData: CourseData[];
+};
+
+const Loading = () => {
+  return (
+    <div className="flex-1 max-h-screen p-4 pt-6 space-y-4 overflow-y-auto md:p-8">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between space-y-2">
+        <Skeleton className="h-8 w-[200px]" />
+      </div>
+
+      {/* Tabs Skeleton */}
+      <div className="space-y-4">
+        <div className="border-b">
+          <div className="flex items-center h-10 space-x-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-8 w-[100px]" />
+            ))}
+          </div>
+        </div>
+
+        {/* Dashboard Cards Skeleton */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <Skeleton className="h-4 w-[100px]" />
+                <Skeleton className="w-4 h-4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-[120px] mb-2" />
+                <Skeleton className="h-4 w-[140px]" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Content Grid Skeleton */}
+        <div className="grid grid-cols-1 col-span-5 gap-4 pb-10 lg:grid-cols-5 md:gap-8">
+          {/* Course Summary Card Skeleton */}
+          <Card className="col-span-3">
+            <CardHeader>
+              <div className="flex flex-row items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-[150px]" />
+                  <Skeleton className="h-4 w-[250px]" />
+                </div>
+                <Skeleton className="h-10 w-[150px]" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                {/* Summary Stats Skeleton */}
+                <div className="grid grid-cols-4 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="p-4 rounded-lg bg-secondary">
+                      <Skeleton className="h-4 w-[100px] mb-2" />
+                      <Skeleton className="h-8 w-[80px]" />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Table Skeleton */}
+                <div className="border rounded-lg">
+                  <div className="border-b">
+                    <div className="grid grid-cols-4 p-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <Skeleton key={i} className="h-4 w-[100px]" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="grid grid-cols-4 p-4">
+                        {[1, 2, 3, 4].map((j) => (
+                          <Skeleton key={j} className="h-4 w-[100px]" />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Range Skeleton */}
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Alert Card Skeleton */}
+          <Card className="h-[500px] col-span-2">
+            <CardHeader>
+              <Skeleton className="h-6 w-[150px] mb-2" />
+              <Skeleton className="h-4 w-[250px]" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-[200px]" />
+                      <Skeleton className="h-4 w-[150px]" />
+                    </div>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default function DashboardPage() {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [dashboardLoading, setDashboardLoading] = useState<boolean>(true);
+  const [courseLoading, setCourseLoading] = useState<boolean>(true);
+  const [alertLoading, setAlertLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<Dashboard>({
     totalAmount: "",
@@ -156,10 +276,12 @@ export default function DashboardPage() {
     totalRemainingAmount: "",
   });
   const [alert, setAlert] = useState<Alert[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("yearly");
   const [course, setCourse] = useState<Course>();
 
   const fetchDashboardData = async () => {
     try {
+      setDashboardLoading(true);
       const response = await crudRequest<Dashboard>(
         "GET",
         "/student/dashboard"
@@ -173,12 +295,13 @@ export default function DashboardPage() {
       setError("Error fetching dashboard data");
       console.error("Error fetching dashboard data:", error);
     } finally {
-      setLoading(false);
+      setDashboardLoading(false);
     }
   };
 
   const fetchAlertData = async () => {
     try {
+      setAlertLoading(true);
       const response = await crudRequest<Alert[]>(
         "GET",
         "/student/students-with-remaining"
@@ -192,15 +315,16 @@ export default function DashboardPage() {
       setError("Error fetching alert data");
       console.error("Error fetching alert data:", error);
     } finally {
-      setLoading(false);
+      setAlertLoading(false);
     }
   };
 
-  const fetchCourseData = async () => {
+  const fetchCourseData = async (period: string) => {
     try {
+      setCourseLoading(true);
       const response = await crudRequest<Course>(
         "GET",
-        "/student/count-students-by-courses"
+        `/student/count-students-by-courses?period=${period}`
       );
       if (response) {
         setCourse(response);
@@ -208,26 +332,73 @@ export default function DashboardPage() {
         setError("Unexpected response format");
       }
     } catch (error) {
-      setError("Error fetching alert data");
-      console.error("Error fetching alert data:", error);
+      setError("Error fetching course data");
+      console.error("Error fetching course data:", error);
     } finally {
-      setLoading(false);
+      setCourseLoading(false);
     }
   };
 
   useEffect(() => {
     fetchDashboardData();
     fetchAlertData();
-    fetchCourseData();
-  }, []);
+    fetchCourseData(selectedPeriod);
+  }, [selectedPeriod]);
 
-  if (loading) {
-    return (
-      <>
-        <Loading />
-      </>
-    );
-  }
+  const DashboardSkeleton = () => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {[1, 2, 3, 4].map((i) => (
+        <Card key={i}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <Skeleton className="h-4 w-[100px]" />
+            <Skeleton className="w-4 h-4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-[120px] mb-2" />
+            <Skeleton className="h-4 w-[140px]" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const CourseSummarySkeleton = () => (
+    <div className="space-y-8">
+      <div className="grid grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-4 rounded-lg bg-secondary">
+            <Skeleton className="h-4 w-[100px] mb-2" />
+            <Skeleton className="h-8 w-[80px]" />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex items-center justify-between p-4">
+            <Skeleton className="h-4 w-[150px]" />
+            <Skeleton className="h-4 w-[60px]" />
+            <Skeleton className="h-4 w-[60px]" />
+            <Skeleton className="h-4 w-[80px]" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const AlertSkeleton = () => (
+    <div className="space-y-4">
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="flex items-center space-x-4">
+          <Skeleton className="w-12 h-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[200px]" />
+            <Skeleton className="h-4 w-[150px]" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   if (error) {
     return (
       <div>
@@ -235,12 +406,18 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  // Use the loading component when all sections are loading
+  if (dashboardLoading && courseLoading && alertLoading) {
+    return <Loading />;
+  }
+
   return (
     <>
       <PageHead title="Dashboard | App" />
       <div className="flex-1 max-h-screen p-4 pt-6 space-y-4 overflow-y-auto md:p-8">
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-xl font-bold tracking-tight">
             Hi, Welcome back 👋
           </h2>
         </div>
@@ -248,138 +425,154 @@ export default function DashboardPage() {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <PremiumComponent>
-              <TabsTrigger value="accounting">Accounting</TabsTrigger>
-              <TabsTrigger value="control">Control</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="stats">Stats</TabsTrigger>
+              <AdminComponent>
+                <TabsTrigger value="accounting">Accounting</TabsTrigger>
+                <TabsTrigger value="control">Control</TabsTrigger>
+                <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                <TabsTrigger value="stats">Stats</TabsTrigger>
+              </AdminComponent>
             </PremiumComponent>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">
-                    Total Students
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4 text-muted-foreground"
-                  >
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {dashboard.totalStudents}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    in the institute.
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">
-                    Total Amount
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    Rs. {dashboard.totalAmount}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    of all students
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">
-                    Total Paid Amount
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4 text-muted-foreground"
-                  >
-                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                    <path d="M2 10h20" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    Rs. {dashboard.totalPaidAmount}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    of all students
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-sm font-medium">
-                    Total Remaining Amount
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="w-4 h-4 text-muted-foreground"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    Rs. {dashboard.totalRemainingAmount}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    of all students
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            {dashboardLoading ? (
+              <DashboardSkeleton />
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">
+                      Total Students
+                    </CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="w-4 h-4 text-muted-foreground"
+                    >
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      {dashboard.totalStudents}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      in the institute.
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">
+                      Total Amount
+                    </CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="w-4 h-4 text-muted-foreground"
+                    >
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      Rs. {dashboard.totalAmount}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      of all students
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">
+                      Total Paid Amount
+                    </CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="w-4 h-4 text-muted-foreground"
+                    >
+                      <rect width="20" height="14" x="2" y="5" rx="2" />
+                      <path d="M2 10h20" />
+                    </svg>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      Rs. {dashboard.totalPaidAmount}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      of all students
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-sm font-medium">
+                      Total Remaining Amount
+                    </CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="w-4 h-4 text-muted-foreground"
+                    >
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                    </svg>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">
+                      Rs. {dashboard.totalRemainingAmount}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      of all students
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
             <div className="grid grid-cols-1 col-span-5 gap-4 pb-10 lg:grid-cols-5 md:gap-8">
               <Card className="col-span-3">
                 <CardHeader className="flex flex-row items-center gap-10">
                   <div className="grid gap-2">
                     <CardTitle>Course Summary</CardTitle>
                     <CardDescription>
-                      Course, Admission, Amount Summary.
+                      Course, Admission, Amount Summary for{" "}
+                      {selectedPeriod === "daily"
+                        ? "Today"
+                        : selectedPeriod === "weekly"
+                          ? "This Week"
+                          : selectedPeriod === "monthly"
+                            ? "This Month"
+                            : "This Year"}
                     </CardDescription>
                   </div>
-                  <Select>
+                  <Select
+                    value={selectedPeriod}
+                    onValueChange={(value) => setSelectedPeriod(value)}
+                  >
                     <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Select Date" />
+                      <SelectValue placeholder="Select Period" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -392,31 +585,78 @@ export default function DashboardPage() {
                   </Select>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Program</TableHead>
-                        <TableHead>Total Office Visit</TableHead>
-                        <TableHead>New Admission</TableHead>
-                        <TableHead className="text-right">Income</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {course &&
-                        course.coursesData.map((data, index) => (
-                          <TableRow key={index}>
-                            <TableCell>
-                              <div className="font-medium">{data.course}</div>
-                            </TableCell>
-                            <TableCell>{data.totalVisit}</TableCell>
-                            <TableCell>{data.totalAdmission}</TableCell>
-                            <TableCell className="text-right">
-                              {data.totalPaidAmount}
-                            </TableCell>
+                  {courseLoading ? (
+                    <CourseSummarySkeleton />
+                  ) : (
+                    <div className="space-y-8">
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="p-2 border rounded-lg bg-card">
+                          <h3 className="text-xs font-normal">
+                            Total Students
+                          </h3>
+                          <p className="font-bold text-md">
+                            {course?.studentsData || 0}
+                          </p>
+                        </div>
+                        <div className="p-2 border rounded-lg bg-card">
+                          <h3 className="text-xs font-normal">Total Visits</h3>
+                          <p className="font-bold text-md">
+                            {course?.totalVisitData || 0}
+                          </p>
+                        </div>
+                        <div className="p-2 border rounded-lg bg-card">
+                          <h3 className="text-xs font-normal">
+                            New Admissions
+                          </h3>
+                          <p className="font-bold text-md">
+                            {course?.totalAdmissionData || 0}
+                          </p>
+                        </div>
+                        <div className="p-2 border rounded-lg bg-card">
+                          <h3 className="text-xs font-normal">Total Income</h3>
+                          <p className="font-bold text-md">
+                            Rs. {course?.totalPaidAmount || 0}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Program</TableHead>
+                            <TableHead>Total Office Visit</TableHead>
+                            <TableHead>New Admission</TableHead>
+                            <TableHead className="text-right">Income</TableHead>
                           </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {course?.coursesData.map((data, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <div className="font-medium">{data.course}</div>
+                              </TableCell>
+                              <TableCell>{data.totalVisit}</TableCell>
+                              <TableCell>{data.totalAdmission}</TableCell>
+                              <TableCell className="text-right">
+                                Rs. {data.totalPaidAmount}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+
+                      <div className="text-sm text-muted-foreground">
+                        Data from:{" "}
+                        {new Date(
+                          course?.dateRange.start || ""
+                        ).toLocaleDateString()}{" "}
+                        &nbsp; to &nbsp;
+                        {new Date(
+                          course?.dateRange.end || ""
+                        ).toLocaleDateString()}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -428,71 +668,79 @@ export default function DashboardPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-8 overflow-auto">
-                    {alert &&
-                      alert.map((data, index) => (
-                        <Drawer>
-                          <DrawerTrigger
-                            asChild
-                            className="cursor-pointer hover:bg-secondary hover:rounded-sm"
-                          >
-                            <div className="flex items-center" key={index}>
-                              <Avatar className="h-9 w-9">
-                                <AvatarImage src={data.photo} alt="Avatar" />
-                                <AvatarFallback>OM</AvatarFallback>
-                              </Avatar>
-                              <div className="ml-4 space-y-1">
-                                <p className="text-sm font-medium leading-none">
-                                  {data?.personalInfo.studentName}
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                  {data.personalInfo.contactNo}
-                                </p>
+                  {alertLoading ? (
+                    <AlertSkeleton />
+                  ) : (
+                    <div className="space-y-8 overflow-auto">
+                      {alert &&
+                        alert.map((data, index) => (
+                          <Drawer>
+                            <DrawerTrigger
+                              asChild
+                              className="cursor-pointer hover:bg-secondary hover:rounded-sm"
+                            >
+                              <div className="flex items-center" key={index}>
+                                <Avatar className="h-9 w-9">
+                                  <AvatarImage src={data.photo} alt="Avatar" />
+                                  <AvatarFallback>OM</AvatarFallback>
+                                </Avatar>
+                                <div className="ml-4 space-y-1">
+                                  <p className="text-sm font-medium leading-none">
+                                    {data?.personalInfo.studentName}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {data.personalInfo.contactNo}
+                                  </p>
+                                </div>
+                                <div className="ml-auto font-medium">
+                                  {data?.remaining}
+                                </div>
                               </div>
-                              <div className="ml-auto font-medium">
-                                {data?.remaining}
+                            </DrawerTrigger>
+                            <DrawerContent className="z-50">
+                              <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                                <DrawerHeader>
+                                  <DrawerTitle>Student Details</DrawerTitle>
+                                  <DrawerDescription>
+                                    See details about{" "}
+                                    {data?.personalInfo?.studentName}
+                                  </DrawerDescription>
+                                </DrawerHeader>
+                                <div className="p-4 pb-0">
+                                  <StudentDetails {...data} />
+                                </div>
+                                <DrawerFooter>
+                                  <DrawerClose asChild>
+                                    <Button variant="outline">Cancel</Button>
+                                  </DrawerClose>
+                                </DrawerFooter>
                               </div>
-                            </div>
-                          </DrawerTrigger>
-                          <DrawerContent className="z-50">
-                            <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
-                              <DrawerHeader>
-                                <DrawerTitle>Student Details</DrawerTitle>
-                                <DrawerDescription>
-                                  See details about{" "}
-                                  {data?.personalInfo?.studentName}
-                                </DrawerDescription>
-                              </DrawerHeader>
-                              <div className="p-4 pb-0">
-                                <StudentDetails {...data} />
-                              </div>
-                              <DrawerFooter>
-                                <DrawerClose asChild>
-                                  <Button variant="outline">Cancel</Button>
-                                </DrawerClose>
-                              </DrawerFooter>
-                            </div>
-                          </DrawerContent>
-                        </Drawer>
-                      ))}
-                  </div>
+                            </DrawerContent>
+                          </Drawer>
+                        ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="accounting">
-            <Accounting />
-          </TabsContent>
-          <TabsContent value="control">
-            <Control />
-          </TabsContent>
-          <TabsContent value="transactions">
-            <Transactions />
-          </TabsContent>
-          <TabsContent value="stats">
-            <StudentDataVisualization />
-          </TabsContent>
+          <PremiumComponent>
+            <AdminComponent>
+              <TabsContent value="accounting">
+                <Accounting />
+              </TabsContent>
+              <TabsContent value="control">
+                <Control />
+              </TabsContent>
+              <TabsContent value="transactions">
+                <Transactions />
+              </TabsContent>
+              <TabsContent value="stats">
+                <StudentDataVisualization />
+              </TabsContent>
+            </AdminComponent>
+          </PremiumComponent>
         </Tabs>
       </div>
     </>

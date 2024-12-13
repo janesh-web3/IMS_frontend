@@ -1,5 +1,6 @@
 // components/StudentDataVisualization.tsx
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { crudRequest } from "@/lib/api";
 import React, { useEffect, useState } from "react";
 import {
@@ -8,8 +9,6 @@ import {
   Cell,
   ScatterChart,
   Scatter,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -66,6 +65,22 @@ const generateRandomColor = () => {
   return color;
 };
 
+const StatisticsCardSkeleton = () => (
+  <Card className="p-4 shadow-lg">
+    <CardHeader>
+      <Skeleton className="h-6 w-[200px] mb-2" />
+      <Skeleton className="h-4 w-[300px]" />
+    </CardHeader>
+    <CardContent>
+      <Skeleton className="h-[250px] w-full rounded-lg" />
+      <div className="mt-2 space-y-2">
+        <Skeleton className="h-4 w-[150px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </div>
+    </CardContent>
+  </Card>
+);
+
 const StudentDataVisualization: React.FC = () => {
   const [stats, setStats] = useState<DescriptiveStats | null>(null);
   const [paymentDistribution, setPaymentDistribution] =
@@ -114,7 +129,11 @@ const StudentDataVisualization: React.FC = () => {
   }, []);
 
   if (!stats || !paymentDistribution || !correlation || !advanced) {
-    return <div className="text-center text-gray-500">Loading data...</div>;
+    return (
+      <div className="text-center text-gray-500">
+        <StatisticsCardSkeleton />
+      </div>
+    );
   }
 
   // Data for distribution visualization

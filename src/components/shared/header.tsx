@@ -4,8 +4,15 @@ import Heading from "./heading";
 import { ModeToggle } from "./theme-toggle";
 import TimeTracker from "./Session";
 import Notification from "@/pages/notification/components/Notification";
-import { Link } from "react-router-dom";
 import PremiumComponent from "./PremiumComponent";
+import AdminComponent from "./AdminComponent";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { lazy } from "react";
+const NotificationPage = lazy(() => import("@/pages/notification"));
 
 // Custom hook to find the matched path
 const useMatchedPath = (pathname: string) => {
@@ -27,9 +34,18 @@ export default function Header() {
       <div className="flex items-center ml-4 md:ml-6">
         <TimeTracker />
         <PremiumComponent>
-          <Link to={"notification"}>
-            <Notification />
-          </Link>
+          <AdminComponent>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button>
+                  <Notification />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" forceMount className="mt-2">
+                <NotificationPage />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </AdminComponent>
         </PremiumComponent>
         <ModeToggle />
       </div>

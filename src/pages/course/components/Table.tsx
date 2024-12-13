@@ -19,7 +19,6 @@ import {
 import { MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import UpdateCourseForm from "./UpdateCourseForm";
 import {
@@ -30,6 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 type Course = {
   _id: string;
@@ -79,18 +79,39 @@ export function CourseTable() {
     fetchCourses();
   }, []);
 
-  if (loading)
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
-  if (error)
-    return (
-      <div>
-        <Error />
-      </div>
-    );
+  const renderLoadingSkeleton = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[100px]">S.N</TableHead>
+          <TableHead>Courses Name</TableHead>
+          <TableHead>Update</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...Array(5)].map((_, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[30px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[200px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-8 bg-muted animate-pulse rounded w-[80px]" />
+            </TableCell>
+            <TableCell>
+              <div className="w-8 h-8 rounded bg-muted animate-pulse" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  if (loading) return renderLoadingSkeleton();
+  if (error) return <Error />;
 
   return (
     <div className="w-full max-h-[200vh] overflow-auto">
@@ -159,12 +180,14 @@ export function CourseTable() {
                           Details
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem
-                        onClick={() => setOpen(true)}
-                        className="cursor-pointer"
-                      >
-                        <Trash className="w-4 h-4 mr-2" /> Delete
-                      </DropdownMenuItem>
+                      <AdminComponent>
+                        <DropdownMenuItem
+                          onClick={() => setOpen(true)}
+                          className="cursor-pointer"
+                        >
+                          <Trash className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </AdminComponent>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

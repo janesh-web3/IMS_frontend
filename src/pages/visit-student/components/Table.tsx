@@ -6,6 +6,7 @@ import {
   Search,
   Trash,
   View,
+  Edit,
 } from "lucide-react";
 
 import {
@@ -63,25 +64,12 @@ import {
 import { Courses } from "@/types";
 import VisitStudentDetails from "./VisitStudentDetails";
 import VisitStudentCreateForm from "./VisitStudentCreateForm";
-import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import PremiumComponent from "@/components/shared/PremiumComponent";
-
-type SubjectEnroll = {
-  subjectName: {
-    subjectName: string;
-  };
-  _id: string;
-};
-
-type StudentCourse = {
-  courseEnroll: {
-    name: string;
-    _id: string;
-  };
-  subjectsEnroll: SubjectEnroll[];
-  _id: string;
-};
+import VisitStats from "./VisitStats";
+import AdminComponent from "@/components/shared/AdminComponent";
+import { UpdateModal } from "./UpdateModal";
+import { toast } from "react-toastify";
 
 type VisitStudent = {
   _id: string;
@@ -89,10 +77,21 @@ type VisitStudent = {
   studentNumber: string;
   address: string;
   gender: string;
-  schoolName: string;
   dateOfVisit: string;
   courses: StudentCourse[];
-  photo: string;
+  photo?: string;
+  schoolName: string;
+};
+
+type SubjectEnroll = {
+  _id: string;
+  subjectName: { _id: string; subjectName: string };
+};
+
+type StudentCourse = {
+  _id: string;
+  courseEnroll: { _id: string; name: string };
+  subjectsEnroll: SubjectEnroll[];
 };
 
 export function VisitStudentTable() {
@@ -101,7 +100,7 @@ export function VisitStudentTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedTab] = useState<string>("all");
+  const [selectedTab, setSelectedTab] = useState<string>("all");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [courses, setCourses] = useState<Courses[]>([]);
 
@@ -312,14 +311,25 @@ export function VisitStudentTable() {
                           View <View size={17} />
                         </DropdownMenuItem>
                       </DrawerTrigger>
-                      <DropdownMenuItem
-                        onClick={() => {
-                          setOpen(true);
-                        }}
-                        className="flex justify-between cursor-pointer"
-                      >
-                        Delete <Trash size={17} />
-                      </DropdownMenuItem>
+                      <AdminComponent>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setSelectedStudent(student);
+                            setIsUpdateModalOpen(true);
+                          }}
+                          className="flex justify-between cursor-pointer"
+                        >
+                          Update <Edit size={17} />
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setOpen(true);
+                          }}
+                          className="flex justify-between cursor-pointer"
+                        >
+                          Delete <Trash size={17} />
+                        </DropdownMenuItem>
+                      </AdminComponent>
                     </DropdownMenuContent>
                   </DropdownMenu>
 
@@ -398,6 +408,66 @@ export function VisitStudentTable() {
     document.body.removeChild(a);
   };
 
+  const renderLoadingSkeleton = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Gender</TableHead>
+          <TableHead>Contact</TableHead>
+          <TableHead>Address</TableHead>
+          <TableHead>Visit Date</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...Array(5)].map((_, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[150px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[80px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[120px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[200px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[100px]" />
+            </TableCell>
+            <TableCell>
+              <div className="w-8 h-8 rounded bg-muted animate-pulse" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<VisitStudent | null>(
+    null
+  );
+
+  const handleUpdate = async (values: any) => {
+    try {
+      await crudRequest(
+        "PUT",
+        `/visit/update-visit/${selectedStudent?._id}`,
+        values
+      );
+      setIsUpdateModalOpen(false);
+      fetchStudent(currentPage, itemsPerPage);
+      toast.success("Student updated successfully");
+    } catch (error) {
+      console.error("Error updating student:", error);
+      toast.error("Failed to update student");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -433,7 +503,11 @@ export function VisitStudentTable() {
       </div>
 
       <div className="border rounded-md">
-        <Tabs defaultValue="all" value={selectedTab}>
+        <Tabs
+          defaultValue="all"
+          value={selectedTab}
+          onValueChange={setSelectedTab}
+        >
           <div className="flex items-center justify-between p-2">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
@@ -535,17 +609,19 @@ export function VisitStudentTable() {
               </DropdownMenu>
 
               <PremiumComponent>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 gap-1"
-                  onClick={exportToCSV}
-                >
-                  <File className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Export
-                  </span>
-                </Button>
+                <AdminComponent>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1"
+                    onClick={exportToCSV}
+                  >
+                    <File className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Export
+                    </span>
+                  </Button>
+                </AdminComponent>
               </PremiumComponent>
               <PopupModal
                 text="Add Visit Student"
@@ -556,10 +632,16 @@ export function VisitStudentTable() {
               />
             </div>
           </div>
-
+          <PremiumComponent>
+            <AdminComponent>
+              <div className="px-2">
+                <VisitStats />
+              </div>
+            </AdminComponent>
+          </PremiumComponent>
           {loading ? (
             <div className="flex justify-center p-8">
-              <Loading />
+              {renderLoadingSkeleton()}
             </div>
           ) : error ? (
             <div className="flex justify-center p-8">
@@ -613,6 +695,16 @@ export function VisitStudentTable() {
           </PaginationContent>
         </Pagination>
       </div>
+
+      <UpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedStudent(null);
+        }}
+        onSubmit={handleUpdate}
+        initialData={selectedStudent || undefined}
+      />
     </div>
   );
 }

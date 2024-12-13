@@ -48,6 +48,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 type Teacher = {
   _id: string;
@@ -130,7 +132,6 @@ export function TeacherTable() {
     setShowSalaryModal(true);
   };
 
-  if (loading) return <Loading />;
   if (error) return <Error />;
 
   return (
@@ -143,12 +144,40 @@ export function TeacherTable() {
             <TableHead>Contact Number</TableHead>
             <TableHead>Monthly Salary</TableHead>
             <TableHead>Percentage</TableHead>
-            <TableHead>Update</TableHead>
-            <TableHead>Actions</TableHead>
+            <AdminComponent>
+              <TableHead>Update</TableHead>
+              <TableHead>Actions</TableHead>
+            </AdminComponent>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {teacher.length === 0 ? (
+          {loading ? (
+            [...Array(5)].map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <Skeleton className="w-8 h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[200px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[150px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[100px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-[80px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-9 w-[80px]" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-9 w-[40px]" />
+                </TableCell>
+              </TableRow>
+            ))
+          ) : teacher.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7}>No teachers available</TableCell>
             </TableRow>
@@ -160,82 +189,85 @@ export function TeacherTable() {
                 <TableCell>{teacher.contactNo}</TableCell>
                 <TableCell>{teacher.monthlySalary}</TableCell>
                 <TableCell>{teacher.percentage}</TableCell>
-                <Sheet>
-                  <TableCell>
-                    <SheetTrigger asChild>
-                      <Button variant="outline">Update</Button>
-                    </SheetTrigger>
-                  </TableCell>
-                  <SheetContent className="overflow-auto">
-                    <SheetHeader>
-                      <SheetTitle>Update Teacher</SheetTitle>
-                      <SheetDescription>
-                        Fill the data correctly to update teacher.
-                      </SheetDescription>
-                    </SheetHeader>
-                    <TeacherUpdateForm id={teacher._id} />
-                  </SheetContent>
-                </Sheet>
+                <AdminComponent>
+                  <Sheet>
+                    <TableCell>
+                      <SheetTrigger asChild>
+                        <Button variant="outline">Update</Button>
+                      </SheetTrigger>
+                    </TableCell>
+                    <SheetContent className="overflow-auto">
+                      <SheetHeader>
+                        <SheetTitle>Update Teacher</SheetTitle>
+                        <SheetDescription>
+                          Fill the data correctly to update teacher.
+                        </SheetDescription>
+                      </SheetHeader>
+                      <TeacherUpdateForm id={teacher._id} />
+                    </SheetContent>
+                  </Sheet>
 
-                <TableCell className="cursor-pointer">
-                  <Drawer>
-                    <DropdownMenu modal={false}>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="w-8 h-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <TableCell className="cursor-pointer">
+                    <Drawer>
+                      <DropdownMenu modal={false}>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="w-8 h-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        <DrawerTrigger asChild>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <View className="w-4 h-4 mr-2" /> View
+                          <DrawerTrigger asChild>
+                            <DropdownMenuItem className="cursor-pointer">
+                              <View className="w-4 h-4 mr-2" /> View
+                            </DropdownMenuItem>
+                          </DrawerTrigger>
+
+                          <DropdownMenuItem
+                            onClick={() => handleSalaryPayment(teacher)}
+                            className="cursor-pointer"
+                          >
+                            <DollarSign className="w-4 h-4 mr-2" /> Pay Salary
                           </DropdownMenuItem>
-                        </DrawerTrigger>
 
-                        <DropdownMenuItem
-                          onClick={() => handleSalaryPayment(teacher)}
-                          className="cursor-pointer"
-                        >
-                          <DollarSign className="w-4 h-4 mr-2" /> Pay Salary
-                        </DropdownMenuItem>
-
-                        <DropdownMenuItem
-                          onClick={() => setOpen(true)}
-                          className="cursor-pointer"
-                        >
-                          <Trash className="w-4 h-4 mr-2" /> Move to Recycle Bin
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <AlertModal
-                      isOpen={open}
-                      onClose={() => setOpen(false)}
-                      onConfirm={() => onConfirm(teacher._id)}
-                      loading={loading}
-                    />
-                    <DrawerContent className="z-50">
-                      <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
-                        <DrawerHeader>
-                          <DrawerTitle>Teacher Details</DrawerTitle>
-                          <DrawerDescription>
-                            See details about {teacher.name}
-                          </DrawerDescription>
-                        </DrawerHeader>
-                        <div className="p-4 pb-0">
-                          <TeacherDetails {...teacher} />
+                          <DropdownMenuItem
+                            onClick={() => setOpen(true)}
+                            className="cursor-pointer"
+                          >
+                            <Trash className="w-4 h-4 mr-2" /> Move to Recycle
+                            Bin
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                      <AlertModal
+                        isOpen={open}
+                        onClose={() => setOpen(false)}
+                        onConfirm={() => onConfirm(teacher._id)}
+                        loading={loading}
+                      />
+                      <DrawerContent className="z-50">
+                        <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                          <DrawerHeader>
+                            <DrawerTitle>Teacher Details</DrawerTitle>
+                            <DrawerDescription>
+                              See details about {teacher.name}
+                            </DrawerDescription>
+                          </DrawerHeader>
+                          <div className="p-4 pb-0">
+                            <TeacherDetails {...teacher} />
+                          </div>
+                          <DrawerFooter>
+                            <DrawerClose asChild>
+                              <Button variant="outline">Cancel</Button>
+                            </DrawerClose>
+                          </DrawerFooter>
                         </div>
-                        <DrawerFooter>
-                          <DrawerClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                          </DrawerClose>
-                        </DrawerFooter>
-                      </div>
-                    </DrawerContent>
-                  </Drawer>
-                </TableCell>
+                      </DrawerContent>
+                    </Drawer>
+                  </TableCell>
+                </AdminComponent>
               </TableRow>
             ))
           )}

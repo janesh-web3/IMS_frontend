@@ -19,7 +19,6 @@ import {
 import { MoreHorizontal, Trash, View } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router-dom";
-import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import {
   Sheet,
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/sheet";
 import UpdateSubjectForm from "./UpdateSubjectForm";
 import { toast } from "react-toastify";
+import AdminComponent from "@/components/shared/AdminComponent";
 
 type Subject = {
   _id: string;
@@ -85,18 +85,47 @@ export function Subject() {
     fetchCourses();
   }, [id]);
 
-  if (loading)
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
-  if (error)
-    return (
-      <div>
-        <Error />
-      </div>
-    );
+  const renderLoadingSkeleton = () => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[100px]">S.N</TableHead>
+          <TableHead>Subject Name</TableHead>
+          <TableHead>Monthly Fee</TableHead>
+          <TableHead>Regular Fee</TableHead>
+          <TableHead>Update</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...Array(5)].map((_, index) => (
+          <TableRow key={index}>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[30px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[150px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[100px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-4 bg-muted animate-pulse rounded w-[100px]" />
+            </TableCell>
+            <TableCell>
+              <div className="h-8 bg-muted animate-pulse rounded w-[80px]" />
+            </TableCell>
+            <TableCell>
+              <div className="w-8 h-8 rounded bg-muted animate-pulse" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  if (loading) return renderLoadingSkeleton();
+  if (error) return <Error />;
 
   return (
     <>
@@ -107,8 +136,10 @@ export function Subject() {
             <TableHead>Subject Name</TableHead>
             <TableHead>Monthly Fee</TableHead>
             <TableHead>Regular Fee</TableHead>
-            <TableHead>Update</TableHead>
-            <TableHead>Actions</TableHead>
+            <AdminComponent>
+              <TableHead>Update</TableHead>
+              <TableHead>Actions</TableHead>
+            </AdminComponent>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -136,51 +167,55 @@ export function Subject() {
                   </Link>
                 </TableCell>
 
-                <Sheet>
-                  <TableCell>
-                    <SheetTrigger asChild>
-                      <Button variant="outline">Update</Button>
-                    </SheetTrigger>
-                  </TableCell>
-                  <SheetContent>
-                    <SheetHeader>
-                      <SheetTitle>Update Subject</SheetTitle>
-                      <SheetDescription>
-                        Fill the data correctly to update subject.
-                      </SheetDescription>
-                    </SheetHeader>
-                    <UpdateSubjectForm id={subject._id} />
-                  </SheetContent>
-                </Sheet>
+                <AdminComponent>
+                  <Sheet>
+                    <TableCell>
+                      <SheetTrigger asChild>
+                        <Button variant="outline">Update</Button>
+                      </SheetTrigger>
+                    </TableCell>
+                    <SheetContent>
+                      <SheetHeader>
+                        <SheetTitle>Update Subject</SheetTitle>
+                        <SheetDescription>
+                          Fill the data correctly to update subject.
+                        </SheetDescription>
+                      </SheetHeader>
+                      <UpdateSubjectForm id={subject._id} />
+                    </SheetContent>
+                  </Sheet>
+                </AdminComponent>
 
-                <TableCell>
-                  <AlertModal
-                    isOpen={open}
-                    onClose={() => setOpen(false)}
-                    onConfirm={() => onConfirm(subject._id)}
-                    loading={loading}
-                  />
-                  <DropdownMenu modal={false}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="w-8 h-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem className="cursor-pointer">
-                        <View className="w-4 h-4 mr-2" /> Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setOpen(true)}
-                        className="cursor-pointer"
-                      >
-                        <Trash className="w-4 h-4 mr-2" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+                <AdminComponent>
+                  <TableCell>
+                    <AlertModal
+                      isOpen={open}
+                      onClose={() => setOpen(false)}
+                      onConfirm={() => onConfirm(subject._id)}
+                      loading={loading}
+                    />
+                    <DropdownMenu modal={false}>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="w-8 h-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <View className="w-4 h-4 mr-2" /> Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setOpen(true)}
+                          className="cursor-pointer"
+                        >
+                          <Trash className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </AdminComponent>
               </TableRow>
             ))
           )}
