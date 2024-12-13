@@ -86,7 +86,6 @@ const StudentDataVisualization: React.FC = () => {
         "GET",
         "/statistics/probability"
       );
-      console.log(probabilityData);
       const advancedData = await crudRequest<Advanced>(
         "GET",
         "/statistics/advanced"
@@ -210,25 +209,6 @@ const StudentDataVisualization: React.FC = () => {
             ).toFixed(2)}%`}
           </div>
         )}
-      </Card>
-      {/* Kurtosis Explanation */}
-      <Card className="p-4 shadow-lg">
-        <h3 className="mb-4 text-lg font-semibold text-center">Kurtosis</h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={[{ name: "Kurtosis", value: advanced.kurtosis }]}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
-        <div className="mt-2 text-center text-gray-600">
-          {advanced.kurtosis > 3
-            ? "Leptokurtic: Data has more extreme values."
-            : advanced.kurtosis < 3
-              ? "Platykurtic: Data has fewer extreme values."
-              : "Mesokurtic: Data distribution is normal."}
-        </div>
       </Card>
 
       {/* Correlation Visualization */}

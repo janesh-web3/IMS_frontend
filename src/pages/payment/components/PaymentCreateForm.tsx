@@ -138,10 +138,10 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                               </div>
                             </div>
                           </SelectItem>
-                          <SelectItem value="Offline">
+                          <SelectItem value="Cash">
                             <div className="flex items-start gap-3 text-muted-foreground">
                               <div className="grid gap-0.5">
-                                <h1>Offline</h1>
+                                <h1>Cash</h1>
                               </div>
                             </div>
                           </SelectItem>

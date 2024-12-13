@@ -21,9 +21,54 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
-import { Courses, StudentDetails } from "@/types";
+import { Courses } from "@/types";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+
+export interface StudentDetails {
+  personalInfo: {
+    studentName: string;
+    schoolName: string;
+    address: string;
+    dateOfBirth: Date | null;
+    gender: string;
+    contactNo: string;
+    billNo: Array<{
+      billNo: string;
+      dateSubmitted: Date;
+      paid: string;
+      method: string;
+    }>;
+    guardianName: string;
+    guardianContact: string;
+    localGuardianName: string;
+    localGuardianContact: string;
+    referredBy: string;
+    admissionNumber: string;
+    paymentMethod: string;
+  };
+  courses: Array<{
+    courseEnroll: { _id: string };
+    subjectsEnroll: Array<{
+      subjectName: { _id: string };
+      discount: number;
+      feeType: string;
+    }>;
+    booksEnroll: Array<{
+      bookName: { _id: string };
+    }>;
+  }>;
+  admissionFee: number;
+  tshirtFee: number;
+  examFee: number;
+  document: boolean;
+  totalDiscount: number;
+  totalAmount: number;
+  totalAfterDiscount: number;
+  paid: number;
+  remaining: number;
+  paymentDeadline: Date | null;
+}
 
 const StudentUpdateForm = () => {
   const [step, setStep] = useState(1);
@@ -33,7 +78,7 @@ const StudentUpdateForm = () => {
     studentName: "",
     schoolName: "",
     address: "",
-    dateOfBirth: null,
+    dateOfBirth: null as Date | null,
     gender: "",
     contactNo: "",
     billNo: "",
@@ -57,7 +102,19 @@ const StudentUpdateForm = () => {
   };
 
   //step 2
-  const [feesInfo, setFeesInfo] = useState({
+  const [feesInfo, setFeesInfo] = useState<{
+    admissionFee: number;
+    tshirtFee: number;
+    examFee: number;
+    document: boolean;
+    totalDiscount: number;
+    totalAmount: number;
+    totalAfterDiscount: number;
+    paidAmount: number;
+    remainingAmount: number;
+    paymentMethod: string;
+    paymentDeadline: Date | null;
+  }>({
     admissionFee: 0,
     tshirtFee: 0,
     examFee: 0,

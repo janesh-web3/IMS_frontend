@@ -24,6 +24,10 @@ interface BookUpdateFormProps {
   modalClose: () => void;
 }
 
+interface BookResponse {
+  success: boolean;
+}
+
 const BookUpdateForm = ({
   bookId,
   initialData,
@@ -37,7 +41,7 @@ const BookUpdateForm = ({
     setLoading(true);
 
     try {
-      const response = await crudRequest(
+      const response = await crudRequest<BookResponse>(
         "PUT",
         `/book/update-book/${bookId}`,
         formData

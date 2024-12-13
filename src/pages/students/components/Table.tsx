@@ -96,6 +96,8 @@ import PremiumComponent from "@/components/shared/PremiumComponent";
 import { Modal } from "@/components/ui/modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Zap } from "lucide-react";
+import { generateBill } from "@/components/shared/BillGenerator";
+import { formatCurrency } from "@/lib/utils";
 
 type Bill = {
   billNo: string;
@@ -233,118 +235,23 @@ export function StudentTable() {
     },
   });
 
-  //bill print
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "NPR",
-    }).format(amount);
-  };
-
   // Add the generateBill function
-  const generateBill = (studentData: {
-    studentName: string;
-    billNo: number;
-    amount: number;
-    method: string;
-    remaining: number;
-    date?: string;
-  }) => {
-    const billHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Fee Receipt</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .bill-container { 
-          max-width: 400px; 
-          margin: 0 auto; 
-          padding: 20px;
-          border: 1px solid #ccc;
-        }
-        .header { 
-          text-align: center; 
-          margin-bottom: 20px;
-          border-bottom: 2px solid #333;
-          padding-bottom: 10px;
-        }
-        .bill-details { 
-          margin-bottom: 20px; 
-          padding: 10px;
-          background-color: #f9f9f9;
-        }
-        .bill-row { 
-          display: flex; 
-          justify-content: space-between; 
-          margin: 10px 0;
-          padding: 5px 0;
-          border-bottom: 1px dashed #ccc;
-        }
-        .footer { 
-          margin-top: 30px; 
-          text-align: center;
-          border-top: 2px solid #333;
-          padding-top: 10px;
-        }
-        @media print {
-          .no-print { display: none; }
-          body { margin: 0; }
-          .bill-container { border: none; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="bill-container">
-        <div class="header">
-          <h2>Fee Receipt</h2>
-          <p>Date: ${studentData.date || new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div class="bill-details">
-          <div class="bill-row">
-            <strong>Student Name:</strong>
-            <span>${studentData.studentName}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Bill No:</strong>
-            <span>${studentData.billNo}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Amount Paid:</strong>
-            <span>${formatCurrency(studentData.amount)}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Payment Method:</strong>
-            <span>${studentData.method}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Remaining Amount:</strong>
-            <span>${formatCurrency(studentData.remaining)}</span>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p>Thank you for your payment!</p>
-          <p>This is a computer generated receipt.</p>
-        </div>
-      </div>
-      <div class="no-print" style="text-align: center; margin-top: 20px;">
-        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer;">Print Receipt</button>
-      </div>
-    </body>
-    </html>
-  `;
-
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(billHTML);
-      printWindow.document.close();
-      // Automatically trigger print
-      printWindow.onload = function () {
-        printWindow.print();
-      };
-    }
+  const generateStudentBill = (studentData: any) => {
+    generateBill({
+      title: "Fee Receipt",
+      billNo: studentData.billNo,
+      recipientName: studentData.studentName,
+      amount: studentData.amount,
+      paymentMethod: studentData.method,
+      description: "Fee payment",
+      type: "fee",
+      additionalDetails: [
+        {
+          label: "Remaining Amount",
+          value: formatCurrency(studentData.remaining),
+        },
+      ],
+    });
   };
 
   //Update fee and billing
@@ -401,8 +308,9 @@ export function StudentTable() {
         amount: updateFee.amount,
         method: updateFee.paymentMethod,
         remaining: student.remaining,
-        date: new Date().toLocaleDateString(),
       };
+
+      generateStudentBill(studentBillData);
 
       setUpdateFee({
         amount: 0,
@@ -410,8 +318,6 @@ export function StudentTable() {
         paymentMethod: "",
         remaining: 0,
       });
-
-      generateBill(studentBillData);
     } catch (error) {
       console.error("Error updating fee:", error);
     }
@@ -1254,7 +1160,7 @@ export function StudentTable() {
                   Other
                 </TabsTrigger>
               </TabsList>
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex flex-wrap  items-center gap-2 ml-auto">
                 {/* Filter by fee */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -1288,35 +1194,6 @@ export function StudentTable() {
                 </DropdownMenu>
 
                 {/* filter by course */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
-                      <ListFilter className="h-3.5 w-3.5" />
-                      <span>Filter by Course</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {courses &&
-                      courses.map((course, index) => (
-                        <DropdownMenuCheckboxItem
-                          key={index}
-                          checked={selectedCourses.includes(course._id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedCourses((prev) =>
-                              checked
-                                ? [...prev, course._id]
-                                : prev.filter((id) => id !== course._id)
-                            );
-                          }}
-                        >
-                          {course.name}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">

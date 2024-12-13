@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash, View } from "lucide-react";
+import { MoreHorizontal, Trash, View, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
@@ -40,6 +40,14 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import TeacherDetails from "./TeacherDetails";
+import { SalaryPaymentForm } from "./SalaryPaymentForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Teacher = {
   _id: string;
@@ -79,6 +87,9 @@ export function TeacherTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [showSalaryModal, setShowSalaryModal] = useState<boolean>(false);
+
   const onConfirm = async (id: string) => {
     try {
       const success = await moveToRecycleBin("Faculty", id);
@@ -91,7 +102,7 @@ export function TeacherTable() {
     }
   };
 
-  const fetchCourses = async () => {
+  const fetchTeachers = async () => {
     try {
       const response = await crudRequest<Teacher[]>(
         "GET",
@@ -103,29 +114,24 @@ export function TeacherTable() {
         setError("Unexpected response format");
       }
     } catch (error) {
-      setError("Error fetching course data");
-      console.error("Error fetching course data:", error);
+      setError("Error fetching teacher data");
+      console.error("Error fetching teacher data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCourses();
+    fetchTeachers();
   }, []);
 
-  if (loading)
-    return (
-      <div>
-        <Loading />
-      </div>
-    );
-  if (error)
-    return (
-      <div>
-        <Error />
-      </div>
-    );
+  const handleSalaryPayment = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setShowSalaryModal(true);
+  };
+
+  if (loading) return <Loading />;
+  if (error) return <Error />;
 
   return (
     <>
@@ -144,15 +150,12 @@ export function TeacherTable() {
         <TableBody>
           {teacher.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={2}>No courses available</TableCell>
+              <TableCell colSpan={7}>No teachers available</TableCell>
             </TableRow>
           ) : (
             teacher.map((teacher, index) => (
-              <TableRow>
-                <TableCell className="font-medium" key={index}>
-                  {index + 1}
-                </TableCell>
-
+              <TableRow key={teacher._id}>
+                <TableCell className="font-medium">{index + 1}</TableCell>
                 <TableCell>{teacher.name}</TableCell>
                 <TableCell>{teacher.contactNo}</TableCell>
                 <TableCell>{teacher.monthlySalary}</TableCell>
@@ -193,9 +196,14 @@ export function TeacherTable() {
                         </DrawerTrigger>
 
                         <DropdownMenuItem
-                          onClick={() => {
-                            setOpen(true);
-                          }}
+                          onClick={() => handleSalaryPayment(teacher)}
+                          className="cursor-pointer"
+                        >
+                          <DollarSign className="w-4 h-4 mr-2" /> Pay Salary
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() => setOpen(true)}
                           className="cursor-pointer"
                         >
                           <Trash className="w-4 h-4 mr-2" /> Move to Recycle Bin
@@ -217,18 +225,7 @@ export function TeacherTable() {
                           </DrawerDescription>
                         </DrawerHeader>
                         <div className="p-4 pb-0">
-                          <TeacherDetails
-                            _id={teacher._id}
-                            name={teacher.name}
-                            contactNo={teacher.contactNo}
-                            monthlySalary={teacher.monthlySalary}
-                            percentage={teacher.percentage}
-                            photo={teacher.photo}
-                            courses={teacher.courses}
-                            enabled={teacher.enabled}
-                            deleted={teacher.deleted}
-                            invoices={teacher.invoices}
-                          />
+                          <TeacherDetails {...teacher} />
                         </div>
                         <DrawerFooter>
                           <DrawerClose asChild>
@@ -244,6 +241,27 @@ export function TeacherTable() {
           )}
         </TableBody>
       </Table>
+
+      <Dialog open={showSalaryModal} onOpenChange={setShowSalaryModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pay Salary - {selectedTeacher?.name}</DialogTitle>
+            <DialogDescription>
+              Enter salary payment details below
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTeacher && (
+            <SalaryPaymentForm
+              teacher={selectedTeacher}
+              onSuccess={() => {
+                setShowSalaryModal(false);
+                fetchTeachers(); // Refresh the teacher list
+              }}
+              onCancel={() => setShowSalaryModal(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -4,7 +4,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogContent,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";

@@ -18,14 +18,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
@@ -67,13 +59,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Courses } from "@/types";
 import VisitStudentDetails from "./VisitStudentDetails";
 import VisitStudentCreateForm from "./VisitStudentCreateForm";
@@ -115,14 +101,14 @@ export function VisitStudentTable() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<string>("all");
+  const [selectedTab] = useState<string>("all");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [courses, setCourses] = useState<Courses[]>([]);
 
   //pagination
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(10); // Customize this based on your requirement
+  const [itemsPerPage] = useState<number>(10); // Keep only the value
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -446,7 +432,7 @@ export function VisitStudentTable() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="border rounded-md">
         <Tabs defaultValue="all" value={selectedTab}>
           <div className="flex items-center justify-between p-2">
             <TabsList>
@@ -572,11 +558,11 @@ export function VisitStudentTable() {
           </div>
 
           {loading ? (
-            <div className="p-8 flex justify-center">
+            <div className="flex justify-center p-8">
               <Loading />
             </div>
           ) : error ? (
-            <div className="p-8 flex justify-center">
+            <div className="flex justify-center p-8">
               <Error />
             </div>
           ) : (
@@ -593,7 +579,7 @@ export function VisitStudentTable() {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end py-4 space-x-2">
         <Pagination>
           <PaginationContent>
             <PaginationItem>

@@ -49,6 +49,8 @@ import StudentDetails from "../students/components/StudentDetails";
 import { Button } from "@/components/ui/button";
 import Accounting from "./accounting";
 import PremiumComponent from "@/components/shared/PremiumComponent";
+import StudentDataVisualization from "./statistics/StudentDataVisualization";
+import { Transactions } from "./transactions/Transactions";
 
 type Dashboard = {
   totalAmount: string;
@@ -248,6 +250,8 @@ export default function DashboardPage() {
             <PremiumComponent>
               <TabsTrigger value="accounting">Accounting</TabsTrigger>
               <TabsTrigger value="control">Control</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              <TabsTrigger value="stats">Stats</TabsTrigger>
             </PremiumComponent>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
@@ -482,6 +486,12 @@ export default function DashboardPage() {
           </TabsContent>
           <TabsContent value="control">
             <Control />
+          </TabsContent>
+          <TabsContent value="transactions">
+            <Transactions />
+          </TabsContent>
+          <TabsContent value="stats">
+            <StudentDataVisualization />
           </TabsContent>
         </Tabs>
       </div>
