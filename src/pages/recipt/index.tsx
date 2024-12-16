@@ -4,7 +4,7 @@ import ReciptLayout from "./components";
 
 export default function ReciptPage() {
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-2 md:p-4">
       <PageHead title="Recipt | Details" />
       <Breadcrumbs
         items={[

@@ -128,6 +128,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 "/notification/add-notification",
                 notificationPayload
               );
+              window.location.reload();
             })
             .catch((err) => {
               console.error("Error adding teacher:", err);
@@ -147,6 +148,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 "/notification/add-notification",
                 notificationPayload
               );
+              window.location.reload();
             })
             .catch(() => {
               console.error("Error adding teacher with photo:");

@@ -1,36 +1,8 @@
-import PopupModal from "@/components/shared/popup-modal";
-import TableSearchInput from "@/components/shared/table-search-input";
-import ReciptCreateForm from "./ReciptCreateForm";
 import { ReciptTable } from "./Table";
-import { Plus } from "lucide-react";
-import ReciptStats from "./ReciptStats";
-import AdminComponent from "@/components/shared/AdminComponent";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 
 export default function ReciptLayout() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-2 py-5">
-        <div className="flex flex-1 gap-4">
-          <TableSearchInput placeholder="Search Recipt Here" />
-        </div>
-        <AdminComponent>
-          <div className="flex gap-3">
-            <PopupModal
-              text="Add Recipt"
-              icon={<Plus className="w-4 h-4 mr-2" />}
-              renderModal={(onClose) => (
-                <ReciptCreateForm modalClose={onClose} />
-              )}
-            />
-          </div>
-        </AdminComponent>
-      </div>
-      <PremiumComponent>
-        <AdminComponent>
-          <ReciptStats />
-        </AdminComponent>
-      </PremiumComponent>
       <ReciptTable />
     </div>
   );

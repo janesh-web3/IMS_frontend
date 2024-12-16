@@ -99,11 +99,7 @@ const OverviewSkeleton = () => {
 
 export function Overview() {
   const [statsLoading, setStatsLoading] = useState(true);
-  const [dashboardStatsLoading, setDashboardStatsLoading] = useState(true);
   const [stats, setStats] = useState<OverviewStats | null>(null);
-  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(
-    null
-  );
   const [period, setPeriod] = useState("today");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
@@ -121,7 +117,7 @@ export function Overview() {
           }`;
         }
 
-        const [overviewResponse, dashboardResponse] = await Promise.all([
+        const [overviewResponse] = await Promise.all([
           crudRequest<{ data: OverviewStats }>("GET", endpoint),
           crudRequest<{ data: DashboardStats }>(
             "GET",
@@ -130,12 +126,10 @@ export function Overview() {
         ]);
 
         setStats(overviewResponse.data);
-        setDashboardStats(dashboardResponse.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
         setStatsLoading(false);
-        setDashboardStatsLoading(false);
       }
     };
 
@@ -147,7 +141,7 @@ export function Overview() {
     setPeriod("custom");
   };
 
-  if (statsLoading || !stats || !dashboardStats) {
+  if (statsLoading || !stats) {
     return <OverviewSkeleton />;
   }
 

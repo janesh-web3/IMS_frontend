@@ -15,7 +15,6 @@ import { usePathname } from "@/routes/hooks";
 import { Link, useNavigate } from "react-router-dom";
 import UpgradeToPro from "./upgrade-pro";
 import { usePackageContext } from "@/context/packageContext";
-import Billboard from "./Billboard";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -36,11 +35,20 @@ export default function DashboardNav({
   const userPlan = packageDetails?.plan || "Basic"; // Default to "Basic" if not defined
 
   // Filter navigation items based on user plan
-  const filteredNavItems = items.filter(
-    (item) =>
-      item.tag === "Basic" ||
-      (userPlan === "Standard" && item.tag === "Standard")
-  );
+  const filteredNavItems = items.filter((item) => {
+    switch (userPlan) {
+      case "PremiumPlus":
+        // Show all items for PremiumPlus users
+        return true;
+      case "Premium":
+        // Show Basic and Premium items for Premium users
+        return item.tag === "Basic" || item.tag === "Premium";
+      case "Basic":
+      default:
+        // Show only Basic items for Basic users
+        return item.tag === "Basic";
+    }
+  });
 
   if (!filteredNavItems.length) {
     return null;
@@ -97,11 +105,8 @@ export default function DashboardNav({
           );
         })}
         <div className="mb-28">
-          {userPlan === "Basic" && (isMobileNav || !isMinimized) && (
+          {(isMobileNav || !isMinimized) && (
             <UpgradeToPro onClick={handleUpgradeClick} />
-          )}
-          {userPlan === "Standard" && (isMobileNav || !isMinimized) && (
-            <Billboard />
           )}
         </div>
       </TooltipProvider>

@@ -63,6 +63,7 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         notificationPayload
       );
       modalClose();
+      window.location.reload();
     } catch (error) {
       console.error("Error adding receipt:", error);
       toast.error("Error adding receipt");

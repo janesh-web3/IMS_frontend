@@ -28,8 +28,20 @@ import {
   User,
   User2Icon,
   UserX2Icon,
-  X
-} from 'lucide-react';
+  X,
+  LayoutDashboard,
+  GraduationCap,
+  ClipboardCheck,
+  BookOpen,
+  UserCog,
+  Receipt,
+  ArrowLeftRight,
+  Brain,
+  MessageSquare,
+  Video,
+  Bell,
+  AlertCircle,
+} from "lucide-react";
 
 export type Icon = LucideIcon;
 
@@ -78,5 +90,20 @@ export const Icons = {
     </svg>
   ),
   twitter: Twitter,
-  check: Check
+  check: Check,
+  layoutDashboard: LayoutDashboard,
+  graduationCap: GraduationCap,
+  clipboardCheck: ClipboardCheck,
+  bookOpen: BookOpen,
+  userCog: UserCog,
+  receipt: Receipt,
+  creditCard: CreditCard,
+  switchHorizontal: ArrowLeftRight,
+  helpCircle: HelpCircle,
+  brain: Brain,
+  messageSquare: MessageSquare,
+  video: Video,
+  bell: Bell,
+  idCard: CreditCard,
+  alertCircle: AlertCircle,
 };

@@ -905,12 +905,12 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </div>
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="totalAmount">Total Amount</Label>
                 <Input id="totalAmount" readOnly value={feesInfo.totalAmount} />
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="totalDiscount">Total Discount Amount</Label>
                 <Input
                   id="totalDiscount"
@@ -919,7 +919,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="totalAfterDiscount">
                   Total After Discount Amount
                 </Label>
@@ -929,7 +929,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="paidAmount">Total Paid Amount</Label>
                 <Input
                   id="paidAmount"
@@ -940,12 +940,12 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="remainingAmount">Total Remaining Amount</Label>
                 <Input id="remainingAmount" value={feesInfo.remainingAmount} />
               </div>
 
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="paymentMethod">Select Payment Method</Label>
                 <Select
                   onValueChange={(value) =>
@@ -966,7 +966,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 </Select>
               </div>
 
-              <div className="grid items-center justify-center grid-cols-1 gap-2 pt-2 text-center md:gap-6 md:grid-cols-2">
+              <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="paymentDeadline">Payment Deadline</Label>
                 <Popover>
                   <PopoverTrigger asChild>

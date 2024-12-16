@@ -34,7 +34,7 @@ export default function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove("light", "dark", "basic", "premium");
+    root.classList.remove("light", "dark", "basic", "premium", "premium-plus");
 
     const appliedTheme =
       theme === "system"
@@ -44,7 +44,17 @@ export default function ThemeProvider({
         : theme;
 
     // Apply theme based on the user's package plan
-    const planClass = packageDetails.plan === "Standard" ? "premium" : "basic";
+    let planClass;
+    switch (packageDetails.plan) {
+      case "PremiumPlus":
+        planClass = "premium-plus";
+        break;
+      case "Premium":
+        planClass = "premium";
+        break;
+      default:
+        planClass = "basic";
+    }
 
     root.classList.add(appliedTheme);
     root.classList.add(planClass);

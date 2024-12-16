@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Search, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Error from "@/pages/not-found/error";
 import {
@@ -36,6 +36,13 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UpdateModal } from "./UpdateModal";
+import PopupModal from "@/components/shared/popup-modal";
+import PaymentCreateForm from "./PaymentCreateForm";
+import { Plus } from "lucide-react";
+import PaymentStats from "./PaymentStats";
+import PremiumComponent from "@/components/shared/PremiumComponent";
+import AdminComponent from "@/components/shared/AdminComponent";
+import { Input } from "@/components/ui/input";
 
 type Teacher = {
   _id: string;
@@ -61,6 +68,18 @@ export function PaymentTable() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Teacher | null>(null);
 
+  // Add search state
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Add debounce function
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
+
   const onConfirm = async (id: string) => {
     try {
       const success = await moveToRecycleBin("Payment", id);
@@ -75,10 +94,11 @@ export function PaymentTable() {
     }
   };
 
+  // Update fetchTeachers function to include search
   const fetchTeachers = async (
     page: number = 1,
     limit: number = itemsPerPage,
-    search: string = ""
+    search: string = searchQuery
   ) => {
     try {
       const response = await crudRequest<{
@@ -100,9 +120,16 @@ export function PaymentTable() {
     }
   };
 
+  // Add debounced search handler
+  const debouncedSearch = debounce((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+    fetchTeachers(1, itemsPerPage, value);
+  }, 500);
+
   useEffect(() => {
-    fetchTeachers();
-  }, []);
+    fetchTeachers(currentPage, itemsPerPage, searchQuery);
+  }, [currentPage, itemsPerPage, searchQuery]);
 
   const handleUpdate = async (values: Partial<Teacher>) => {
     try {
@@ -165,6 +192,33 @@ export function PaymentTable() {
 
   return (
     <>
+      <div className="flex items-center justify-between gap-2 py-5">
+        <div className="relative flex-1 mx-2 ml-auto md:grow-0">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+            onChange={(e) => debouncedSearch(e.target.value)}
+          />
+        </div>
+        <AdminComponent>
+          <div className="flex gap-3">
+            <PopupModal
+              text="Add Payment"
+              icon={<Plus className="w-4 h-4 mr-2" />}
+              renderModal={(onClose) => (
+                <PaymentCreateForm modalClose={onClose} />
+              )}
+            />
+          </div>
+        </AdminComponent>
+      </div>
+      <PremiumComponent>
+        <AdminComponent>
+          <PaymentStats />
+        </AdminComponent>
+      </PremiumComponent>
       <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
         <div className="w-full max-h-[200vh]">
           <Table>

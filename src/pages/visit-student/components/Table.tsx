@@ -8,7 +8,6 @@ import {
   View,
   Edit,
 } from "lucide-react";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -60,7 +59,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
 import { Courses } from "@/types";
 import VisitStudentDetails from "./VisitStudentDetails";
 import VisitStudentCreateForm from "./VisitStudentCreateForm";
@@ -469,242 +467,250 @@ export function VisitStudentTable() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Breadcrumb className="hidden md:flex">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="#">Dashboard</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="#">Students</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Visits Students</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-        <div className="relative flex-1 mx-2 ml-auto md:grow-0">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+    <div className="flex flex-col h-full">
+      <div className="flex-none">
+        <header className="sticky top-0 z-30 flex items-center gap-4 px-4 border-b h-14 bg-background sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <Breadcrumb className="hidden md:flex">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="#">Dashboard</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="#">Students</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Visits Students</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <div className="relative flex-1 mx-2 ml-auto md:grow-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+            />
+          </div>
+        </header>
+      </div>
+
+      <div className="flex-1">
+        <div className="p-4">
+          <Tabs
+            defaultValue="all"
+            value={selectedTab}
+            onValueChange={setSelectedTab}
+          >
+            <div className="flex flex-wrap gap-2 items-center justify-between p-2">
+              <TabsList>
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="male">Male</TabsTrigger>
+                <TabsTrigger value="female">Female</TabsTrigger>
+                <TabsTrigger value="other">Other</TabsTrigger>
+              </TabsList>
+              <div className="flex flex-wrap items-center gap-2 ml-auto">
+                {/* filter by course */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                      <ListFilter className="h-3.5 w-3.5" />
+                      <span>Filter by Course</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {courses &&
+                      courses.map((course, index) => (
+                        <DropdownMenuCheckboxItem
+                          key={index}
+                          checked={selectedCourses.includes(course._id)}
+                          onCheckedChange={(checked) => {
+                            setSelectedCourses((prev) =>
+                              checked
+                                ? [...prev, course._id]
+                                : prev.filter((id) => id !== course._id)
+                            );
+                          }}
+                        >
+                          {course.name}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 ml-2 md:h-9"
+                    >
+                      Columns
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px]">
+                    <DropdownMenuLabel>Select Columns</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.photo}
+                      onCheckedChange={() => toggleColumnVisibility("photo")}
+                    >
+                      Photo
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.name}
+                      onCheckedChange={() => toggleColumnVisibility("name")}
+                    >
+                      Name
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.gender}
+                      onCheckedChange={() => toggleColumnVisibility("gender")}
+                    >
+                      Gender
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.contact}
+                      onCheckedChange={() => toggleColumnVisibility("contact")}
+                    >
+                      Contact
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.address}
+                      onCheckedChange={() => toggleColumnVisibility("address")}
+                    >
+                      Address
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.schoolName}
+                      onCheckedChange={() =>
+                        toggleColumnVisibility("schoolName")
+                      }
+                    >
+                      School
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={columnVisibility.dateOfVisit}
+                      onCheckedChange={() =>
+                        toggleColumnVisibility("dateOfVisit")
+                      }
+                    >
+                      Date of Visit
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <PremiumComponent>
+                  <AdminComponent>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 gap-1"
+                      onClick={exportToCSV}
+                    >
+                      <File className="h-3.5 w-3.5" />
+                      <span>Export</span>
+                    </Button>
+                  </AdminComponent>
+                </PremiumComponent>
+                <PopupModal
+                  text="Add Visit Student"
+                  icon={<Plus className="w-4 h-4 mr-2" />}
+                  renderModal={(onClose) => (
+                    <VisitStudentCreateForm modalClose={onClose} />
+                  )}
+                />
+              </div>
+            </div>
+            <PremiumComponent>
+              <AdminComponent>
+                <div>
+                  <VisitStats />
+                </div>
+              </AdminComponent>
+            </PremiumComponent>
+            {loading ? (
+              <div className="flex justify-center p-8">
+                {renderLoadingSkeleton()}
+              </div>
+            ) : error ? (
+              <div className="flex justify-center p-8">
+                <Error />
+              </div>
+            ) : (
+              <div>
+                <div>
+                  <TabsContent value="all">{renderStudentTable()}</TabsContent>
+                  <TabsContent value="male">{renderStudentTable()}</TabsContent>
+                  <TabsContent value="female">
+                    {renderStudentTable()}
+                  </TabsContent>
+                  <TabsContent value="other">
+                    {renderStudentTable()}
+                  </TabsContent>
+                </div>
+              </div>
+            )}
+          </Tabs>
+        </div>
+        <div className="flex-none p-4">
+          <div className="flex items-center justify-end py-4 space-x-2 overflow-auto">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    isActive={currentPage === 1 ? false : true}
+                    onClick={() =>
+                      handlePageChange(Math.max(currentPage - 1, 1))
+                    }
+                    // disabled={currentPage === 1}
+                  />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      href="#"
+                      onClick={() => handlePageChange(index + 1)}
+                      isActive={currentPage === index + 1}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={() =>
+                      handlePageChange(Math.min(currentPage + 1, totalPages))
+                    }
+                    isActive={currentPage === totalPages ? false : true}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+
+          <UpdateModal
+            isOpen={isUpdateModalOpen}
+            onClose={() => {
+              setIsUpdateModalOpen(false);
+              setSelectedStudent(null);
+            }}
+            onSubmit={handleUpdate}
+            initialData={selectedStudent || undefined}
           />
         </div>
       </div>
-
-      <div className="border rounded-md">
-        <Tabs
-          defaultValue="all"
-          value={selectedTab}
-          onValueChange={setSelectedTab}
-        >
-          <div className="flex items-center justify-between p-2">
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="male">Male</TabsTrigger>
-              <TabsTrigger value="female">Female</TabsTrigger>
-              <TabsTrigger value="other">Other</TabsTrigger>
-            </TabsList>
-            <div className="flex items-center gap-2 ml-auto">
-              {/* filter by course */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <ListFilter className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Filter by Course
-                    </span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {courses &&
-                    courses.map((course, index) => (
-                      <DropdownMenuCheckboxItem
-                        key={index}
-                        checked={selectedCourses.includes(course._id)}
-                        onCheckedChange={(checked) => {
-                          setSelectedCourses((prev) =>
-                            checked
-                              ? [...prev, course._id]
-                              : prev.filter((id) => id !== course._id)
-                          );
-                        }}
-                      >
-                        {course.name}
-                      </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 ml-2 md:h-9"
-                  >
-                    Columns
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[200px]">
-                  <DropdownMenuLabel>Select Columns</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.photo}
-                    onCheckedChange={() => toggleColumnVisibility("photo")}
-                  >
-                    Photo
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.name}
-                    onCheckedChange={() => toggleColumnVisibility("name")}
-                  >
-                    Name
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.gender}
-                    onCheckedChange={() => toggleColumnVisibility("gender")}
-                  >
-                    Gender
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.contact}
-                    onCheckedChange={() => toggleColumnVisibility("contact")}
-                  >
-                    Contact
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.address}
-                    onCheckedChange={() => toggleColumnVisibility("address")}
-                  >
-                    Address
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.schoolName}
-                    onCheckedChange={() => toggleColumnVisibility("schoolName")}
-                  >
-                    School
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={columnVisibility.dateOfVisit}
-                    onCheckedChange={() =>
-                      toggleColumnVisibility("dateOfVisit")
-                    }
-                  >
-                    Date of Visit
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <PremiumComponent>
-                <AdminComponent>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 gap-1"
-                    onClick={exportToCSV}
-                  >
-                    <File className="h-3.5 w-3.5" />
-                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                      Export
-                    </span>
-                  </Button>
-                </AdminComponent>
-              </PremiumComponent>
-              <PopupModal
-                text="Add Visit Student"
-                icon={<Plus className="w-4 h-4 mr-2" />}
-                renderModal={(onClose) => (
-                  <VisitStudentCreateForm modalClose={onClose} />
-                )}
-              />
-            </div>
-          </div>
-          <PremiumComponent>
-            <AdminComponent>
-              <div className="px-2">
-                <VisitStats />
-              </div>
-            </AdminComponent>
-          </PremiumComponent>
-          {loading ? (
-            <div className="flex justify-center p-8">
-              {renderLoadingSkeleton()}
-            </div>
-          ) : error ? (
-            <div className="flex justify-center p-8">
-              <Error />
-            </div>
-          ) : (
-            <div className="relative overflow-auto ">
-              <div className="max-h-[calc(100vh-300px)] overflow-auto">
-                <TabsContent value="all">{renderStudentTable()}</TabsContent>
-                <TabsContent value="male">{renderStudentTable()}</TabsContent>
-                <TabsContent value="female">{renderStudentTable()}</TabsContent>
-                <TabsContent value="other">{renderStudentTable()}</TabsContent>
-              </div>
-            </div>
-          )}
-        </Tabs>
-      </div>
-
-      {/* Pagination */}
-      <div className="flex items-center justify-end py-4 space-x-2">
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                isActive={currentPage === 1 ? false : true}
-                onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
-                // disabled={currentPage === 1}
-              />
-            </PaginationItem>
-            {[...Array(totalPages)].map((_, index) => (
-              <PaginationItem key={index}>
-                <PaginationLink
-                  href="#"
-                  onClick={() => handlePageChange(index + 1)}
-                  isActive={currentPage === index + 1}
-                >
-                  {index + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={() =>
-                  handlePageChange(Math.min(currentPage + 1, totalPages))
-                }
-                isActive={currentPage === totalPages ? false : true}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-
-      <UpdateModal
-        isOpen={isUpdateModalOpen}
-        onClose={() => {
-          setIsUpdateModalOpen(false);
-          setSelectedStudent(null);
-        }}
-        onSubmit={handleUpdate}
-        initialData={selectedStudent || undefined}
-      />
     </div>
   );
 }

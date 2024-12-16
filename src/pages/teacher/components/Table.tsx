@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Trash, View, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Loading from "@/pages/not-found/loading";
 import Error from "@/pages/not-found/error";
 import {
   Sheet,

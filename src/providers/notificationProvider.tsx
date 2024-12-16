@@ -6,7 +6,6 @@ import React, {
   ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import { toast } from "react-toastify";
 
 interface Notification {
   id: string;
@@ -93,7 +92,6 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
       console.log("New notification received:", notification);
       setNotifications((prev) => [notification, ...prev]);
       setCountNotifications((prev) => prev + 1);
-      toast.info(notification.message);
     });
 
     socket.on("notification-read", (notificationId: string) => {

@@ -61,6 +61,7 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       );
       toast.success("Payment added successfully");
       modalClose();
+      window.location.reload();
     } catch (error) {
       console.error("Error adding payment:", error);
       toast.error("Failed to add payment");

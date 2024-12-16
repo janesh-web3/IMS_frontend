@@ -4,7 +4,7 @@ import CourseLayout from "./components";
 
 export default function CoursePage() {
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-2">
       <PageHead title="Course | Details" />
       <Breadcrumbs
         items={[
@@ -12,7 +12,9 @@ export default function CoursePage() {
           { title: "Courses", link: "/course" },
         ]}
       />
-      <CourseLayout />
+      <div>
+        <CourseLayout />
+      </div>
     </div>
   );
 }

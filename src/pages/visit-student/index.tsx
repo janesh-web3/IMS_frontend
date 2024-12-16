@@ -5,7 +5,9 @@ const VisitPage = () => {
   return (
     <div>
       <PageHead title="Visit Students" />
-      <VisitLayout />
+      <div>
+        <VisitLayout />
+      </div>
     </div>
   );
 };

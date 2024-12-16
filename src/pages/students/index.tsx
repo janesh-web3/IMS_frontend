@@ -3,9 +3,9 @@ import StudentLayout from "./components";
 
 export default function StudentPage() {
   return (
-    <div className="h-screen overflow-hidden">
+    <div>
       <PageHead title="Student Management | App" />
-      <div className="h-[calc(100vh-2rem)] overflow-auto">
+      <div>
         <StudentLayout />
       </div>
     </div>

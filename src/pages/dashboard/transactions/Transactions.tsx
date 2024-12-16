@@ -45,83 +45,12 @@ interface TransactionSummary {
   };
 }
 
-const TransactionsSkeleton = () => {
-  return (
-    <div className="space-y-6">
-      {/* Date Range Filter Skeleton */}
-      <div className="flex justify-end">
-        <Skeleton className="h-10 w-[240px]" />
-      </div>
-
-      {/* Summary Cards Skeleton */}
-      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i}>
-            <CardHeader>
-              <Skeleton className="h-4 w-[120px]" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-[100px] mb-2" />
-              <Skeleton className="h-4 w-[80px]" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Transactions Table Skeleton */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-[180px]" />
-        </CardHeader>
-        <CardContent>
-          <div className="border rounded-md">
-            {/* Table Header Skeleton */}
-            <div className="border-b">
-              <div className="grid grid-cols-6 p-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <Skeleton key={i} className="h-4 w-[100px]" />
-                ))}
-              </div>
-            </div>
-
-            {/* Table Body Skeleton */}
-            <div className="space-y-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-6 p-4 border-b last:border-0"
-                >
-                  {[1, 2, 3, 4, 5, 6].map((j) => (
-                    <Skeleton key={j} className="h-4 w-[100px]" />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Pagination Skeleton */}
-          <div className="flex justify-center mt-4">
-            <div className="flex items-center space-x-2">
-              <Skeleton className="h-8 w-[32px]" /> {/* Previous */}
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-8 w-[32px]" />
-              ))}
-              <Skeleton className="h-8 w-[32px]" /> {/* Next */}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
 export function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [summary, setSummary] = useState<TransactionSummary | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
 
   // Separate loading states for different sections

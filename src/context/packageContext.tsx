@@ -10,7 +10,7 @@ interface PackageFeatures {
 }
 
 interface PackageDetails {
-  plan: "Basic" | "Standard" | "Premium";
+  plan: "Basic" | "Premium" | "PremiumPlus";
   features: PackageFeatures;
 }
 

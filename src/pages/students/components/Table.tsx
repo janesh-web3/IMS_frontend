@@ -99,6 +99,7 @@ import { generateBill } from "@/components/shared/BillGenerator";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminComponent from "@/components/shared/AdminComponent";
+import PremiumPlusComponent from "@/components/shared/PremiumPlusComponent";
 
 type Bill = {
   billNo: string;
@@ -763,9 +764,9 @@ export function StudentTable() {
                   <TableHead className="table-cell">Date of Birth</TableHead>
                 )}
                 <TableHead className="table-cell">Billing</TableHead>
-                <PremiumComponent>
+                <PremiumPlusComponent>
                   <TableHead className="table-cell">AI</TableHead>
-                </PremiumComponent>
+                </PremiumPlusComponent>
                 <TableHead className="table-cell">
                   <span>Actions</span>
                 </TableHead>
@@ -935,7 +936,7 @@ export function StudentTable() {
                         </SheetFooter>
                       </SheetContent>
                     </Sheet>
-                    <PremiumComponent>
+                    <PremiumPlusComponent>
                       <TableCell className="table-cell">
                         <button
                           onClick={() => handleGenerateReport(student)}
@@ -945,7 +946,7 @@ export function StudentTable() {
                           Report
                         </button>
                       </TableCell>
-                    </PremiumComponent>
+                    </PremiumPlusComponent>
 
                     <TableCell className="table-cell">
                       <Drawer>

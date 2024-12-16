@@ -14,6 +14,8 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { crudRequest } from "@/lib/api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QuestionForm from "./question-form";
 
 interface QuizFormProps {
   initialData?: any;
@@ -174,6 +176,29 @@ export default function QuizForm({
           )}
         </Button>
       </div>
+
+      {!useAI && initialData && (
+        <Tabs defaultValue="details" className="mt-6">
+          <TabsList>
+            <TabsTrigger value="details">Quiz Details</TabsTrigger>
+            <TabsTrigger value="questions">Questions</TabsTrigger>
+          </TabsList>
+          <TabsContent value="details">
+            {/* Existing form fields */}
+          </TabsContent>
+          <TabsContent value="questions">
+            <QuestionForm
+              quizId={initialData._id}
+              onQuestionAdded={() => {
+                toast({
+                  title: "Success",
+                  description: "Question added successfully",
+                });
+              }}
+            />
+          </TabsContent>
+        </Tabs>
+      )}
     </form>
   );
 }

@@ -16,12 +16,19 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Search, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Error from "@/pages/not-found/error";
 import { toast } from "react-toastify";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UpdateModal } from "./UpdateModal";
+import PopupModal from "@/components/shared/popup-modal";
+import HandOverCreateForm from "./HandOverCreateForm";
+import { Plus } from "lucide-react";
+import HandOverStats from "./HandOverStats";
+import PremiumComponent from "@/components/shared/PremiumComponent";
+import AdminComponent from "@/components/shared/AdminComponent";
+import { Input } from "@/components/ui/input";
 
 type Teacher = {
   _id: string;
@@ -36,6 +43,11 @@ export function HandOverTable() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout>();
+  const limit = 10; // items per page
   const [open, setOpen] = useState<boolean>(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [selectedHandOver, setSelectedHandOver] = useState<HandOver | null>(
@@ -57,13 +69,32 @@ export function HandOverTable() {
     }
   };
 
-  const fetchTeachers = async () => {
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      setPage(1);
+      fetchTeachers(1, value);
+    }, 500);
+
+    setDebounceTimeout(timeout);
+  };
+
+  const fetchTeachers = async (currentPage?: number, search?: string) => {
     try {
-      const response = await crudRequest<Teacher[]>(
+      setLoading(true);
+      const response = await crudRequest<{
+        data: Teacher[];
+        pagination: { total: number; page: number; totalPages: number };
+      }>(
         "GET",
-        "/handover/get-handover"
+        `/handover/get-handover?page=${currentPage || page}&limit=${limit}&search=${search || searchQuery}`
       );
-      setTeachers(response);
+      setTeachers(response.data);
+      setTotalPages(response.pagination.totalPages);
     } catch (error) {
       setError("Error fetching teacher data");
       console.error("Error fetching teacher data:", error);
@@ -90,7 +121,31 @@ export function HandOverTable() {
 
   useEffect(() => {
     fetchTeachers();
-  }, []);
+  }, [page]); // Fetch when page changes
+
+  const Pagination = () => (
+    <div className="flex items-center justify-end space-x-2 py-4">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setPage(page - 1)}
+        disabled={page === 1}
+      >
+        Previous
+      </Button>
+      <div className="text-sm text-muted-foreground">
+        Page {page} of {totalPages}
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setPage(page + 1)}
+        disabled={page === totalPages}
+      >
+        Next
+      </Button>
+    </div>
+  );
 
   if (loading)
     return (
@@ -112,6 +167,34 @@ export function HandOverTable() {
 
   return (
     <>
+      <div className="flex items-center justify-between gap-2 py-5">
+        <div className="relative flex-1 mx-2 ml-auto md:grow-0">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </div>
+        <AdminComponent>
+          <div className="flex gap-3">
+            <PopupModal
+              text="Add Payment"
+              icon={<Plus className="w-4 h-4 mr-2" />}
+              renderModal={(onClose) => (
+                <HandOverCreateForm modalClose={onClose} />
+              )}
+            />
+          </div>
+        </AdminComponent>
+      </div>
+      <PremiumComponent>
+        <AdminComponent>
+          <HandOverStats />
+        </AdminComponent>
+      </PremiumComponent>
       <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] md:py-2">
         <div className="w-full max-h-[200vh]">
           <Table>
@@ -190,6 +273,8 @@ export function HandOverTable() {
         onSubmit={handleUpdate}
         initialData={selectedHandOver || undefined}
       />
+
+      <Pagination />
     </>
   );
 }

@@ -39,7 +39,7 @@ const VisitStats = () => {
   return (
     <div className="space-y-4">
       {/* Overview Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Card className="p-3">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Visits</span>
@@ -77,16 +77,18 @@ const VisitStats = () => {
       </div>
 
       {/* Course and Subject Interest */}
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-2 md:gap-3 grid-cols-2">
         <Card className="p-3">
-          <h3 className="mb-2 text-sm font-semibold">Top Courses Interest</h3>
-          <div className="max-h-[200px] overflow-y-auto">
+          <h3 className="mb-2 text-xs md:text-sm font-semibold">
+            Top Courses Interest
+          </h3>
+          <div className="md:max-h-[200px] overflow-y-auto">
             {stats.courseStats.map((course, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between py-1.5 border-b last:border-0"
               >
-                <span className="text-xs text-muted-foreground truncate mr-2">
+                <span className="text-xs text-muted-foreground truncate md:mr-2">
                   {course.name}
                 </span>
                 <span className="text-xs font-medium whitespace-nowrap">
@@ -98,14 +100,16 @@ const VisitStats = () => {
         </Card>
 
         <Card className="p-3">
-          <h3 className="mb-2 text-sm font-semibold">Top Subjects Interest</h3>
+          <h3 className="mb-2 text-xs md:text-sm font-semibold">
+            Top Subjects Interest
+          </h3>
           <div className="max-h-[200px] overflow-y-auto">
             {stats.subjectStats.map((subject, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between py-1.5 border-b last:border-0"
               >
-                <span className="text-xs text-muted-foreground truncate mr-2">
+                <span className="text-xs text-muted-foreground truncate md:mr-2">
                   {subject.name}
                 </span>
                 <span className="text-xs font-medium whitespace-nowrap">

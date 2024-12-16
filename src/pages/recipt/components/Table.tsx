@@ -16,7 +16,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Search, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Error from "@/pages/not-found/error";
 import {
@@ -35,8 +35,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import AdminComponent from "@/components/shared/AdminComponent";
 import { UpdateModal } from "./UpdateModal";
+import PopupModal from "@/components/shared/popup-modal";
+import ReciptCreateForm from "./ReciptCreateForm";
+import { Plus } from "lucide-react";
+import ReciptStats from "./ReciptStats";
+import AdminComponent from "@/components/shared/AdminComponent";
+import PremiumComponent from "@/components/shared/PremiumComponent";
+import { Input } from "@/components/ui/input";
 
 type Recipt = {
   _id: string;
@@ -46,7 +52,7 @@ type Recipt = {
 };
 
 export function ReciptTable() {
-  const [teachers, setTeachers] = useState<Recipt[]>([]);
+  const [recipts, setRecipts] = useState<Recipt[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState<boolean>(false);
@@ -61,6 +67,8 @@ export function ReciptTable() {
     setCurrentPage(page);
   };
 
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const onConfirm = async (id: string) => {
     try {
       const success = await moveToRecycleBin("Recipt", id);
@@ -74,10 +82,10 @@ export function ReciptTable() {
     }
   };
 
-  const fetchTeachers = async (
+  const fetchRecipts = async (
     page: number = 1,
     limit: number = itemsPerPage,
-    search: string = ""
+    search: string = searchQuery
   ) => {
     try {
       const response = await crudRequest<{
@@ -86,19 +94,33 @@ export function ReciptTable() {
         pageCount: number;
         totalUser: number;
       }>("GET", `/recipt/recipt?page=${page}&limit=${limit}&search=${search}`);
-      setTeachers(response.result);
+      setRecipts(response.result);
       setTotalPages(response.totalPages);
     } catch (error) {
-      setError("Error fetching teacher data");
-      console.error("Error fetching teacher data:", error);
+      setError("Error fetching receipt data");
+      console.error("Error fetching receipt data:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  const debouncedSearch = debounce((value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+    fetchRecipts(1, itemsPerPage, value);
+  }, 500);
+
   useEffect(() => {
-    fetchTeachers();
-  }, []);
+    fetchRecipts(currentPage, itemsPerPage, searchQuery);
+  }, [currentPage, itemsPerPage, searchQuery]);
 
   const handleUpdate = async (values: Partial<Recipt>) => {
     try {
@@ -108,7 +130,7 @@ export function ReciptTable() {
         values
       );
       setIsUpdateModalOpen(false);
-      fetchTeachers(currentPage, itemsPerPage);
+      fetchRecipts(currentPage, itemsPerPage);
     } catch (error) {
       console.error("Error updating receipt:", error);
     }
@@ -118,8 +140,35 @@ export function ReciptTable() {
 
   return (
     <>
-      <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
-        <div className="w-full max-h-[200vh]">
+      <div className="flex items-center justify-between gap-2 py-5">
+        <div className="relative flex-1 mx-2 ml-auto md:grow-0">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search..."
+            className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
+            onChange={(e) => debouncedSearch(e.target.value)}
+          />
+        </div>
+        <AdminComponent>
+          <div className="flex gap-3">
+            <PopupModal
+              text="Add Recipt"
+              icon={<Plus className="w-4 h-4 mr-2" />}
+              renderModal={(onClose) => (
+                <ReciptCreateForm modalClose={onClose} />
+              )}
+            />
+          </div>
+        </AdminComponent>
+      </div>
+      <PremiumComponent>
+        <AdminComponent>
+          <ReciptStats />
+        </AdminComponent>
+      </PremiumComponent>
+      <div className="w-full">
+        <div className="w-full ">
           <Table>
             <TableHeader>
               <TableRow>
@@ -153,23 +202,23 @@ export function ReciptTable() {
                     </TableCell>
                   </TableRow>
                 ))
-              ) : teachers.length === 0 ? (
+              ) : recipts.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>No receipt available</TableCell>
                 </TableRow>
               ) : (
-                teachers.map((teacher, index) => (
-                  <TableRow key={teacher._id}>
+                recipts.map((recipt, index) => (
+                  <TableRow key={recipt._id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>{teacher.income}</TableCell>
-                    <TableCell>{teacher.amount}</TableCell>
-                    <TableCell>{teacher.paymentMethod}</TableCell>
+                    <TableCell>{recipt.income}</TableCell>
+                    <TableCell>{recipt.amount}</TableCell>
+                    <TableCell>{recipt.paymentMethod}</TableCell>
                     <AdminComponent>
                       <TableCell className="cursor-pointer">
                         <AlertModal
                           isOpen={open}
                           onClose={() => setOpen(false)}
-                          onConfirm={() => onConfirm(teacher._id)}
+                          onConfirm={() => onConfirm(recipt._id)}
                           loading={loading}
                         />
                         <DropdownMenu modal={false}>
@@ -184,10 +233,10 @@ export function ReciptTable() {
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedRecipt({
-                                  _id: teacher._id,
-                                  income: teacher.income,
-                                  amount: teacher.amount,
-                                  paymentMethod: teacher.paymentMethod,
+                                  _id: recipt._id,
+                                  income: recipt.income,
+                                  amount: recipt.amount,
+                                  paymentMethod: recipt.paymentMethod,
                                 });
                                 setIsUpdateModalOpen(true);
                               }}

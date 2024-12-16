@@ -415,7 +415,7 @@ export default function DashboardPage() {
   return (
     <>
       <PageHead title="Dashboard | App" />
-      <div className="flex-1 max-h-screen p-4 pt-6 space-y-4 overflow-y-auto md:p-8">
+      <div className="flex-1 max-h-screen p-4 pt-6 space-y-4  md:p-8">
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-xl font-bold tracking-tight">
             Hi, Welcome back 👋
@@ -433,14 +433,15 @@ export default function DashboardPage() {
               </AdminComponent>
             </PremiumComponent>
           </TabsList>
+
           <TabsContent value="overview" className="space-y-4">
             {dashboardLoading ? (
               <DashboardSkeleton />
             ) : (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">
+                  <CardHeader className="flex flex-row items-center justify-between pb-1 md:pb-2 space-y-0">
+                    <CardTitle className="text-xs md:text-sm font-normal md:font-medium">
                       Total Students
                     </CardTitle>
                     <svg
@@ -457,17 +458,17 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-lg md:text-2xl font-bold">
                       {dashboard.totalStudents}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       in the institute.
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-xs md:text-sm font-normal md:  font-medium">
                       Total Amount
                     </CardTitle>
                     <svg
@@ -486,17 +487,17 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-lg md:text-2xl font-bold">
                       Rs. {dashboard.totalAmount}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       of all students
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-xs md:text-sm font-normal md:font-medium">
                       Total Paid Amount
                     </CardTitle>
                     <svg
@@ -514,17 +515,17 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-lg md:text-2xl font-bold">
                       Rs. {dashboard.totalPaidAmount}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       of all students
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-xs md:text-sm font-normal md:font-medium">
                       Total Remaining Amount
                     </CardTitle>
                     <svg
@@ -541,10 +542,10 @@ export default function DashboardPage() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-lg md:text-2xl font-bold">
                       Rs. {dashboard.totalRemainingAmount}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs md:text-sm text-muted-foreground">
                       of all students
                     </p>
                   </CardContent>
@@ -555,8 +556,10 @@ export default function DashboardPage() {
               <Card className="col-span-3">
                 <CardHeader className="flex flex-row items-center gap-10">
                   <div className="grid gap-2">
-                    <CardTitle>Course Summary</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-xs md:text-sm font-normal md:font-medium">
+                      Course Summary
+                    </CardTitle>
+                    <CardDescription className="text-xs md:text-sm text-muted-foreground">
                       Course, Admission, Amount Summary for{" "}
                       {selectedPeriod === "daily"
                         ? "Today"
@@ -660,7 +663,7 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className=" h-[500px] overflow-y-auto col-span-2 ">
+              <Card className="overflow-y-auto col-span-2 ">
                 <CardHeader>
                   <CardTitle>Alert Students</CardTitle>
                   <CardDescription>

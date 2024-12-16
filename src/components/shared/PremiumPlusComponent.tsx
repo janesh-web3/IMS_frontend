@@ -4,18 +4,16 @@ import React from "react";
 type PremiumComponentProps = {
   children: React.ReactNode;
 };
-
-const PremiumComponent: React.FC<PremiumComponentProps> = ({ children }) => {
+const PremiumPlusComponent: React.FC<PremiumComponentProps> = ({
+  children,
+}) => {
   const { packageDetails } = usePackageContext();
 
-  if (
-    packageDetails.plan !== "Premium" &&
-    packageDetails.plan !== "PremiumPlus"
-  ) {
+  if (packageDetails.plan !== "PremiumPlus") {
     return null;
   }
 
   return <>{children}</>;
 };
 
-export default PremiumComponent;
+export default PremiumPlusComponent;

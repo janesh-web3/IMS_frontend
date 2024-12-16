@@ -19,7 +19,7 @@ export default function DashboardLayout({
       />
 
       <Sidebar />
-      <div className="flex flex-col flex-1 w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 w-0 overflow-auto">
         <div className="relative z-10 flex flex-shrink-0 h-12 ">
           <button
             className="pl-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 xl:hidden"
@@ -30,7 +30,7 @@ export default function DashboardLayout({
           </button>
           <Header />
         </div>
-        <main className="relative flex-1 overflow-hidden rounded-l-xl bg-background focus:outline-none">
+        <main className="relative flex-1 overflow-auto rounded-l-xl bg-background focus:outline-none">
           {children}
         </main>
       </div>

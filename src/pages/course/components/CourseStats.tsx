@@ -69,7 +69,7 @@ const CourseStats = () => {
       </div>
 
       {/* Course-wise Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-2 md:gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
         {stats.courseStats.map((course, index) => (
           <Card key={index} className="p-2 md:p-4">
             <div className="space-y-2">

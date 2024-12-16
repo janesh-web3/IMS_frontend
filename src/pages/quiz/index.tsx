@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import QuizForm from "./quiz-form"; // We'll create this component next
+import { useRouter } from "@/routes/hooks";
 
 interface Quiz {
   _id: string;
@@ -30,6 +31,7 @@ export default function QuizPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchQuizzes();
@@ -75,7 +77,7 @@ export default function QuizPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
+    <div className="flex flex-col bg-background">
       <div className="sticky top-0 z-20 border-b bg-background">
         <div className="p-4 md:p-6">
           <PageHead title="Quizzes" />
@@ -88,9 +90,9 @@ export default function QuizPage() {
         </div>
       </div>
 
-      <div className="flex-1 mb-10 overflow-y-auto">
+      <div className="flex-1 mb-10">
         <div className="container p-4 mx-auto md:p-6">
-          <div className="sticky top-0 z-10 py-2 bg-background">
+          <div className="sticky top-4 z-10 py-2 bg-background">
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -98,7 +100,7 @@ export default function QuizPage() {
                   Create Quiz
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
+              <DialogContent className="sm:max-w-[600px] h-[500px] overflow-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {selectedQuiz ? "Edit Quiz" : "Create New Quiz"}
@@ -164,6 +166,12 @@ export default function QuizPage() {
                         minutes
                       </div>
                     </div>
+                    <Button
+                      onClick={() => router.push(`/quiz/take/${quiz._id}`)}
+                      className="mt-4"
+                    >
+                      Take Quiz
+                    </Button>
                   </CardContent>
                 </Card>
               ))

@@ -6,6 +6,7 @@ import VisitPage from "@/pages/visit-student";
 import Loading from "@/pages/not-found/loading";
 import PremiumRoute from "./PremiumRoute";
 import ProPlanUpgrade from "@/components/shared/ProPlanUpgrade";
+import PremiumPlusRoute from "./PremiumPlusRoute";
 
 // Lazy-loaded components
 const DashboardLayout = lazy(
@@ -32,6 +33,7 @@ const AIPage = lazy(() => import("@/pages/ai_model"));
 const ProfilePage = lazy(() => import("@/pages/profile"));
 const AdministrationPage = lazy(() => import("@/pages/administration"));
 const RecycleBinPage = lazy(() => import("@/pages/recyclebin"));
+const TakeQuiz = lazy(() => import("@/pages/quiz/take/[id]"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -67,11 +69,20 @@ const AppRouter: React.FC = () => {
         { path: "handover", element: <HandOverPage /> },
         { path: "profile", element: <ProfilePage /> },
         { path: "upgrade-to-pro", element: <ProPlanUpgrade /> },
+        { path: "quiz/take/:id", element: <TakeQuiz /> },
         {
           path: "quiz",
           element: (
             <PremiumRoute>
               <QuizPage />
+            </PremiumRoute>
+          ),
+        },
+        {
+          path: "quiz/take/:id",
+          element: (
+            <PremiumRoute>
+              <TakeQuiz />
             </PremiumRoute>
           ),
         },
@@ -113,6 +124,46 @@ const AppRouter: React.FC = () => {
             <PremiumRoute>
               <RecycleBinPage />
             </PremiumRoute>
+          ),
+        },
+        {
+          path: "chat-bot",
+          element: (
+            <PremiumPlusRoute>
+              <h1>chat-bot</h1>
+            </PremiumPlusRoute>
+          ),
+        },
+        {
+          path: "live-classes",
+          element: (
+            <PremiumPlusRoute>
+              <h1>live-classes</h1>
+            </PremiumPlusRoute>
+          ),
+        },
+        {
+          path: "notice",
+          element: (
+            <PremiumPlusRoute>
+              <h1>notice</h1>
+            </PremiumPlusRoute>
+          ),
+        },
+        {
+          path: "id-card",
+          element: (
+            <PremiumPlusRoute>
+              <h1>id-card</h1>
+            </PremiumPlusRoute>
+          ),
+        },
+        {
+          path: "complain",
+          element: (
+            <PremiumPlusRoute>
+              <h1>complain</h1>
+            </PremiumPlusRoute>
           ),
         },
       ],

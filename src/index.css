@@ -60,6 +60,7 @@
   }
 }
 
+/* premium themes */
 @layer base {
   :root.premium {
     --background: 0 0% 100%;
@@ -114,6 +115,101 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+}
+
+/* premium plus themes */
+
+@layer base {
+  :root.premium-plus {
+    /* Ultra-clean background with subtle blue undertone */
+    --background: 225 30% 98%;
+    --foreground: 228 19% 15%;
+
+    /* Futuristic electric blue gradient */
+    --primary: 240 96% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Pristine secondary tones */
+    --secondary: 230 15% 94%;
+    --secondary-foreground: 228 19% 15%;
+
+    /* Neo-morphic card design */
+    --card: 225 30% 99%;
+    --card-foreground: 228 19% 15%;
+    --popover: 225 30% 99%;
+    --popover-foreground: 228 19% 15%;
+
+    /* Crystal-clear muted palette */
+    --muted: 228 15% 94%;
+    --muted-foreground: 228 15% 45%;
+
+    /* Ethereal accent */
+    --accent: 240 96% 96%;
+    --accent-foreground: 240 96% 35%;
+
+    /* Refined alert colors */
+    --destructive: 360 95% 65%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Crisp borders and focus states */
+    --border: 228 20% 90%;
+    --input: 228 20% 90%;
+    --ring: 240 96% 70%;
+
+    /* Modern rounded corners */
+    --radius: 1.4rem;
+
+    /* Futuristic data visualization palette */
+    --chart-1: 240 96% 70%; /* Electric Blue */
+    --chart-2: 290 90% 65%; /* Cyber Purple */
+    --chart-3: 180 90% 50%; /* Neo Teal */
+    --chart-4: 320 90% 65%; /* Future Pink */
+    --chart-5: 150 85% 45%; /* Matrix Green */
+  }
+
+  .dark.premium-plus {
+    /* Deep space background */
+    --background: 228 30% 5%;
+    --foreground: 228 25% 98%;
+
+    /* Luminescent primary */
+    --primary: 240 96% 70%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Obsidian secondary */
+    --secondary: 228 20% 10%;
+    --secondary-foreground: 228 25% 98%;
+
+    /* Dark matter cards */
+    --card: 228 30% 7%;
+    --card-foreground: 228 25% 98%;
+    --popover: 228 30% 7%;
+    --popover-foreground: 228 25% 98%;
+
+    /* Stellar muted tones */
+    --muted: 228 20% 13%;
+    --muted-foreground: 228 20% 75%;
+
+    /* Aurora accent */
+    --accent: 240 96% 15%;
+    --accent-foreground: 240 96% 70%;
+
+    /* Plasma destructive */
+    --destructive: 360 95% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Nebula borders */
+    --border: 228 20% 13%;
+    --input: 228 20% 13%;
+    --ring: 240 96% 70%;
+
+    /* Cosmic chart colors */
+    --chart-1: 240 96% 70%; /* Plasma Blue */
+    --chart-2: 290 90% 70%; /* Nebula Purple */
+    --chart-3: 180 90% 60%; /* Quantum Teal */
+    --chart-4: 320 90% 70%; /* Nova Pink */
+    --chart-5: 150 85% 60%; /* Pulsar Green */
   }
 }
 
@@ -340,4 +436,111 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: #94a3b8;
   }
+}
+
+/* Add this to your global CSS file */
+.scrollbar-custom .scrollbar {
+  @apply bg-muted !important; /* Background of scrollbar track */
+}
+
+.scrollbar-custom .thumb {
+  @apply bg-muted-foreground/50 !important; /* Color of scrollbar thumb */
+}
+
+/* Add subtle transitions for smooth theme switching */
+* {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.1s ease;
+}
+
+/* Optional: Add glass morphism effect for cards in light mode */
+:root.premium-plus .glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Optional: Add subtle shadow for elevated elements */
+:root.premium-plus .elevated {
+  box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.14);
+}
+
+/* Optional: Add gradient text effect for premium features */
+:root.premium-plus .gradient-text {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)),
+    hsl(var(--accent-foreground))
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Smooth state transitions */
+* {
+  transition:
+    background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced glass morphism */
+:root.premium-plus .glass-effect {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+/* Refined elevation system */
+:root.premium-plus .elevated {
+  box-shadow:
+    0 4px 20px -4px hsl(var(--primary) / 0.14),
+    0 1px 3px hsl(var(--primary) / 0.1);
+}
+
+/* Advanced gradient effects */
+:root.premium-plus .gradient-text {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--accent-foreground)) 50%,
+    hsl(var(--primary)) 100%
+  );
+  background-size: 200% auto;
+  animation: shine 2s linear infinite;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hover effects for interactive elements */
+:root.premium-plus .interactive {
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root.premium-plus .interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px hsl(var(--primary) / 0.24);
+}
+
+/* Gradient animation */
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Dark mode glass effect */
+.dark.premium-plus .glass-effect {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
