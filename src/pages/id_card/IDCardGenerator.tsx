@@ -14,12 +14,20 @@ import { useNavigate, useParams } from "react-router-dom";
 import { crudRequest } from "@/lib/api";
 import html2canvas from "html2canvas";
 import { QRCodeSVG } from "qrcode.react";
+import { Slider } from "@/components/ui/slider";
 
 interface Theme {
   id: string;
   name: string;
-  className: string;
-  preview: string;
+  styles: {
+    backgroundColor: string;
+    headerTextColor: string;
+    textColor: string;
+    borderColor: string;
+    gradientFrom?: string;
+    gradientTo?: string;
+    pattern?: string;
+  };
 }
 
 interface CustomizationOptions {
@@ -61,26 +69,46 @@ interface CustomizationOptions {
     name: string;
     details: string;
   };
+  patternColor: string;
+  patternOpacity: number;
+  headerBgColor: string;
+  footerBgColor: string;
 }
 
 const themes: Theme[] = [
   {
     id: "modern",
     name: "Modern",
-    className: "bg-gradient-to-r from-blue-500 to-purple-500",
-    preview: "/themes/modern.png",
+    styles: {
+      backgroundColor: "#ffffff",
+      headerTextColor: "#1a365d",
+      textColor: "#2d3748",
+      borderColor: "#e2e8f0",
+      gradientFrom: "from-blue-50",
+      gradientTo: "to-indigo-50",
+    },
+  },
+  {
+    id: "elegant",
+    name: "Elegant",
+    styles: {
+      backgroundColor: "#fafafa",
+      headerTextColor: "#1a202c",
+      textColor: "#4a5568",
+      borderColor: "#cbd5e0",
+      pattern:
+        "radial-gradient(circle at 50% 50%, #f7fafc 0%, transparent 10%)",
+    },
   },
   {
     id: "minimal",
     name: "Minimal",
-    className: "bg-white border-2 border-gray-200",
-    preview: "/themes/minimal.png",
-  },
-  {
-    id: "dark",
-    name: "Dark",
-    className: "bg-gray-900 text-white",
-    preview: "/themes/dark.png",
+    styles: {
+      backgroundColor: "#ffffff",
+      headerTextColor: "#000000",
+      textColor: "#4a5568",
+      borderColor: "#e2e8f0",
+    },
   },
 ];
 
@@ -109,8 +137,8 @@ interface CardLayout {
 interface BackgroundPattern {
   id: string;
   name: string;
-  pattern: string;
-  preview: string;
+  pattern: string | ((color: string) => string);
+  size?: string;
 }
 
 const cardLayouts: CardLayout[] = [
@@ -148,29 +176,28 @@ const backgroundPatterns: BackgroundPattern[] = [
   {
     id: "none",
     name: "None",
-    pattern: "",
-    preview: "/patterns/none.png",
+    pattern: "none",
   },
   {
     id: "dots",
     name: "Dots",
-    pattern:
-      "radial-gradient(circle, #00000010 1px, transparent 1px) 0 0/20px 20px",
-    preview: "/patterns/dots.png",
-  },
-  {
-    id: "lines",
-    name: "Lines",
-    pattern:
-      "linear-gradient(45deg, #00000008 25%, transparent 25%, transparent 75%, #00000008 75%, #00000008)",
-    preview: "/patterns/lines.png",
+    pattern: (color: string) =>
+      `radial-gradient(${color} 1px, transparent 1px)`,
+    size: "20px 20px",
   },
   {
     id: "grid",
     name: "Grid",
-    pattern:
-      "linear-gradient(#00000008 1px, transparent 1px), linear-gradient(90deg, #00000008 1px, transparent 1px)",
-    preview: "/patterns/grid.png",
+    pattern: (color: string) => `linear-gradient(${color} 1px, transparent 1px),
+      linear-gradient(90deg, ${color} 1px, transparent 1px)`,
+    size: "20px 20px",
+  },
+  {
+    id: "diagonal",
+    name: "Diagonal Lines",
+    pattern: (color: string) =>
+      `repeating-linear-gradient(45deg, ${color} 0, ${color} 1px, transparent 0, transparent 50%)`,
+    size: "10px 10px",
   },
 ];
 
@@ -219,6 +246,10 @@ const defaultCustomization: CustomizationOptions = {
     name: "semibold",
     details: "normal",
   },
+  patternColor: "#e2e8f0",
+  patternOpacity: 0.2,
+  headerBgColor: "#3b82f6",
+  footerBgColor: "#3b82f6",
 };
 
 const fontStyles = [
@@ -359,22 +390,31 @@ const IDCardGenerator = () => {
 
   const getCardStyle = () => {
     const style: React.CSSProperties = {
-      fontFamily: customization.fontFamily,
       backgroundColor: customization.backgroundColor,
       color: customization.textColor,
+      fontFamily: `var(--font-${customization.fontStyle})`,
       borderRadius: `var(--radius-${customization.borderRadius})`,
       borderWidth: `${customization.borderWidth}px`,
       borderColor: customization.borderColor,
-      boxShadow:
-        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+      // Adjusted dimensions
+      width: customization.orientation === "landscape" ? "650px" : "400px",
+      height: customization.orientation === "landscape" ? "400px" : "600px",
     };
 
-    if (customization.orientation === "landscape") {
-      style.width = "540px";
-      style.height = "340px";
-    } else {
-      style.width = "340px";
-      style.height = "540px";
+    // Apply pattern if selected
+    if (customization.backgroundPattern !== "none") {
+      const pattern = backgroundPatterns.find(
+        (p) => p.id === customization.backgroundPattern
+      );
+      if (pattern && pattern.pattern !== "none") {
+        const patternColor = `${customization.patternColor}${Math.round(customization.patternOpacity * 255).toString(16)}`;
+        style.backgroundImage =
+          typeof pattern.pattern === "function"
+            ? pattern.pattern(patternColor)
+            : pattern.pattern;
+        style.backgroundSize = pattern.size;
+      }
     }
 
     return style;
@@ -383,80 +423,56 @@ const IDCardGenerator = () => {
   const renderLayoutContent = () => {
     if (!student) return null;
 
-    switch (customization.layout) {
-      case "modern":
-        return (
-          <div className="grid h-full grid-cols-2">
-            <div className="p-4 bg-gradient-to-b from-primary/10 to-primary/5">
-              {/* Photo and Name */}
-              <div className="flex flex-col items-center">
-                <div className="w-32 h-32 mb-4 overflow-hidden border-4 border-white rounded-full shadow-lg">
-                  <img
-                    src={student.photo || "/profile.jpg"}
-                    alt="Student"
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <h2 className="text-xl font-bold text-center">
-                  {student.personalInfo.studentName}
-                </h2>
-              </div>
+    if (customization.orientation === "landscape") {
+      return (
+        <div className="flex h-full">
+          {/* Left side */}
+          <div className="flex flex-col items-center justify-center w-2/5 p-6 ">
+            <div className="w-32 h-32 mb-4 overflow-hidden border-4 border-white rounded-full shadow-lg">
+              <img
+                src={student.photo || "/profile.jpg"}
+                alt="Student"
+                className="object-cover w-full h-full"
+              />
             </div>
-            <div className="flex flex-col justify-between p-4">
-              {/* Details and QR Code */}
-              <div className="space-y-2">
-                <InfoRow
-                  label="ID"
-                  value={student.personalInfo.admissionNumber}
-                  customization={customization}
-                />
-                <InfoRow
-                  label="Course"
-                  value={student.courses[0]?.courseEnroll.name}
-                  customization={customization}
-                />
-                <InfoRow
-                  label="Contact"
-                  value={student.personalInfo.contactNo}
-                  customization={customization}
-                />
-              </div>
-              <div className="flex justify-center">
-                <QRCodeSVG
-                  value={generateQRData()}
-                  size={customization.qrStyle.size}
-                  level="H"
-                  fgColor={customization.qrStyle.color}
-                  bgColor={customization.qrStyle.backgroundColor}
-                  includeMargin={true}
-                  className="p-2 bg-white rounded"
-                />
-              </div>
-            </div>
+            <h2
+              className="mb-4 text-center"
+              style={{
+                fontSize: `var(--font-size-${customization.fontSize.name})`,
+                fontWeight: customization.fontWeight.name,
+              }}
+            >
+              {student.personalInfo.studentName}
+            </h2>
+            <QRCodeSVG
+              value={generateQRData()}
+              size={90}
+              level="H"
+              fgColor={customization.qrStyle.color}
+              bgColor={customization.qrStyle.backgroundColor}
+              includeMargin={true}
+              className="p-2 bg-white rounded shadow-sm"
+            />
           </div>
-        );
 
-      case "compact":
-        return (
-          <div className="flex flex-col h-full p-4">
-            <div className="flex items-center mb-4 space-x-4">
-              <div className="w-24 h-24 overflow-hidden border-4 border-white rounded-full shadow-lg">
-                <img
-                  src={student.photo || "/profile.jpg"}
-                  alt="Student"
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold">
-                  {student.personalInfo.studentName}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  {student.personalInfo.admissionNumber}
-                </p>
-              </div>
-            </div>
-            <div className="flex-1 space-y-2">
+          {/* Right side */}
+          <div className="flex-1 p-6">
+            <h1
+              className="mb-4"
+              style={{
+                color: customization.headerTextColor,
+                fontSize: `var(--font-size-${customization.fontSize.header})`,
+                fontWeight: customization.fontWeight.header,
+              }}
+            >
+              Student ID Card
+            </h1>
+            <div className="space-y-3">
+              <InfoRow
+                label="ID Number"
+                value={student.personalInfo.admissionNumber}
+                customization={customization}
+              />
               <InfoRow
                 label="Course"
                 value={student.courses[0]?.courseEnroll.name}
@@ -468,129 +484,84 @@ const IDCardGenerator = () => {
                 customization={customization}
               />
             </div>
-            <div className="flex justify-center mt-4">
-              <QRCodeSVG
-                value={generateQRData()}
-                size={customization.qrStyle.size}
-                level="H"
-                fgColor={customization.qrStyle.color}
-                bgColor={customization.qrStyle.backgroundColor}
-                includeMargin={true}
-                className="p-2 bg-white rounded"
-              />
-            </div>
           </div>
-        );
-
-      case "elegant":
-        return (
-          <div className="relative h-full">
-            <div
-              className="absolute inset-0 opacity-5"
-              style={{ backgroundImage: customization.backgroundPattern }}
-            />
-            <div className="relative z-10 flex flex-col h-full p-6">
-              <div className="mb-6 text-center">
-                <h1
-                  style={{ color: customization.headerTextColor }}
-                  className="mb-1 text-2xl font-bold"
-                >
-                  Student ID Card
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Academic Year {new Date().getFullYear()}
-                </p>
+        </div>
+      );
+    } else {
+      // Rest of the code remains unchanged
+      switch (customization.layout) {
+        case "modern":
+          return (
+            <div className="grid h-full grid-cols-2">
+              <div className="p-4 bg-gradient-to-b from-primary/10 to-primary/5">
+                {/* Photo and Name */}
+                <div className="flex flex-col items-center">
+                  <div className="w-32 h-32 mb-4 overflow-hidden">
+                    <img
+                      src={student.photo || "/profile.jpg"}
+                      alt="Student"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <h2 className="text-xl font-bold text-center">
+                    {student.personalInfo.studentName}
+                  </h2>
+                </div>
               </div>
-              <div className="flex flex-col items-center mb-6">
-                <div className="mb-4 overflow-hidden border-4 rounded-full shadow-xl w-36 h-36 border-primary/20">
+              <div className="flex flex-col justify-between p-4">
+                {/* Details and QR Code */}
+                <div className="space-y-2">
+                  <InfoRow
+                    label="ID"
+                    value={student.personalInfo.admissionNumber}
+                    customization={customization}
+                  />
+                  <InfoRow
+                    label="Course"
+                    value={student.courses[0]?.courseEnroll.name}
+                    customization={customization}
+                  />
+                  <InfoRow
+                    label="Contact"
+                    value={student.personalInfo.contactNo}
+                    customization={customization}
+                  />
+                </div>
+                <div className="flex justify-center">
+                  <QRCodeSVG
+                    value={generateQRData()}
+                    size={customization.qrStyle.size}
+                    level="H"
+                    fgColor={customization.qrStyle.color}
+                    bgColor={customization.qrStyle.backgroundColor}
+                    includeMargin={true}
+                    className="p-2 bg-white rounded"
+                  />
+                </div>
+              </div>
+            </div>
+          );
+
+        case "compact":
+          return (
+            <div className="flex flex-col h-full p-4">
+              <div className="flex items-center mb-4 space-x-4">
+                <div className="w-24 h-24 overflow-hidden border-4 border-white rounded-full shadow-lg">
                   <img
                     src={student.photo || "/profile.jpg"}
                     alt="Student"
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <h2 className="text-xl font-bold text-center">
-                  {student.personalInfo.studentName}
-                </h2>
-                <p className="text-sm text-gray-600">
-                  {student.personalInfo.admissionNumber}
-                </p>
-              </div>
-              <div className="flex-1 space-y-3">
-                <InfoRow
-                  label="Course"
-                  value={student.courses[0]?.courseEnroll.name}
-                  className="text-primary"
-                  customization={customization}
-                />
-                <InfoRow
-                  label="Contact"
-                  value={student.personalInfo.contactNo}
-                  className="text-primary"
-                  customization={customization}
-                />
-                <InfoRow
-                  label="Address"
-                  value={student.personalInfo.address || "N/A"}
-                  className="text-primary"
-                  customization={customization}
-                />
-              </div>
-              <div className="flex justify-center mt-4">
-                <QRCodeSVG
-                  value={generateQRData()}
-                  size={customization.qrStyle.size}
-                  level="H"
-                  fgColor={customization.qrStyle.color}
-                  bgColor={customization.qrStyle.backgroundColor}
-                  includeMargin={true}
-                  className="p-2 bg-white rounded-lg shadow-md"
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className="flex flex-col h-full p-6">
-            {/* Header with Logo */}
-            <div className="mb-4 text-center">
-              <h1
-                className="mb-2 text-2xl font-bold"
-                style={{ color: customization.headerTextColor }}
-              >
-                Student ID Card
-              </h1>
-              {customLogo && (
-                <img
-                  src={customLogo}
-                  alt="Logo"
-                  className="h-10 mx-auto mb-2" // Reduced height and margin
-                />
-              )}
-            </div>
-
-            {/* Main Content */}
-            <div className="flex flex-col flex-1">
-              {/* Photo and Name */}
-              <div className="flex flex-col items-center mb-4">
-                <div className="w-32 h-32 mb-2 overflow-hidden border-4 border-white rounded-full shadow-lg">
-                  <img
-                    src={student.photo || "/profile.jpg"}
-                    alt="Student"
-                    className="object-cover w-full h-full"
-                  />
+                <div>
+                  <h2 className="text-lg font-bold">
+                    {student.personalInfo.studentName}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {student.personalInfo.admissionNumber}
+                  </p>
                 </div>
-                <h2 className="text-xl font-bold">
-                  {student.personalInfo.studentName}
-                </h2>
-                <p className="text-sm">
-                  {student.personalInfo.admissionNumber}
-                </p>
               </div>
-
-              {/* Details */}
               <div className="flex-1 space-y-2">
                 <InfoRow
                   label="Course"
@@ -602,17 +573,8 @@ const IDCardGenerator = () => {
                   value={student.personalInfo.contactNo}
                   customization={customization}
                 />
-                <InfoRow
-                  label="Address"
-                  value={student.personalInfo.address || "N/A"}
-                  customization={customization}
-                />
               </div>
-
-              {/* QR Code */}
-              <div className="pt-2 mt-auto">
-                {" "}
-                {/* Changed to mt-auto to push to bottom */}
+              <div className="flex justify-center mt-4">
                 <QRCodeSVG
                   value={generateQRData()}
                   size={customization.qrStyle.size}
@@ -620,12 +582,248 @@ const IDCardGenerator = () => {
                   fgColor={customization.qrStyle.color}
                   bgColor={customization.qrStyle.backgroundColor}
                   includeMargin={true}
-                  className="p-2 mx-auto bg-white rounded"
+                  className="p-2 bg-white rounded"
                 />
               </div>
             </div>
-          </div>
-        );
+          );
+
+        case "elegant":
+          return (
+            <div className="relative h-full">
+              <div
+                className="absolute inset-0 opacity-5"
+                style={{ backgroundImage: customization.backgroundPattern }}
+              />
+              <div className="relative z-10 flex flex-col h-full p-6">
+                <div className="mb-6 text-center">
+                  <h1
+                    className="mb-2"
+                    style={{
+                      color: customization.headerTextColor,
+                      fontSize: `var(--font-size-${customization.fontSize.header})`,
+                      fontWeight: customization.fontWeight.header,
+                      fontFamily: `var(--font-${customization.fontStyle})`,
+                    }}
+                  >
+                    Student ID Card
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Academic Year {new Date().getFullYear()}
+                  </p>
+                </div>
+                <div className="flex flex-col items-center mb-6">
+                  <div className="mb-4 overflow-hidden border-4 rounded-full shadow-xl w-36 h-36 border-primary/20">
+                    <img
+                      src={student.photo || "/profile.jpg"}
+                      alt="Student"
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <h2
+                    style={{
+                      fontSize: `var(--font-size-${customization.fontSize.name})`,
+                      fontWeight: customization.fontWeight.name,
+                      fontFamily: `var(--font-${customization.fontStyle})`,
+                    }}
+                  >
+                    {student.personalInfo.studentName}
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {student.personalInfo.admissionNumber}
+                  </p>
+                </div>
+                <div className="flex-1 space-y-3">
+                  <InfoRow
+                    label="Course"
+                    value={student.courses[0]?.courseEnroll.name}
+                    className="text-primary"
+                    customization={customization}
+                  />
+                  <InfoRow
+                    label="Contact"
+                    value={student.personalInfo.contactNo}
+                    className="text-primary"
+                    customization={customization}
+                  />
+                  <InfoRow
+                    label="Address"
+                    value={student.personalInfo.address || "N/A"}
+                    className="text-primary"
+                    customization={customization}
+                  />
+                </div>
+                <div className="flex justify-center mt-4">
+                  <QRCodeSVG
+                    value={generateQRData()}
+                    size={customization.qrStyle.size}
+                    level="H"
+                    fgColor={customization.qrStyle.color}
+                    bgColor={customization.qrStyle.backgroundColor}
+                    includeMargin={true}
+                    className="p-2 bg-white rounded-lg shadow-md"
+                  />
+                </div>
+              </div>
+            </div>
+          );
+
+        default:
+          return (
+            <div className="relative flex flex-col h-full">
+              {/* Header Wave */}
+              <div
+                className="absolute top-0 left-0 right-0 overflow-hidden h-28"
+                style={{
+                  background: `linear-gradient(135deg, ${customization.headerBgColor}, ${customization.headerBgColor})`,
+                }}
+              >
+                <div className="absolute bottom-0 left-0 w-full">
+                  <svg
+                    viewBox="0 0 1440 320"
+                    preserveAspectRatio="none"
+                    className="w-full h-20"
+                    style={{ fill: customization.backgroundColor }}
+                  >
+                    <path d="M0,96L34.3,106.7C68.6,117,137,139,206,133.3C274.3,128,343,96,411,90.7C480,85,549,107,617,128C685.7,149,754,171,823,165.3C891.4,160,960,128,1029,117.3C1097.1,107,1166,117,1234,122.7C1302.9,128,1371,128,1406,128L1440,128L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Card Content */}
+              <div className="z-10 flex flex-col h-full p-6">
+                {/* Header Section with Fixed Height */}
+                <div className="h-24 text-center">
+                  <h1
+                    className="relative mb-2"
+                    style={{
+                      color: customization.headerTextColor,
+                      fontSize: `var(--font-size-${customization.fontSize.header})`,
+                      fontWeight: customization.fontWeight.header,
+                      textShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    Student ID Card
+                  </h1>
+                  {customLogo && (
+                    <img
+                      src={customLogo}
+                      alt="Logo"
+                      className="h-10 mx-auto mt-2"
+                    />
+                  )}
+                </div>
+
+                {/* Main Content with Flex Auto */}
+                <div className="flex flex-col justify-between flex-1 min-h-0">
+                  {/* Photo and Details */}
+                  <div>
+                    <div className="flex flex-col items-center mb-4">
+                      <div className="relative">
+                        <div className="mb-3 overflow-hidden border-4 rounded-full shadow-lg w-28 h-28">
+                          <img
+                            src={student.photo || "/profile.jpg"}
+                            alt="Student"
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      </div>
+                      <h2 className="mb-1 text-center">
+                        {student.personalInfo.studentName}
+                      </h2>
+                      <p className="px-3 py-1 text-sm rounded-full bg-opacity-10">
+                        {student.personalInfo.admissionNumber}
+                      </p>
+                    </div>
+
+                    {/* Details Section */}
+                    <div className="space-y-2">
+                      {[
+                        {
+                          label: "Course",
+                          value: student.courses[0]?.courseEnroll.name,
+                        },
+                        {
+                          label: "Contact",
+                          value: student.personalInfo.contactNo,
+                        },
+                        {
+                          label: "Address",
+                          value: student.personalInfo.address || "N/A",
+                        },
+                      ].map((item, index) => (
+                        <div
+                          key={index}
+                          className="p-1.5 rounded-lg hover:bg-black/5"
+                        >
+                          <InfoRow
+                            label={item.label}
+                            value={item.value}
+                            customization={customization}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* QR Code Section with Fixed Height */}
+                  <div className="flex items-center justify-center mt-2 h-28">
+                    <div
+                      className="p-2 bg-white shadow-sm rounded-xl"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom right, #fff, #f8fafc)",
+                        border: `1px solid ${customization.headerBgColor}10`,
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={generateQRData()}
+                        size={90}
+                        level="H"
+                        fgColor={customization.qrStyle.color}
+                        bgColor={customization.qrStyle.backgroundColor}
+                        includeMargin={true}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Wave */}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-24 overflow-hidden"
+                style={{
+                  background: `linear-gradient(135deg, ${customization.footerBgColor}, ${customization.footerBgColor})`,
+                }}
+              >
+                <div className="absolute top-0 left-0 w-full rotate-180">
+                  <svg
+                    viewBox="0 0 1440 320"
+                    preserveAspectRatio="none"
+                    className="w-full h-20"
+                    style={{ fill: customization.backgroundColor }}
+                  >
+                    <path d="M0,64L34.3,85.3C68.6,107,137,149,206,160C274.3,171,343,149,411,128C480,107,549,85,617,90.7C685.7,96,754,128,823,154.7C891.4,181,960,203,1029,192C1097.1,181,1166,139,1234,122.7C1302.9,107,1371,117,1406,122.7L1440,128L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          );
+      }
+    }
+  };
+
+  const handleThemeChange = (themeId: string) => {
+    const selectedTheme = themes.find((theme) => theme.id === themeId);
+    if (selectedTheme) {
+      setCustomization((prev) => ({
+        ...prev,
+        backgroundColor: selectedTheme.styles.backgroundColor,
+        headerTextColor: selectedTheme.styles.headerTextColor,
+        textColor: selectedTheme.styles.textColor,
+        borderColor: selectedTheme.styles.borderColor,
+      }));
+      setSelectedTheme(themeId);
     }
   };
 
@@ -913,7 +1111,7 @@ const IDCardGenerator = () => {
             <div className="space-y-4">
               <div>
                 <Label>Select Theme</Label>
-                <Select value={selectedTheme} onValueChange={setSelectedTheme}>
+                <Select value={selectedTheme} onValueChange={handleThemeChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select theme" />
                   </SelectTrigger>
@@ -1070,6 +1268,129 @@ const IDCardGenerator = () => {
                 </div>
               </div>
 
+              <div className="space-y-4">
+                <div>
+                  <Label>Background Pattern</Label>
+                  <Select
+                    value={customization.backgroundPattern}
+                    onValueChange={(value) =>
+                      handleCustomizationChange("backgroundPattern", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pattern" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {backgroundPatterns.map((pattern) => (
+                        <SelectItem key={pattern.id} value={pattern.id}>
+                          {pattern.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {customization.backgroundPattern !== "none" && (
+                  <>
+                    <div>
+                      <Label>Pattern Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={customization.patternColor}
+                          onChange={(e) =>
+                            handleCustomizationChange(
+                              "patternColor",
+                              e.target.value
+                            )
+                          }
+                          className="w-20 h-10"
+                        />
+                        <Input
+                          type="text"
+                          value={customization.patternColor}
+                          onChange={(e) =>
+                            handleCustomizationChange(
+                              "patternColor",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label>Pattern Opacity</Label>
+                      <Slider
+                        min={0}
+                        max={1}
+                        step={0.1}
+                        value={[customization.patternOpacity]}
+                        onValueChange={([value]) =>
+                          handleCustomizationChange("patternOpacity", value)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>Header Background Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={customization.headerBgColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "headerBgColor",
+                          e.target.value
+                        )
+                      }
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={customization.headerBgColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "headerBgColor",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Footer Background Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="color"
+                      value={customization.footerBgColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "footerBgColor",
+                          e.target.value
+                        )
+                      }
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={customization.footerBgColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "footerBgColor",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
               <Button onClick={handleDownload} className="w-full">
                 Download ID Card
               </Button>
@@ -1081,7 +1402,7 @@ const IDCardGenerator = () => {
         <Card className="p-4">
           <h2 className="mb-4 text-2xl font-bold">Preview</h2>
 
-          <div className="flex items-center justify-center min-h-[600px] bg-gray-100 rounded-lg p-4">
+          <div className="flex items-center justify-center min-h-[600px] rounded-lg p-4">
             <div
               className={`id-card ${
                 cardLayouts.find((l) => l.id === customization.layout)
@@ -1111,11 +1432,34 @@ const InfoRow = ({
 }) => (
   <div
     className={`flex justify-between items-center py-1.5 ${className}`}
-    style={{ color: customization.textColor }}
+    style={{
+      color: customization.textColor,
+      fontSize: `var(--font-size-${customization.fontSize.details})`,
+      fontWeight: customization.fontWeight.details,
+      fontFamily: `var(--font-${customization.fontStyle})`,
+    }}
   >
-    <span className="text-sm font-medium">{label}:</span>
-    <span className="text-sm">{value}</span>
+    <span className="font-medium">{label}:</span>
+    <span>{value}</span>
   </div>
 );
+
+// Add helper function for color adjustment
+const adjustColor = (color: string, amount: number): string => {
+  const hex = color.replace("#", "");
+  const r = Math.max(
+    Math.min(parseInt(hex.substring(0, 2), 16) + amount, 255),
+    0
+  );
+  const g = Math.max(
+    Math.min(parseInt(hex.substring(2, 4), 16) + amount, 255),
+    0
+  );
+  const b = Math.max(
+    Math.min(parseInt(hex.substring(4, 6), 16) + amount, 255),
+    0
+  );
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+};
 
 export default IDCardGenerator;
