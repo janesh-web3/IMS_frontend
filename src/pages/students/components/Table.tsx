@@ -988,6 +988,17 @@ export function StudentTable() {
                                 <Trash size={17} />
                               </DropdownMenuItem>
                             </AdminComponent>
+                            <PremiumPlusComponent>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  navigate(`/id-card/${student._id}`)
+                                }
+                                className="flex justify-between cursor-pointer"
+                              >
+                                ID Card
+                                <File size={17} />
+                              </DropdownMenuItem>
+                            </PremiumPlusComponent>
                           </DropdownMenuContent>
                         </DropdownMenu>
 

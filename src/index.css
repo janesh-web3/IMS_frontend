@@ -544,3 +544,136 @@
   backdrop-filter: blur(8px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* styles/globals.css */
+.id-card {
+  @apply transition-all duration-300;
+}
+
+/* Theme-specific styles */
+.id-card.modern {
+  @apply text-white bg-gradient-to-r from-blue-500 to-purple-500;
+}
+
+.id-card.minimal {
+  @apply text-gray-900 bg-white border-2 border-gray-200;
+}
+
+.id-card.dark {
+  @apply text-white bg-gray-900;
+}
+
+/* Add more theme variations */
+
+.info-row {
+  @apply flex items-center justify-between py-1;
+}
+
+.id-card {
+  transition: transform 0.3s ease;
+}
+
+.id-card:hover {
+  transform: scale(1.02);
+}
+
+/* Card Layouts */
+.layout-standard {
+  @apply bg-white;
+}
+
+.layout-modern {
+  @apply bg-gradient-to-r from-primary/5 to-primary/10;
+}
+
+.layout-compact {
+  @apply bg-white shadow-lg;
+}
+
+.layout-elegant {
+  @apply bg-white border border-gray-200;
+}
+
+/* QR Code Styles */
+.qr-rounded path {
+  @apply rounded-sm;
+}
+
+.qr-dots path {
+  @apply rounded-full;
+}
+
+/* Hover Effects */
+.id-card {
+  transition: transform 0.3s ease;
+}
+
+.id-card:hover {
+  transform: scale(1.02);
+}
+
+/* Add to your index.css or relevant stylesheet */
+.id-card {
+  @apply overflow-hidden bg-white shadow-lg rounded-xl;
+  min-height: 400px;
+}
+
+.layout-modern {
+  @apply bg-gradient-to-br from-primary/5 to-primary/10;
+}
+
+.layout-elegant {
+  @apply bg-white border border-primary/20;
+  background-image: linear-gradient(
+      45deg,
+      var(--primary-color) 1px,
+      transparent 1px
+    ),
+    linear-gradient(-45deg, var(--primary-color) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+}
+
+.layout-compact {
+  @apply bg-white shadow-xl;
+}
+
+.info-row {
+  @apply border-b border-gray-100 last:border-0;
+}
+
+/* Add smooth transitions */
+.id-card * {
+  @apply transition-all duration-200;
+}
+
+/* Enhanced hover effect */
+.id-card:hover {
+  @apply shadow-xl transform scale-[1.02];
+}
+
+/* Font imports */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap");
+
+/* Font variables */
+:root {
+  --font-inter: "Inter", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-opensans: "Open Sans", sans-serif;
+
+  /* Font sizes */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+}
+
+/* Add to existing id-card styles */
+.id-card * {
+  transition: all 0.2s ease;
+}

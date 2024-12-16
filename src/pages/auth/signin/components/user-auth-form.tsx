@@ -61,8 +61,6 @@ export default function UserAuthForm() {
       console.error("Login failed:", error);
       toast.error("Login Failed!");
     }
-
-    console.log("formData", formData);
   };
 
   return (
@@ -108,13 +106,13 @@ export default function UserAuthForm() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-black" />
+                        <EyeOff className="w-4 h-4 text-black" />
                       ) : (
-                        <Eye className="h-4 w-4 text-black" />
+                        <Eye className="w-4 h-4 text-black" />
                       )}
                     </Button>
                   </div>

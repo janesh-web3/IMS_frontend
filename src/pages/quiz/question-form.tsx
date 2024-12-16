@@ -1,31 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Plus, Trash2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
 import { crudRequest } from "@/lib/api";
+import { Question } from "@/types/quiz";
+import { toast } from "react-toastify";
 
 interface QuestionFormProps {
   quizId: string;
-  onQuestionAdded: () => void;
+  onQuestionAdded: (question: Question) => void;
+  questionToEdit?: Question | null;
+  onQuestionUpdated?: (question: Question) => void;
+  onCancelEdit?: () => void;
+}
+
+interface FormOption {
+  text: string;
+  isCorrect: boolean;
 }
 
 export default function QuestionForm({
   quizId,
   onQuestionAdded,
+  questionToEdit = null,
+  onQuestionUpdated,
+  onCancelEdit,
 }: QuestionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [question, setQuestion] = useState({
-    text: "",
-    explanation: "",
-    options: [
+  const [question, setQuestion] = useState<{
+    text: string;
+    explanation: string;
+    options: FormOption[];
+  }>({
+    text: questionToEdit?.text || "",
+    explanation: questionToEdit?.explanation || "",
+    options: questionToEdit?.options.map((opt) => ({
+      text: opt.text,
+      isCorrect: opt.isCorrect || false,
+    })) || [
       { text: "", isCorrect: false },
       { text: "", isCorrect: false },
     ],
   });
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (questionToEdit && formRef.current) {
+      formRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [questionToEdit]);
+
+  useEffect(() => {
+    if (questionToEdit) {
+      setQuestion({
+        text: questionToEdit.text,
+        explanation: questionToEdit.explanation || "",
+        options: questionToEdit.options.map((opt) => ({
+          text: opt.text,
+          isCorrect: opt.isCorrect || false,
+        })),
+      });
+    }
+  }, [questionToEdit]);
 
   const addOption = () => {
     setQuestion((prev) => ({
@@ -60,71 +103,62 @@ export default function QuestionForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validation
-    if (!question.text.trim()) {
-      toast({
-        title: "Error",
-        description: "Question text is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!question.options.some((option) => option.isCorrect)) {
-      toast({
-        title: "Error",
-        description: "Please mark at least one option as correct",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (question.options.some((option) => !option.text.trim())) {
-      toast({
-        title: "Error",
-        description: "All options must have text",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
+
     try {
-      await crudRequest("POST", "/question/add-question", {
-        ...question,
-        quiz: quizId,
-      });
+      if (questionToEdit) {
+        const updatedQuestion = (await crudRequest(
+          "PUT",
+          `/quiz/question/${questionToEdit._id}`,
+          question
+        )) as Question;
+        toast.success("Question updated successfully");
+        onQuestionUpdated?.(updatedQuestion);
+      } else {
+        const newQuestion = (await crudRequest("POST", "/quiz/add-question", {
+          ...question,
+          quizId,
+        })) as Question;
+        toast.success("Question added successfully");
+        onQuestionAdded(newQuestion);
+      }
 
-      toast({
-        title: "Success",
-        description: "Question added successfully",
-      });
-
-      // Reset form
-      setQuestion({
-        text: "",
-        explanation: "",
-        options: [
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-        ],
-      });
-
-      onQuestionAdded();
+      if (!questionToEdit) {
+        // Only reset form for new questions
+        setQuestion({
+          text: "",
+          explanation: "",
+          options: [
+            { text: "", isCorrect: false },
+            { text: "", isCorrect: false },
+          ],
+        });
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add question",
-        variant: "destructive",
-      });
+      toast.error("Failed to save question");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const resetForm = () => {
+    setQuestion({
+      text: "",
+      explanation: "",
+      options: [
+        { text: "", isCorrect: false },
+        { text: "", isCorrect: false },
+      ],
+    });
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancelEdit?.();
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text</Label>
         <Textarea
@@ -185,16 +219,25 @@ export default function QuestionForm({
         />
       </div>
 
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Adding Question...
-          </>
-        ) : (
-          "Add Question"
+      <div className="flex justify-end space-x-2">
+        {questionToEdit && (
+          <Button type="button" variant="outline" onClick={handleCancel}>
+            Cancel
+          </Button>
         )}
-      </Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              {questionToEdit ? "Updating..." : "Adding..."}
+            </>
+          ) : questionToEdit ? (
+            "Update Question"
+          ) : (
+            "Add Question"
+          )}
+        </Button>
+      </div>
     </form>
   );
 }

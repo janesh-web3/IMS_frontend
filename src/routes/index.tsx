@@ -34,7 +34,8 @@ const ProfilePage = lazy(() => import("@/pages/profile"));
 const AdministrationPage = lazy(() => import("@/pages/administration"));
 const RecycleBinPage = lazy(() => import("@/pages/recyclebin"));
 const TakeQuiz = lazy(() => import("@/pages/quiz/take/[id]"));
-
+const IdCardPage = lazy(() => import("@/pages/id_card"));
+const IDCardGenerator = lazy(() => import("@/pages/id_card/IDCardGenerator"));
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
     {
@@ -154,7 +155,15 @@ const AppRouter: React.FC = () => {
           path: "id-card",
           element: (
             <PremiumPlusRoute>
-              <h1>id-card</h1>
+              <IdCardPage />
+            </PremiumPlusRoute>
+          ),
+        },
+        {
+          path: "id-card/:id",
+          element: (
+            <PremiumPlusRoute>
+              <IDCardGenerator />
             </PremiumPlusRoute>
           ),
         },

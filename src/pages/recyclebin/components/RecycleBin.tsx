@@ -57,6 +57,7 @@ const RecycleBin = () => {
     handovers: DeletedItem[];
     recipts: DeletedItem[];
     books: DeletedItem[];
+    quizzes: DeletedItem[];
   }>({
     students: [],
     faculty: [],
@@ -67,6 +68,7 @@ const RecycleBin = () => {
     handovers: [],
     recipts: [],
     books: [],
+    quizzes: [],
   });
 
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -91,6 +93,7 @@ const RecycleBin = () => {
         handovers: DeletedItem[];
         recipts: DeletedItem[];
         books: DeletedItem[];
+        quizzes: DeletedItem[];
       };
       const response = await crudRequest<DeletedItemsResponse>(
         "GET",
@@ -218,7 +221,7 @@ const RecycleBin = () => {
   );
 
   return (
-    <div className="container py-6 mx-auto">
+    <div className="px-1 py-2 md:container md:mx-auto md:py-6">
       <DeleteConfirmDialog />
       <Card>
         <CardHeader>
@@ -226,20 +229,41 @@ const RecycleBin = () => {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="students" className="w-full">
-            <TabsList className="flex flex-wrap gap-2 mb-4">
-              <TabsTrigger value="students">Students</TabsTrigger>
-              <TabsTrigger value="faculty">Faculty</TabsTrigger>
-              <TabsTrigger value="courses">Courses</TabsTrigger>
-              <TabsTrigger value="subjects">Subjects</TabsTrigger>
-              <TabsTrigger value="payments">Payments</TabsTrigger>
-              <TabsTrigger value="visits">Visits</TabsTrigger>
-              <TabsTrigger value="handovers">Handovers</TabsTrigger>
-              <TabsTrigger value="recipts">Recipts</TabsTrigger>
-              <TabsTrigger value="books">Books</TabsTrigger>
+            <TabsList className="grid grid-cols-2 gap-2 mb-4 md:flex md:flex-wrap">
+              <TabsTrigger value="students" className="w-full md:w-auto">
+                Students
+              </TabsTrigger>
+              <TabsTrigger value="faculty" className="w-full md:w-auto">
+                Faculty
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="w-full md:w-auto">
+                Courses
+              </TabsTrigger>
+              <TabsTrigger value="subjects" className="w-full md:w-auto">
+                Subjects
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="w-full md:w-auto">
+                Payments
+              </TabsTrigger>
+              <TabsTrigger value="visits" className="w-full md:w-auto">
+                Visits
+              </TabsTrigger>
+              <TabsTrigger value="handovers" className="w-full md:w-auto">
+                Handovers
+              </TabsTrigger>
+              <TabsTrigger value="recipts" className="w-full md:w-auto">
+                Recipts
+              </TabsTrigger>
+              <TabsTrigger value="books" className="w-full md:w-auto">
+                Books
+              </TabsTrigger>
+              <TabsTrigger value="quizzes" className="w-full md:w-auto">
+                Quizzes
+              </TabsTrigger>
             </TabsList>
 
-            <div className="mt-20 md:mt-4 overflow-y-auto max-h-[calc(100vh-300px)]">
-              <TabsContent value="students">
+            <div className="mt-36 md:mt-0 overflow-y-auto max-h-[calc(100vh-400px)]">
+              <TabsContent value="students" className="mt-0">
                 {renderTable(
                   deletedItems?.students,
                   [
@@ -253,7 +277,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="faculty">
+              <TabsContent value="faculty" className="mt-0">
                 {renderTable(
                   deletedItems?.faculty,
                   [
@@ -264,7 +288,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="courses">
+              <TabsContent value="courses" className="mt-0">
                 {renderTable(
                   deletedItems?.courses,
                   [
@@ -275,7 +299,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="subjects">
+              <TabsContent value="subjects" className="mt-0">
                 {renderTable(
                   deletedItems?.subjects,
                   [
@@ -286,7 +310,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="payments">
+              <TabsContent value="payments" className="mt-0">
                 {renderTable(
                   deletedItems?.payments,
                   [
@@ -299,7 +323,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="visits">
+              <TabsContent value="visits" className="mt-0">
                 {renderTable(
                   deletedItems?.visits,
                   [
@@ -311,7 +335,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="handovers">
+              <TabsContent value="handovers" className="mt-0">
                 {renderTable(
                   deletedItems?.handovers,
                   [
@@ -322,7 +346,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="recipts">
+              <TabsContent value="recipts" className="mt-0">
                 {renderTable(
                   deletedItems?.recipts,
                   [
@@ -333,7 +357,7 @@ const RecycleBin = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="books">
+              <TabsContent value="books" className="mt-0">
                 {renderTable(
                   deletedItems?.books,
                   [
@@ -348,6 +372,14 @@ const RecycleBin = () => {
                     },
                   ],
                   "book"
+                )}
+              </TabsContent>
+
+              <TabsContent value="quizzes" className="mt-0">
+                {renderTable(
+                  deletedItems?.quizzes,
+                  [{ header: "ID", accessor: "_id" }],
+                  "quiz"
                 )}
               </TabsContent>
             </div>

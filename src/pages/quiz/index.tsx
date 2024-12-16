@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Breadcrumbs } from "@/components/shared/breadcrumbs";
 import PageHead from "@/components/shared/page-head";
-import { crudRequest } from "@/lib/api";
+import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -31,6 +31,13 @@ export default function QuizPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    quizId: string | null;
+  }>({
+    isOpen: false,
+    quizId: null,
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -53,20 +60,32 @@ export default function QuizPage() {
     }
   };
 
+  const openDeleteConfirmation = (quizId: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      quizId,
+    });
+  };
+
   const handleDelete = async (quizId: string) => {
     try {
-      await crudRequest("PUT", `/recycle/move-to-bin/quiz/${quizId}`);
-      toast({
-        title: "Success",
-        description: "Quiz moved to recycle bin",
-      });
-      fetchQuizzes();
+      const success = await moveToRecycleBin("Quiz", quizId);
+      if (success) {
+        setQuizzes((prev) => prev.filter((q) => q._id !== quizId));
+        toast({
+          title: "Success",
+          description: "Quiz moved to recycle bin",
+        });
+        fetchQuizzes();
+      }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete quiz",
         variant: "destructive",
       });
+    } finally {
+      setDeleteConfirmation({ isOpen: false, quizId: null });
     }
   };
 
@@ -92,8 +111,14 @@ export default function QuizPage() {
 
       <div className="flex-1 mb-10">
         <div className="container p-4 mx-auto md:p-6">
-          <div className="sticky top-4 z-10 py-2 bg-background">
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <div className="sticky z-10 py-2 top-4 bg-background">
+            <Dialog
+              open={isModalOpen}
+              onOpenChange={(open) => {
+                setIsModalOpen(open);
+                if (!open) handleModalClose();
+              }}
+            >
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
@@ -109,7 +134,47 @@ export default function QuizPage() {
                 <QuizForm
                   initialData={selectedQuiz}
                   onClose={handleModalClose}
+                  onSuccess={() => {
+                    fetchQuizzes();
+                  }}
                 />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={deleteConfirmation.isOpen}
+              onOpenChange={(isOpen) =>
+                setDeleteConfirmation({ isOpen, quizId: null })
+              }
+            >
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Confirm Deletion</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <p>
+                    Are you sure you want to move this quiz to the recycle bin?
+                  </p>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setDeleteConfirmation({ isOpen: false, quizId: null })
+                    }
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() =>
+                      deleteConfirmation.quizId &&
+                      handleDelete(deleteConfirmation.quizId)
+                    }
+                  >
+                    Delete
+                  </Button>
+                </div>
               </DialogContent>
             </Dialog>
           </div>
@@ -143,7 +208,7 @@ export default function QuizPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(quiz._id)}
+                        onClick={() => openDeleteConfirmation(quiz._id)}
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </Button>
@@ -166,12 +231,12 @@ export default function QuizPage() {
                         minutes
                       </div>
                     </div>
-                    <Button
+                    {/* <Button
                       onClick={() => router.push(`/quiz/take/${quiz._id}`)}
                       className="mt-4"
                     >
                       Take Quiz
-                    </Button>
+                    </Button> */}
                   </CardContent>
                 </Card>
               ))
