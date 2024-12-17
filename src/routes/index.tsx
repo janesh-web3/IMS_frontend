@@ -7,6 +7,7 @@ import Loading from "@/pages/not-found/loading";
 import PremiumRoute from "./PremiumRoute";
 import ProPlanUpgrade from "@/components/shared/ProPlanUpgrade";
 import PremiumPlusRoute from "./PremiumPlusRoute";
+import IDCardGenerator from "@/pages/id_card/IDCardGenerator";
 
 // Lazy-loaded components
 const DashboardLayout = lazy(
@@ -35,7 +36,7 @@ const AdministrationPage = lazy(() => import("@/pages/administration"));
 const RecycleBinPage = lazy(() => import("@/pages/recyclebin"));
 const TakeQuiz = lazy(() => import("@/pages/quiz/take/[id]"));
 const IdCardPage = lazy(() => import("@/pages/id_card"));
-const IDCardGenerator = lazy(() => import("@/pages/id_card/IDCardGenerator"));
+const ChatPage = lazy(() => import("@/pages/chat"));
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
     {
@@ -131,7 +132,7 @@ const AppRouter: React.FC = () => {
           path: "chat-bot",
           element: (
             <PremiumPlusRoute>
-              <h1>chat-bot</h1>
+              <ChatPage />
             </PremiumPlusRoute>
           ),
         },

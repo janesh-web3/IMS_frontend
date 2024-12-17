@@ -1,4 +1,5 @@
 import {
+  CreditCardIcon,
   Edit,
   File,
   ListFilter,
@@ -88,7 +89,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Courses } from "@/types";
+import { Courses } from "@/types/index";
 import Error from "@/pages/not-found/error";
 import { toast } from "react-toastify";
 import PremiumComponent from "@/components/shared/PremiumComponent";
@@ -100,6 +101,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminComponent from "@/components/shared/AdminComponent";
 import PremiumPlusComponent from "@/components/shared/PremiumPlusComponent";
+import { IDCardGenerator } from "@/pages/id_card/IDCardGenerator";
 
 type Bill = {
   billNo: string;
@@ -164,6 +166,7 @@ type Student = {
   admissionFee: number;
   tshirtFee: number;
   examFee: number;
+  booksFee: number;
   document: string;
   totalDiscount: number;
   paid: number;
