@@ -34,6 +34,7 @@ type TeacherDetailsProps = {
   monthlySalary: string | null;
   percentage: string;
   photo: string[];
+  email: string;
   courses: Course[];
   enabled: boolean;
   deleted: boolean;
@@ -89,6 +90,7 @@ const TeacherDetails = ({
   monthlySalary,
   percentage,
   photo,
+  email,
   courses,
   enabled,
   deleted,
@@ -128,6 +130,10 @@ const TeacherDetails = ({
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Name</p>
               <p className="text-base">{name}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Email</p>
+              <p className="text-base">{email}</p>
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">

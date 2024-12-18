@@ -22,6 +22,7 @@ type Courses = {
 type CourseResponse = {
   _id: string;
   name: string;
+  email: string;
   percentage: string;
   monthlySalary: number;
   courses: Courses[];
@@ -40,6 +41,7 @@ const TeacherUpdateForm = ({ id }: { id: string }) => {
 
   // Form field states
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [percentage, setPercentage] = useState("");
   const [monthlySalary, setMonthlySalary] = useState<number | "">(0);
@@ -68,6 +70,7 @@ const TeacherUpdateForm = ({ id }: { id: string }) => {
       crudRequest<CourseResponse>("GET", `/faculty/get-faculty/${id}`).then(
         (response) => {
           setName(response.name);
+          setEmail(response.email);
           setPercentage(response.percentage);
           setMonthlySalary(response.monthlySalary);
           //   setSelectedCourses(response.courses);
@@ -181,6 +184,17 @@ const TeacherUpdateForm = ({ id }: { id: string }) => {
                 value={name}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setName(e.target.value)
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                placeholder="Enter email address"
+                value={email}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
                 }
               />
             </div>

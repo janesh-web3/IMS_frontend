@@ -5,7 +5,6 @@ import { ModeToggle } from "./theme-toggle";
 import TimeTracker from "./Session";
 import Notification from "@/pages/notification/components/Notification";
 import PremiumComponent from "./PremiumComponent";
-import AdminComponent from "./AdminComponent";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,33 +37,31 @@ export default function Header() {
       <div className="flex items-center ml-4 md:ml-6">
         <TimeTracker />
         <PremiumComponent>
-          <AdminComponent>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="relative">
-                  <MessageCircle className="text-blue-600" />
-                  {unreadMessages > 0 && (
-                    <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-2 -right-2">
-                      {unreadMessages}
-                    </span>
-                  )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" forceMount className="mt-2">
-                <MessageDropdown />
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button>
-                  <Notification />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" forceMount className="mt-2">
-                <NotificationPage />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </AdminComponent>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="relative">
+                <MessageCircle className="text-blue-600" />
+                {unreadMessages > 0 && (
+                  <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-2 -right-2">
+                    {unreadMessages}
+                  </span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" forceMount className="mt-2">
+              <MessageDropdown />
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button>
+                <Notification />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" forceMount className="mt-2">
+              <NotificationPage />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </PremiumComponent>
         <ModeToggle />
       </div>

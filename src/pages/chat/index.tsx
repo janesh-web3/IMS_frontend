@@ -4,20 +4,30 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { io, Socket } from "socket.io-client";
-import { ArrowLeft, ArrowRight, Menu, Search, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { crudRequest } from "@/lib/api";
 import { useLocation } from "react-router-dom";
 import { socketBaseUrl } from "@/server";
 import { useMessages } from "@/providers/messageProvider";
 
-interface Message {
+interface PrivateMessage {
   _id: string;
   message: string;
   timestamp: Date;
   read: boolean;
   isCurrentUser: boolean;
-  sender: string;
-  receiver: string;
+  sender: {
+    _id: string;
+    name: string;
+    photo?: string;
+    role: string;
+  };
+  receiver: {
+    _id: string;
+    name: string;
+    photo?: string;
+    role: string;
+  };
 }
 
 interface Contact {
@@ -67,7 +77,7 @@ const ChatPage = () => {
     location.state || {};
 
   const [socket, setSocket] = useState<CustomSocket | null>(null);
-  const [messages, setMessage] = useState<Message[]>([]);
+  const [messages, setMessage] = useState<PrivateMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -115,8 +125,9 @@ const ChatPage = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handlePrivateMessage = (message: Message) => {
+    const handlePrivateMessage = (message: PrivateMessage) => {
       const isCurrentUser = message.isCurrentUser;
+      console.log(message);
 
       socket.on("message read", (messageId: string) => {
         setMessage((prev) =>
@@ -132,9 +143,13 @@ const ChatPage = () => {
         {
           ...message,
           isCurrentUser,
-          sender: isCurrentUser ? "me" : selectedContact?._id || message.sender,
+          sender: message.isCurrentUser ? message.receiver : message.sender,
         },
       ]);
+
+      if (!message.isCurrentUser) {
+        setSelectedContact(message.sender);
+      }
 
       if (!isCurrentUser) {
         socket?.emit("message read", { messageId: message._id });
@@ -229,14 +244,15 @@ const ChatPage = () => {
         setIsLoading(true);
         setMessage([]);
 
-        const response = await crudRequest<Message[]>(
+        const response = await crudRequest<PrivateMessage[]>(
           "GET",
           `/chat/history/${selectedContact._id}`
         );
 
+        console.log(response);
         const transformedMessages = response.map((msg) => ({
           ...msg,
-          sender: msg.isCurrentUser ? "me" : selectedContact._id,
+          sender: msg.isCurrentUser ? msg.receiver : msg.sender,
         }));
 
         setMessage(transformedMessages);

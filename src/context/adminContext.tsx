@@ -50,6 +50,7 @@ export default function AdminProvider({ children }: AdminProviderProps) {
     try {
       const response = await crudRequest<AdminDetails>("GET", "/user/get-role");
       setAdminDetails(response);
+      console.log(response);
     } catch (error) {
       console.error("Failed to fetch admin details:", error);
     }

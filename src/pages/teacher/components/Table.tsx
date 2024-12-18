@@ -52,6 +52,7 @@ import AdminComponent from "@/components/shared/AdminComponent";
 
 type Teacher = {
   _id: string;
+  email: string;
   name: string;
   contactNo: string;
   monthlySalary: string | null;

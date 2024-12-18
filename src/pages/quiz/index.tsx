@@ -14,6 +14,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import QuizForm from "./quiz-form"; // We'll create this component next
+import AdminComponent from "@/components/shared/AdminComponent";
+import PremiumComponent from "@/components/shared/PremiumComponent";
+import StudentComponent from "@/components/shared/StudentComponent";
 
 interface Quiz {
   _id: string;
@@ -107,141 +110,150 @@ export default function QuizPage() {
         </div>
       </div>
 
-      <div className="flex-1 mb-10">
-        <div className="container p-4 mx-auto md:p-6">
-          <div className="sticky z-10 py-2 top-4 bg-background">
-            <Dialog
-              open={isModalOpen}
-              onOpenChange={(open) => {
-                setIsModalOpen(open);
-                if (!open) handleModalClose();
-              }}
-            >
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Quiz
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px] h-[500px] overflow-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {selectedQuiz ? "Edit Quiz" : "Create New Quiz"}
-                  </DialogTitle>
-                </DialogHeader>
-                <QuizForm
-                  initialData={selectedQuiz}
-                  onClose={handleModalClose}
-                  onSuccess={() => {
-                    fetchQuizzes();
+      <PremiumComponent>
+        <AdminComponent>
+          <div className="flex-1 mb-10">
+            <div className="container p-4 mx-auto md:p-6">
+              <div className="sticky z-10 py-2 top-4 bg-background">
+                <Dialog
+                  open={isModalOpen}
+                  onOpenChange={(open) => {
+                    setIsModalOpen(open);
+                    if (!open) handleModalClose();
                   }}
-                />
-              </DialogContent>
-            </Dialog>
+                >
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Quiz
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px] h-[500px] overflow-auto">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {selectedQuiz ? "Edit Quiz" : "Create New Quiz"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <QuizForm
+                      initialData={selectedQuiz}
+                      onClose={handleModalClose}
+                      onSuccess={() => {
+                        fetchQuizzes();
+                      }}
+                    />
+                  </DialogContent>
+                </Dialog>
 
-            <Dialog
-              open={deleteConfirmation.isOpen}
-              onOpenChange={(isOpen) =>
-                setDeleteConfirmation({ isOpen, quizId: null })
-              }
-            >
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Confirm Deletion</DialogTitle>
-                </DialogHeader>
-                <div className="py-4">
-                  <p>
-                    Are you sure you want to move this quiz to the recycle bin?
-                  </p>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      setDeleteConfirmation({ isOpen: false, quizId: null })
-                    }
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() =>
-                      deleteConfirmation.quizId &&
-                      handleDelete(deleteConfirmation.quizId)
-                    }
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3">
-            {isLoading ? (
-              <div className="flex items-center justify-center col-span-full">
-                <Loader2 className="w-8 h-8 animate-spin" />
+                <Dialog
+                  open={deleteConfirmation.isOpen}
+                  onOpenChange={(isOpen) =>
+                    setDeleteConfirmation({ isOpen, quizId: null })
+                  }
+                >
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Confirm Deletion</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                      <p>
+                        Are you sure you want to move this quiz to the recycle
+                        bin?
+                      </p>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          setDeleteConfirmation({ isOpen: false, quizId: null })
+                        }
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          deleteConfirmation.quizId &&
+                          handleDelete(deleteConfirmation.quizId)
+                        }
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
-            ) : (
-              quizzes.map((quiz) => (
-                <Card key={quiz._id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                    <CardTitle className="text-xl">
-                      {quiz.title}
-                      {quiz.isAIGenerated && (
-                        <Bot className="inline-block w-4 h-4 ml-2 text-blue-500" />
-                      )}
-                    </CardTitle>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedQuiz(quiz);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openDeleteConfirmation(quiz._id)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      {quiz.description}
-                    </p>
-                    <div className="mt-4 space-y-2">
-                      <div className="text-sm">
-                        <span className="font-medium">Category:</span>{" "}
-                        {quiz.category}
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">Topic:</span> {quiz.topic}
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">Timer:</span> {quiz.timer}{" "}
-                        minutes
-                      </div>
-                    </div>
-                    {/* <Button
+
+              <div className="grid gap-4 mt-4 md:grid-cols-2 lg:grid-cols-3">
+                {isLoading ? (
+                  <div className="flex items-center justify-center col-span-full">
+                    <Loader2 className="w-8 h-8 animate-spin" />
+                  </div>
+                ) : (
+                  quizzes.map((quiz) => (
+                    <Card key={quiz._id}>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                        <CardTitle className="text-xl">
+                          {quiz.title}
+                          {quiz.isAIGenerated && (
+                            <Bot className="inline-block w-4 h-4 ml-2 text-blue-500" />
+                          )}
+                        </CardTitle>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedQuiz(quiz);
+                              setIsModalOpen(true);
+                            }}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openDeleteConfirmation(quiz._id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground">
+                          {quiz.description}
+                        </p>
+                        <div className="mt-4 space-y-2">
+                          <div className="text-sm">
+                            <span className="font-medium">Category:</span>{" "}
+                            {quiz.category}
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium">Topic:</span>{" "}
+                            {quiz.topic}
+                          </div>
+                          <div className="text-sm">
+                            <span className="font-medium">Timer:</span>{" "}
+                            {quiz.timer} minutes
+                          </div>
+                        </div>
+                        {/* <Button
                       onClick={() => router.push(`/quiz/take/${quiz._id}`)}
                       className="mt-4"
                     >
                       Take Quiz
                     </Button> */}
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </AdminComponent>
+        <StudentComponent>
+          <div>Student quiz</div>
+        </StudentComponent>
+      </PremiumComponent>
     </div>
   );
 }

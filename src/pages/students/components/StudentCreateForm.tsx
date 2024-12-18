@@ -470,42 +470,29 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       remaining: feesInfo.remainingAmount,
     };
 
+    const contentType =
+      photo === null ? "application/json" : "multipart/form-data";
+
     const token = sessionStorage.getItem("token");
     try {
-      if (photo === null) {
-        await crudRequest("POST", `/student/add-student`, studentData).then(
-          async () => {
-            toast.success("Student added successfully");
+      await axios
+        .post(`${server}/student/add-student`, studentData, {
+          headers: {
+            "Content-Type": contentType,
+            Authorization: token,
+          },
+        })
+        .then(async () => {
+          toast.success("Student added successfully");
 
-            await crudRequest(
-              "POST",
-              "/notification/add-notification",
-              notificationPayload
-            );
+          await crudRequest(
+            "POST",
+            "/notification/add-notification",
+            notificationPayload
+          );
 
-            generateBill(studentBill);
-          }
-        );
-      } else {
-        await axios
-          .post(`${server}/student/add-student-photo`, studentData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: token,
-            },
-          })
-          .then(async () => {
-            toast.success("Student added successfully");
-
-            await crudRequest(
-              "POST",
-              "/notification/add-notification",
-              notificationPayload
-            );
-
-            generateBill(studentBill);
-          });
-      }
+          generateBill(studentBill);
+        });
 
       modalClose();
     } catch (error) {

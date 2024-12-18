@@ -15,6 +15,8 @@ import { usePathname } from "@/routes/hooks";
 import { Link, useNavigate } from "react-router-dom";
 import UpgradeToPro from "./upgrade-pro";
 import { usePackageContext } from "@/context/packageContext";
+import { useAdminContext } from "@/context/adminContext";
+import AdminComponent from "./AdminComponent";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -29,6 +31,7 @@ export default function DashboardNav({
 }: DashboardNavProps) {
   const path = usePathname();
   const { isMinimized } = useSidebar();
+  const { adminDetails } = useAdminContext();
 
   // Access package details
   const { packageDetails } = usePackageContext();
@@ -50,7 +53,31 @@ export default function DashboardNav({
     }
   });
 
+  //filter navigation items based on user type
+  const filteredNavItemsByType = filteredNavItems.filter((item) => {
+    const userType = adminDetails.role;
+    switch (userType) {
+      case "superadmin":
+        return true;
+      case "admin":
+        return true;
+      case "reception":
+        return item.role === "reception" || item.role === "all";
+      case "teacher":
+        // Show Basic, Premium, and Admin items for teacher users
+        return item.role === "teacher" || item.role === "all";
+      case "student":
+        return item.role === "student" || item.role === "all";
+
+      default:
+        return;
+    }
+  });
+
   if (!filteredNavItems.length) {
+    return null;
+  }
+  if (!filteredNavItemsByType.length) {
     return null;
   }
 
@@ -63,7 +90,7 @@ export default function DashboardNav({
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
-        {filteredNavItems.map((item, index) => {
+        {filteredNavItemsByType.map((item, index) => {
           const Icon = Icons[item.icon || "arrowRight"];
           return (
             item.href && (
@@ -104,11 +131,13 @@ export default function DashboardNav({
             )
           );
         })}
-        <div className="mb-28">
-          {(isMobileNav || !isMinimized) && (
-            <UpgradeToPro onClick={handleUpgradeClick} />
-          )}
-        </div>
+        <AdminComponent>
+          <div className="mb-28">
+            {(isMobileNav || !isMinimized) && (
+              <UpgradeToPro onClick={handleUpgradeClick} />
+            )}
+          </div>
+        </AdminComponent>
       </TooltipProvider>
     </nav>
   );

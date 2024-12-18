@@ -4,6 +4,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
+import TeacherForm from "./components/teacher-auth-form";
 
 export default function SignInPage() {
   return (
@@ -64,6 +65,9 @@ export default function SignInPage() {
             </TabsContent>
             <TabsContent value="student">
               <StudentForm />
+            </TabsContent>
+            <TabsContent value="teacher">
+              <TeacherForm />
             </TabsContent>
           </Tabs>
           <p className="px-8 text-sm text-center text-muted-foreground">

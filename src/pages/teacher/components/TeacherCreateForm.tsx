@@ -23,6 +23,7 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
   // Form field states
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [percentage, setPercentage] = useState("");
   const [monthlySalary, setMonthlySalary] = useState<number | "">(0);
@@ -108,53 +109,40 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
           })) || [],
     }));
 
-    const formData = {
+    const facultyData = {
       name,
       contactNo,
       percentage,
+      email,
       monthlySalary,
       courses: formattedCourses,
       photo: photo,
     };
 
     const token = sessionStorage.getItem("token");
-    {
-      photo === null
-        ? await crudRequest("POST", "/faculty/add-faculty", formData)
-            .then(async () => {
-              toast.success("Teacher added successfully");
-              await crudRequest(
-                "POST",
-                "/notification/add-notification",
-                notificationPayload
-              );
-              window.location.reload();
-            })
-            .catch((err) => {
-              console.error("Error adding teacher:", err);
-              toast.error("Failed to add teacher");
-            })
-        : await axios
-            .post(`${server}/faculty/add-faculty-photo`, formData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: token,
-              },
-            })
-            .then(async () => {
-              toast.success("Teacher added successfully");
-              await crudRequest(
-                "POST",
-                "/notification/add-notification",
-                notificationPayload
-              );
-              window.location.reload();
-            })
-            .catch(() => {
-              console.error("Error adding teacher with photo:");
-              toast.error("Failed to add teacher");
-            });
-    }
+    const contentType =
+      photo === null ? "application/json" : "multipart/form-data";
+
+    await axios
+      .post(`${server}/faculty/add-faculty`, facultyData, {
+        headers: {
+          "Content-Type": contentType,
+          Authorization: token,
+        },
+      })
+      .then(async () => {
+        toast.success("Teacher added successfully");
+        await crudRequest(
+          "POST",
+          "/notification/add-notification",
+          notificationPayload
+        );
+        window.location.reload();
+      })
+      .catch(() => {
+        console.error("Error adding teacher with photo:");
+        toast.error("Failed to add teacher");
+      });
 
     modalClose();
   };
@@ -199,6 +187,17 @@ const TeacherCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   value={contactNo}
                   onChange={(e: ChangeEvent<HTMLInputElement>) =>
                     setContactNo(e.target.value)
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  placeholder="Enter email address"
+                  value={email}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setEmail(e.target.value)
                   }
                 />
               </div>

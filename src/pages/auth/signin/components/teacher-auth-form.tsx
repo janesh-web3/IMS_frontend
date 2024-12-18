@@ -19,23 +19,23 @@ import { Eye, EyeOff } from "lucide-react";
 
 interface AuthResponse {
   _id: string;
-  username: string;
+  email: string;
   token: string;
 }
 
 const formSchema = z.object({
-  username: z.string({ message: "Enter a valid username" }),
+  email: z.string({ message: "Enter a valid email" }),
   password: z.string({ message: "Incorrect Password" }),
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserAuthForm() {
+export default function TeacherForm() {
   const router = useRouter();
   const [loading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const defaultValues = {
-    username: "",
+    email: "",
     password: "",
   };
   const form = useForm<UserFormValue>({
@@ -49,7 +49,7 @@ export default function UserAuthForm() {
 
       const response: AuthResponse = await crudRequest(
         "POST",
-        "/user/login-admin",
+        "/user/login-teacher",
         { ...formData, loginTime }
       );
 
@@ -73,14 +73,14 @@ export default function UserAuthForm() {
         >
           <FormField
             control={form.control}
-            name="username"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>UserName</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
-                    placeholder="Enter your username..."
+                    placeholder="Enter your email..."
                     disabled={loading}
                     {...field}
                   />

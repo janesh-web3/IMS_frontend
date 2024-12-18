@@ -53,6 +53,10 @@ import { Transactions } from "./transactions/Transactions";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminComponent from "@/components/shared/AdminComponent";
 import SuperAdminComponent from "@/components/shared/SuperAdminComponent";
+import StudentDashboard from "./student/StudentDashboard";
+import StudentComponent from "@/components/shared/StudentComponent";
+import TeacherComponent from "@/components/shared/TeacherComponent";
+import TeacherDashboard from "./teacher/TeacherDashboard";
 
 type Dashboard = {
   totalAmount: string;
@@ -425,9 +429,15 @@ export default function DashboardPage() {
         </div>
         <Tabs defaultValue="overview" className="space-y-4 ">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <StudentComponent>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+            </StudentComponent>
+            <TeacherComponent>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+            </TeacherComponent>
             <PremiumComponent>
               <AdminComponent>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="accounting">Accounting</TabsTrigger>
                 <SuperAdminComponent>
                   <TabsTrigger value="control">Control</TabsTrigger>
@@ -438,302 +448,327 @@ export default function DashboardPage() {
             </PremiumComponent>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
-            {dashboardLoading ? (
-              <DashboardSkeleton />
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0 md:pb-2">
-                    <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
-                      Total Students
-                    </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="w-4 h-4 text-muted-foreground"
-                    >
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg font-bold md:text-2xl">
-                      {dashboard.totalStudents}
-                    </div>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      in the institute.
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
-                      Total Amount
-                    </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="w-4 h-4 text-muted-foreground"
-                    >
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg font-bold md:text-2xl">
-                      Rs. {dashboard.totalAmount}
-                    </div>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      of all students
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
-                      Total Paid Amount
-                    </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="w-4 h-4 text-muted-foreground"
-                    >
-                      <rect width="20" height="14" x="2" y="5" rx="2" />
-                      <path d="M2 10h20" />
-                    </svg>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg font-bold md:text-2xl">
-                      Rs. {dashboard.totalPaidAmount}
-                    </div>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      of all students
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                    <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
-                      Total Remaining Amount
-                    </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="w-4 h-4 text-muted-foreground"
-                    >
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                    </svg>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg font-bold md:text-2xl">
-                      Rs. {dashboard.totalRemainingAmount}
-                    </div>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      of all students
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            <div className="grid grid-cols-1 col-span-5 gap-4 pb-10 lg:grid-cols-5 md:gap-8">
-              <Card className="col-span-3">
-                <CardHeader className="flex flex-row items-center gap-10">
-                  <div className="grid gap-2">
-                    <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
-                      Course Summary
-                    </CardTitle>
-                    <CardDescription className="text-xs md:text-sm text-muted-foreground">
-                      Course, Admission, Amount Summary for{" "}
-                      {selectedPeriod === "daily"
-                        ? "Today"
-                        : selectedPeriod === "weekly"
-                          ? "This Week"
-                          : selectedPeriod === "monthly"
-                            ? "This Month"
-                            : "This Year"}
-                    </CardDescription>
-                  </div>
-                  <Select
-                    value={selectedPeriod}
-                    onValueChange={(value) => setSelectedPeriod(value)}
-                  >
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Select Period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </CardHeader>
-                <CardContent>
-                  {courseLoading ? (
-                    <CourseSummarySkeleton />
-                  ) : (
-                    <div className="space-y-8">
-                      <div className="grid grid-cols-4 gap-2">
-                        <div className="p-2 border rounded-lg bg-card">
-                          <h3 className="text-xs font-normal">
-                            Total Students
-                          </h3>
-                          <p className="font-bold text-md">
-                            {course?.studentsData || 0}
-                          </p>
-                        </div>
-                        <div className="p-2 border rounded-lg bg-card">
-                          <h3 className="text-xs font-normal">Total Visits</h3>
-                          <p className="font-bold text-md">
-                            {course?.totalVisitData || 0}
-                          </p>
-                        </div>
-                        <div className="p-2 border rounded-lg bg-card">
-                          <h3 className="text-xs font-normal">
-                            New Admissions
-                          </h3>
-                          <p className="font-bold text-md">
-                            {course?.totalAdmissionData || 0}
-                          </p>
-                        </div>
-                        <div className="p-2 border rounded-lg bg-card">
-                          <h3 className="text-xs font-normal">Total Income</h3>
-                          <p className="font-bold text-md">
-                            Rs. {course?.totalPaidAmount || 0}
-                          </p>
-                        </div>
-                      </div>
-
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Program</TableHead>
-                            <TableHead>Total Office Visit</TableHead>
-                            <TableHead>New Admission</TableHead>
-                            <TableHead className="text-right">Income</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {course?.coursesData.map((data, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                <div className="font-medium">{data.course}</div>
-                              </TableCell>
-                              <TableCell>{data.totalVisit}</TableCell>
-                              <TableCell>{data.totalAdmission}</TableCell>
-                              <TableCell className="text-right">
-                                Rs. {data.totalPaidAmount}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-
-                      <div className="text-sm text-muted-foreground">
-                        Data from:{" "}
-                        {new Date(
-                          course?.dateRange.start || ""
-                        ).toLocaleDateString()}{" "}
-                        &nbsp; to &nbsp;
-                        {new Date(
-                          course?.dateRange.end || ""
-                        ).toLocaleDateString()}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="col-span-2 overflow-y-auto ">
-                <CardHeader>
-                  <CardTitle>Alert Students</CardTitle>
-                  <CardDescription>
-                    Student details with remaining fee and deadlines.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {alertLoading ? (
-                    <AlertSkeleton />
-                  ) : (
-                    <div className="space-y-8 overflow-auto">
-                      {alert &&
-                        alert.map((data, index) => (
-                          <Drawer>
-                            <DrawerTrigger
-                              asChild
-                              className="cursor-pointer hover:bg-secondary hover:rounded-sm"
-                            >
-                              <div className="flex items-center" key={index}>
-                                <Avatar className="h-9 w-9">
-                                  <AvatarImage src={data.photo} alt="Avatar" />
-                                  <AvatarFallback>OM</AvatarFallback>
-                                </Avatar>
-                                <div className="ml-4 space-y-1">
-                                  <p className="text-sm font-medium leading-none">
-                                    {data?.personalInfo.studentName}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {data.personalInfo.contactNo}
-                                  </p>
-                                </div>
-                                <div className="ml-auto font-medium">
-                                  {data?.remaining}
-                                </div>
-                              </div>
-                            </DrawerTrigger>
-                            <DrawerContent className="z-50">
-                              <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
-                                <DrawerHeader>
-                                  <DrawerTitle>Student Details</DrawerTitle>
-                                  <DrawerDescription>
-                                    See details about{" "}
-                                    {data?.personalInfo?.studentName}
-                                  </DrawerDescription>
-                                </DrawerHeader>
-                                <div className="p-4 pb-0">
-                                  <StudentDetails {...data} />
-                                </div>
-                                <DrawerFooter>
-                                  <DrawerClose asChild>
-                                    <Button variant="outline">Cancel</Button>
-                                  </DrawerClose>
-                                </DrawerFooter>
-                              </div>
-                            </DrawerContent>
-                          </Drawer>
-                        ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
+          <StudentComponent>
+            <TabsContent value="overview">
+              <StudentDashboard />
+            </TabsContent>
+          </StudentComponent>
+          <TeacherComponent>
+            <TabsContent value="overview">
+              <TeacherDashboard />
+            </TabsContent>
+          </TeacherComponent>
           <PremiumComponent>
             <AdminComponent>
+              <TabsContent value="overview" className="space-y-4">
+                {dashboardLoading ? (
+                  <DashboardSkeleton />
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-1 space-y-0 md:pb-2">
+                        <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
+                          Total Students
+                        </CardTitle>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          className="w-4 h-4 text-muted-foreground"
+                        >
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        </svg>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-lg font-bold md:text-2xl">
+                          {dashboard.totalStudents}
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          in the institute.
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
+                          Total Amount
+                        </CardTitle>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          className="w-4 h-4 text-muted-foreground"
+                        >
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-lg font-bold md:text-2xl">
+                          Rs. {dashboard.totalAmount}
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          of all students
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
+                          Total Paid Amount
+                        </CardTitle>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          className="w-4 h-4 text-muted-foreground"
+                        >
+                          <rect width="20" height="14" x="2" y="5" rx="2" />
+                          <path d="M2 10h20" />
+                        </svg>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-lg font-bold md:text-2xl">
+                          Rs. {dashboard.totalPaidAmount}
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          of all students
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                        <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
+                          Total Remaining Amount
+                        </CardTitle>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          className="w-4 h-4 text-muted-foreground"
+                        >
+                          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-lg font-bold md:text-2xl">
+                          Rs. {dashboard.totalRemainingAmount}
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground">
+                          of all students
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 col-span-5 gap-4 pb-10 lg:grid-cols-5 md:gap-8">
+                  <Card className="col-span-3">
+                    <CardHeader className="flex flex-row items-center gap-10">
+                      <div className="grid gap-2">
+                        <CardTitle className="text-xs font-normal md:text-sm md:font-medium">
+                          Course Summary
+                        </CardTitle>
+                        <CardDescription className="text-xs md:text-sm text-muted-foreground">
+                          Course, Admission, Amount Summary for{" "}
+                          {selectedPeriod === "daily"
+                            ? "Today"
+                            : selectedPeriod === "weekly"
+                              ? "This Week"
+                              : selectedPeriod === "monthly"
+                                ? "This Month"
+                                : "This Year"}
+                        </CardDescription>
+                      </div>
+                      <Select
+                        value={selectedPeriod}
+                        onValueChange={(value) => setSelectedPeriod(value)}
+                      >
+                        <SelectTrigger className="w-[150px]">
+                          <SelectValue placeholder="Select Period" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="yearly">Yearly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="daily">Daily</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </CardHeader>
+                    <CardContent>
+                      {courseLoading ? (
+                        <CourseSummarySkeleton />
+                      ) : (
+                        <div className="space-y-8">
+                          <div className="grid grid-cols-4 gap-2">
+                            <div className="p-2 border rounded-lg bg-card">
+                              <h3 className="text-xs font-normal">
+                                Total Students
+                              </h3>
+                              <p className="font-bold text-md">
+                                {course?.studentsData || 0}
+                              </p>
+                            </div>
+                            <div className="p-2 border rounded-lg bg-card">
+                              <h3 className="text-xs font-normal">
+                                Total Visits
+                              </h3>
+                              <p className="font-bold text-md">
+                                {course?.totalVisitData || 0}
+                              </p>
+                            </div>
+                            <div className="p-2 border rounded-lg bg-card">
+                              <h3 className="text-xs font-normal">
+                                New Admissions
+                              </h3>
+                              <p className="font-bold text-md">
+                                {course?.totalAdmissionData || 0}
+                              </p>
+                            </div>
+                            <div className="p-2 border rounded-lg bg-card">
+                              <h3 className="text-xs font-normal">
+                                Total Income
+                              </h3>
+                              <p className="font-bold text-md">
+                                Rs. {course?.totalPaidAmount || 0}
+                              </p>
+                            </div>
+                          </div>
+
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Program</TableHead>
+                                <TableHead>Total Office Visit</TableHead>
+                                <TableHead>New Admission</TableHead>
+                                <TableHead className="text-right">
+                                  Income
+                                </TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {course?.coursesData.map((data, index) => (
+                                <TableRow key={index}>
+                                  <TableCell>
+                                    <div className="font-medium">
+                                      {data.course}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>{data.totalVisit}</TableCell>
+                                  <TableCell>{data.totalAdmission}</TableCell>
+                                  <TableCell className="text-right">
+                                    Rs. {data.totalPaidAmount}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+
+                          <div className="text-sm text-muted-foreground">
+                            Data from:{" "}
+                            {new Date(
+                              course?.dateRange.start || ""
+                            ).toLocaleDateString()}{" "}
+                            &nbsp; to &nbsp;
+                            {new Date(
+                              course?.dateRange.end || ""
+                            ).toLocaleDateString()}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="col-span-2 overflow-y-auto ">
+                    <CardHeader>
+                      <CardTitle>Alert Students</CardTitle>
+                      <CardDescription>
+                        Student details with remaining fee and deadlines.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {alertLoading ? (
+                        <AlertSkeleton />
+                      ) : (
+                        <div className="space-y-8 overflow-auto">
+                          {alert &&
+                            alert.map((data, index) => (
+                              <Drawer>
+                                <DrawerTrigger
+                                  asChild
+                                  className="cursor-pointer hover:bg-secondary hover:rounded-sm"
+                                >
+                                  <div
+                                    className="flex items-center"
+                                    key={index}
+                                  >
+                                    <Avatar className="h-9 w-9">
+                                      <AvatarImage
+                                        src={data.photo}
+                                        alt="Avatar"
+                                      />
+                                      <AvatarFallback>OM</AvatarFallback>
+                                    </Avatar>
+                                    <div className="ml-4 space-y-1">
+                                      <p className="text-sm font-medium leading-none">
+                                        {data?.personalInfo.studentName}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">
+                                        {data.personalInfo.contactNo}
+                                      </p>
+                                    </div>
+                                    <div className="ml-auto font-medium">
+                                      {data?.remaining}
+                                    </div>
+                                  </div>
+                                </DrawerTrigger>
+                                <DrawerContent className="z-50">
+                                  <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
+                                    <DrawerHeader>
+                                      <DrawerTitle>Student Details</DrawerTitle>
+                                      <DrawerDescription>
+                                        See details about{" "}
+                                        {data?.personalInfo?.studentName}
+                                      </DrawerDescription>
+                                    </DrawerHeader>
+                                    <div className="p-4 pb-0">
+                                      <StudentDetails {...data} />
+                                    </div>
+                                    <DrawerFooter>
+                                      <DrawerClose asChild>
+                                        <Button variant="outline">
+                                          Cancel
+                                        </Button>
+                                      </DrawerClose>
+                                    </DrawerFooter>
+                                  </div>
+                                </DrawerContent>
+                              </Drawer>
+                            ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
               <TabsContent value="accounting">
                 <Accounting />
               </TabsContent>
