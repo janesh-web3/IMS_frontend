@@ -74,6 +74,7 @@ type PersonalInfo = {
   gender: string;
   contactNo: string;
   billNo: Bill[];
+  email: string;
   admissionNumber: string;
   paymentDeadline: string;
   guardianName: string;
@@ -170,6 +171,10 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({
                   <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">Gender</span>
                     <span>{personalInfo.gender}</span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Email</span>
+                    <span>{personalInfo.email}</span>
                   </li>
                   <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">Contact Us </span>

@@ -36,8 +36,9 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     studentName: "",
     schoolName: "",
     address: "",
-    dateOfBirth: null,
+    dateOfBirth: "",
     gender: "",
+    email: "",
     contactNo: "",
     billNo: "",
     guardianName: "",
@@ -48,13 +49,8 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     admissionNumber: "",
     paymentMethod: "",
   });
-  const [date, setDate] = useState<Date | undefined>(undefined);
   const [deadlinedate, setDeadlineDate] = useState<Date | undefined>(undefined);
 
-  const handleDoBChange = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    handleChange("dateOfBirth", selectedDate);
-  };
   const handleChange = (name: string, value: any) => {
     setPersonalInfo((prev) => ({ ...prev, [name]: value }));
   };
@@ -542,6 +538,15 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  placeholder="Enter email"
+                  value={personalInfo.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
+              </div>
+              <div>
                 <Label htmlFor="schoolName">School Name</Label>
                 <Input
                   id="schoolName"
@@ -560,29 +565,15 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div className="grid">
-                <Popover>
-                  <Label htmlFor="dateOfBirth">Enter Date of Birth</Label>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {date ? format(date, "PPP") : <span>Date of Birth</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={handleDoBChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  placeholder="Enter dateOfBirth"
+                  className="bg-card-foreground/60 text-background"
+                  value={personalInfo.dateOfBirth}
+                  onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                />
               </div>
               <div>
                 <Label htmlFor="gender">Select Gender *</Label>

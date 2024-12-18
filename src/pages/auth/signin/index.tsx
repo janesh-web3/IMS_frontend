@@ -1,5 +1,7 @@
 import UserAuthForm from "./components/user-auth-form";
+import StudentForm from "./components/student-auth-form";
 import { buttonVariants } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
@@ -51,7 +53,19 @@ export default function SignInPage() {
               Enter your username below to login your account
             </p>
           </div>
-          <UserAuthForm />
+          <Tabs defaultValue="admin" className="space-y-4 ">
+            <TabsList>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="student">Student</TabsTrigger>
+              <TabsTrigger value="teacher">Teacher</TabsTrigger>
+            </TabsList>
+            <TabsContent value="admin">
+              <UserAuthForm />
+            </TabsContent>
+            <TabsContent value="student">
+              <StudentForm />
+            </TabsContent>
+          </Tabs>
           <p className="px-8 text-sm text-center text-muted-foreground">
             By clicking continue, you agree to our{" "}
             <Link

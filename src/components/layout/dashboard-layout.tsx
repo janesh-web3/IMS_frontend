@@ -13,10 +13,12 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-secondary">
-      <MobileSidebar
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+      <div className="overflow-auto">
+        <MobileSidebar
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
+      </div>
 
       <Sidebar />
       <div className="flex flex-col flex-1 w-0 overflow-auto">
