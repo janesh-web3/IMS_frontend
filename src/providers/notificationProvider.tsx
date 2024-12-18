@@ -1,3 +1,5 @@
+import { crudRequest } from "@/lib/api";
+import { socketBaseUrl } from "@/server";
 import React, {
   useEffect,
   useState,
@@ -40,15 +42,8 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
       if (!token) return;
 
       try {
-        const response = await fetch(
-          "http://localhost:5000/api/user/get-role",
-          {
-            headers: {
-              Authorization: token,
-            },
-          }
-        );
-        const data = await response.json();
+        const response = await crudRequest<any>("GET", "/user/get-role");
+        const data = await response;
 
         if (data.notifications) {
           setNotifications(
@@ -80,7 +75,7 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
       return;
     }
 
-    const socket: Socket = io("http://localhost:5000", {
+    const socket: Socket = io(socketBaseUrl, {
       auth: { token }, // Send token in connection
     });
 

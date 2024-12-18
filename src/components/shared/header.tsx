@@ -12,6 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { lazy } from "react";
+import { MessageCircle } from "lucide-react";
+import MessageDropdown from "./MessageDropdown";
+import { useMessages } from "@/providers/messageProvider";
 const NotificationPage = lazy(() => import("@/pages/notification"));
 
 // Custom hook to find the matched path
@@ -27,6 +30,7 @@ const useMatchedPath = (pathname: string) => {
 export default function Header() {
   const pathname = usePathname();
   const headingText = useMatchedPath(pathname);
+  const { unreadMessages } = useMessages();
 
   return (
     <div className="flex items-center justify-between flex-1 px-4 bg-secondary">
@@ -35,6 +39,21 @@ export default function Header() {
         <TimeTracker />
         <PremiumComponent>
           <AdminComponent>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="relative">
+                  <MessageCircle className="text-blue-600" />
+                  {unreadMessages > 0 && (
+                    <span className="absolute flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full -top-2 -right-2">
+                      {unreadMessages}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" forceMount className="mt-2">
+                <MessageDropdown />
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button>

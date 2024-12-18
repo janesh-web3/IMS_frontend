@@ -1,5 +1,4 @@
 import {
-  CreditCardIcon,
   Edit,
   File,
   ListFilter,
@@ -101,7 +100,6 @@ import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminComponent from "@/components/shared/AdminComponent";
 import PremiumPlusComponent from "@/components/shared/PremiumPlusComponent";
-import { IDCardGenerator } from "@/pages/id_card/IDCardGenerator";
 
 type Bill = {
   billNo: string;

@@ -55,8 +55,9 @@ export default function UserAuthForm() {
 
       toast.success("Login successful!");
       sessionStorage.setItem("token", response.token);
+      sessionStorage.setItem("userId", response._id);
       router.push("/");
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login Failed!");

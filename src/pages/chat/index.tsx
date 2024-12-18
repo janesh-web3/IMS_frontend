@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { io, Socket } from "socket.io-client";
-import { Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Menu, Search, X } from "lucide-react";
 import { crudRequest } from "@/lib/api";
+import { useLocation } from "react-router-dom";
+import { socketBaseUrl } from "@/server";
+import { useMessages } from "@/providers/messageProvider";
 
 interface Message {
   _id: string;
@@ -57,26 +60,32 @@ const formatMessageTime = (timestamp: string | Date) => {
 };
 
 const ChatPage = () => {
+  const location = useLocation();
+  const { setMessages } = useMessages();
+
+  const { selectedContactId, scrollToMessageId, contactDetails } =
+    location.state || {};
+
   const [socket, setSocket] = useState<CustomSocket | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessage] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
-  const [typingUsers] = useState<Set<string>>(new Set());
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     if (!token) return;
 
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io(socketBaseUrl, {
       auth: {
         token: `Bearer ${token}`,
-        userId: sessionStorage.getItem("userId"),
       },
       transports: ["websocket", "polling"],
     }) as CustomSocket;
@@ -93,13 +102,32 @@ const ChatPage = () => {
   }, []);
 
   useEffect(() => {
+    if (selectedContact && socket) {
+      const unreadMessages = messages.filter(
+        (msg) => !msg.isCurrentUser && !msg.read
+      );
+      unreadMessages.forEach((msg) => {
+        socket.emit("message read", { messageId: msg._id });
+      });
+    }
+  }, [selectedContact, socket, messages]);
+
+  useEffect(() => {
     if (!socket) return;
 
     const handlePrivateMessage = (message: Message) => {
-      const isCurrentUser =
-        message.sender === "me" || message.sender === socket?.auth?.userId;
+      const isCurrentUser = message.isCurrentUser;
 
-      setMessages((prev) => [
+      socket.on("message read", (messageId: string) => {
+        setMessage((prev) =>
+          prev.map((msg) =>
+            msg._id === messageId ? { ...msg, read: true } : msg
+          )
+        );
+        setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+      });
+
+      setMessage((prev) => [
         ...prev,
         {
           ...message,
@@ -131,6 +159,12 @@ const ChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (!isLoading) {
+      scrollToBottom();
+    }
+  }, [messages, isLoading]);
+
   const handleTyping = () => {
     if (!socket || !selectedContact) return;
 
@@ -149,12 +183,11 @@ const ChatPage = () => {
 
   const sendMessage = () => {
     if (!socket || !selectedContact || !newMessage.trim()) return;
-
     const messageData = {
       receiver: selectedContact._id,
       message: newMessage.trim(),
       isCurrentUser: true,
-      sender: socket.auth.userId,
+      sender: sessionStorage.getItem("userId"),
     };
 
     socket.emit("private message", messageData);
@@ -194,7 +227,7 @@ const ChatPage = () => {
 
       try {
         setIsLoading(true);
-        setMessages([]);
+        setMessage([]);
 
         const response = await crudRequest<Message[]>(
           "GET",
@@ -206,7 +239,7 @@ const ChatPage = () => {
           sender: msg.isCurrentUser ? "me" : selectedContact._id,
         }));
 
-        setMessages(transformedMessages);
+        setMessage(transformedMessages);
         setTimeout(scrollToBottom, 100);
       } catch (error) {
         console.error("Error fetching chat history:", error);
@@ -218,11 +251,43 @@ const ChatPage = () => {
     fetchChatHistory();
   }, [selectedContact?._id]);
 
+  useEffect(() => {
+    if (contactDetails) {
+      setSelectedContact(contactDetails);
+    } else if (selectedContactId) {
+      const contact = allContacts.find((c) => c._id === selectedContactId);
+      if (contact) {
+        setSelectedContact(contact);
+      }
+    }
+  }, [selectedContactId, contactDetails, allContacts]);
+
+  useEffect(() => {
+    if (scrollToMessageId && !isLoading && messages.length > 0) {
+      const messageElement = document.getElementById(
+        `message-${scrollToMessageId}`
+      );
+      if (messageElement) {
+        setTimeout(() => {
+          messageElement.scrollIntoView({
+            behavior: "smooth",
+            block: "end",
+          });
+          messageElement.classList.add("highlight-message");
+        }, 100); // Small delay to ensure rendering is complete
+      }
+    }
+  }, [scrollToMessageId, isLoading, messages, selectedContact]);
+
   return (
     <div className="h-[calc(100vh-4rem)] ">
       <div className="flex h-full">
         {/* Contacts Sidebar */}
-        <div className="flex flex-col border-r w-80 border-s3">
+        <div
+          className={`flex flex-col border-r ${
+            isSidebarOpen ? "w-80" : "w-20"
+          } border-s3`}
+        >
           {/* Search Bar */}
           <div className="p-4 border-b border-s3">
             <div className="relative">
@@ -240,7 +305,9 @@ const ChatPage = () => {
           <ScrollArea className="flex-1 scroll-hide">
             {/* Admins */}
             <div className="p-4">
-              <h3 className="px-3 mb-3 small-2 text-p3">Admins</h3>
+              <h3 className="px-3 mb-3 small-2 text-p3">
+                {isSidebarOpen ? "Admins" : "A"}
+              </h3>
               {filteredContacts
                 ?.filter(
                   (contact) =>
@@ -248,6 +315,7 @@ const ChatPage = () => {
                 )
                 .map((contact) => (
                   <ContactItem
+                    isSidebarOpen={isSidebarOpen}
                     key={contact._id}
                     contact={contact}
                     isSelected={selectedContact?._id === contact._id}
@@ -258,11 +326,14 @@ const ChatPage = () => {
 
             {/* Teachers */}
             <div className="p-4">
-              <h3 className="px-3 mb-3 small-2 text-p3">Teachers</h3>
+              <h3 className="px-3 mb-3 small-2 text-p3">
+                {isSidebarOpen ? "Teachers" : "T"}
+              </h3>
               {filteredContacts
                 ?.filter((contact) => contact.role === "faculty")
                 .map((contact) => (
                   <ContactItem
+                    isSidebarOpen={isSidebarOpen}
                     key={contact._id}
                     contact={contact}
                     isSelected={selectedContact?._id === contact._id}
@@ -273,11 +344,14 @@ const ChatPage = () => {
 
             {/* Students */}
             <div className="p-4">
-              <h3 className="px-3 mb-3 small-2 text-p3">Students</h3>
+              <h3 className="px-3 mb-3 small-2 text-p3">
+                {isSidebarOpen ? "Students" : "S"}
+              </h3>
               {filteredContacts
                 ?.filter((contact) => contact.role === "student")
                 .map((contact) => (
                   <ContactItem
+                    isSidebarOpen={isSidebarOpen}
                     key={contact._id}
                     contact={contact}
                     isSelected={selectedContact?._id === contact._id}
@@ -290,6 +364,15 @@ const ChatPage = () => {
 
         {/* Chat Area */}
         <div className="flex flex-col flex-1 bg-s1">
+          <div className="w-6 h-6 m-2 rounded-full bg-primary">
+            <button className="z-10 top-4 left-4" onClick={toggleSidebar}>
+              {isSidebarOpen ? (
+                <ArrowLeft className="w-6 h-6" />
+              ) : (
+                <ArrowRight className="w-6 h-6" />
+              )}
+            </button>
+          </div>
           {selectedContact ? (
             <>
               {/* Chat Header */}
@@ -323,75 +406,29 @@ const ChatPage = () => {
                     <div className="small-1 text-p3">No messages yet</div>
                   </div>
                 ) : (
-                  <>
-                    {messages.map((message, index) => {
-                      const showDate =
-                        index === 0 ||
-                        new Date(message.timestamp).toDateString() !==
-                          new Date(
-                            messages[index - 1].timestamp
-                          ).toDateString();
-
-                      const isSender = message.isCurrentUser;
-
-                      return (
-                        <div key={message._id} className="mb-6">
-                          {showDate && (
-                            <div className="flex justify-center mb-4">
-                              <div className="px-3 py-1 rounded-full small-1 text-p3 bg-s2/30">
-                                {new Date(message.timestamp).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    weekday: "long",
-                                    month: "long",
-                                    day: "numeric",
-                                  }
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          <div
-                            className={`flex ${
-                              isSender ? "justify-end" : "justify-start"
-                            }`}
-                          >
-                            {!isSender && (
-                              <Avatar className="w-8 h-8 mr-2">
-                                <AvatarImage src={selectedContact?.photo} />
-                                <AvatarFallback className="bg-s2 text-p4">
-                                  {selectedContact?.name[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                            )}
-                            <div
-                              className={`rounded-xl px-4 py-3 max-w-[70%] shadow-sm relative ${
-                                isSender ? "g2 text-p1" : "bg-s2/50 text-p4"
-                              }`}
-                            >
-                              <p className="base">{message.message}</p>
-                              <div className="flex items-center justify-end gap-1 mt-1">
-                                <span className="small-compact text-p3/75">
-                                  {formatMessageTime(message.timestamp)}
-                                </span>
-                                {isSender && (
-                                  <span className="small-compact text-p3/75">
-                                    {message.read ? "✓✓" : "✓"}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {typingUsers.has(selectedContact?._id || "") && (
-                      <div className="ml-4 italic small-1 text-p3">
-                        {selectedContact?.name} is typing...
+                  messages.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`flex mb-4 ${
+                        msg.isCurrentUser ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`p-3 rounded-lg shadow-md max-w-xs ${
+                          msg.isCurrentUser
+                            ? "bg-primary/10 text-foreground rounded-br-none"
+                            : "bg-foreground/10 text-foreground rounded-bl-none"
+                        }`}
+                      >
+                        <p className="small-1">{msg.message}</p>
+                        <span className="block mt-1 text-xs text-gray-500">
+                          {formatMessageTime(msg.timestamp)}
+                        </span>
                       </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </>
+                    </div>
+                  ))
                 )}
+                <div ref={messagesEndRef} />
               </ScrollArea>
 
               {/* Message Input */}
@@ -435,10 +472,12 @@ const ChatPage = () => {
 const ContactItem = ({
   contact,
   isSelected,
+  isSidebarOpen,
   onClick,
 }: {
   contact: Contact;
   isSelected: boolean;
+  isSidebarOpen: boolean;
   onClick: () => void;
 }) => (
   <div
@@ -447,7 +486,9 @@ const ContactItem = ({
     }`}
     onClick={onClick}
   >
-    <div className="flex items-center space-x-2">
+    <div
+      className={`  ${isSidebarOpen ? "space-x-2 flex items-center" : "space-x-0 block items-start"}`}
+    >
       <Avatar>
         <AvatarImage src={contact.photo} />
         <AvatarFallback>
@@ -458,12 +499,14 @@ const ContactItem = ({
             .toUpperCase()}
         </AvatarFallback>
       </Avatar>
-      <div>
-        <div className="font-medium">{contact.name}</div>
-        <div className="text-sm capitalize text-secondary-foreground/50">
-          {contact.role}
+      {isSidebarOpen && (
+        <div>
+          <div className="font-medium">{contact.name}</div>
+          <div className="text-sm capitalize text-secondary-foreground/50">
+            {contact.role}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   </div>
 );

@@ -11,12 +11,12 @@ import { SidebarProvider } from "@/hooks/use-sidebar";
 import PackageProvider from "@/context/packageContext";
 import NotificationProvider from "./notificationProvider";
 import AdminProvider from "@/context/adminContext";
+import { MessageProvider } from "./messageProvider";
 
 export const queryClient = new QueryClient();
 
 const ErrorFallback = ({ error }: FallbackProps) => {
   const router = useRouter();
-  console.log("error", error);
   return (
     <div
       className="flex flex-col items-center justify-center w-screen h-screen text-red-500"
@@ -49,12 +49,14 @@ export default function AppProvider({
               <PackageProvider>
                 <AdminProvider>
                   <NotificationProvider>
-                    <ThemeProvider
-                      defaultTheme="dark"
-                      storageKey="vite-ui-theme"
-                    >
-                      <SidebarProvider>{children}</SidebarProvider>
-                    </ThemeProvider>
+                    <MessageProvider>
+                      <ThemeProvider
+                        defaultTheme="dark"
+                        storageKey="vite-ui-theme"
+                      >
+                        <SidebarProvider>{children}</SidebarProvider>
+                      </ThemeProvider>
+                    </MessageProvider>
                   </NotificationProvider>
                 </AdminProvider>
               </PackageProvider>

@@ -14,7 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import QuizForm from "./quiz-form"; // We'll create this component next
-import { useRouter } from "@/routes/hooks";
 
 interface Quiz {
   _id: string;
@@ -38,7 +37,6 @@ export default function QuizPage() {
     isOpen: false,
     quizId: null,
   });
-  const router = useRouter();
 
   useEffect(() => {
     fetchQuizzes();
