@@ -37,6 +37,9 @@ const RecycleBinPage = lazy(() => import("@/pages/recyclebin"));
 const TakeQuiz = lazy(() => import("@/pages/quiz/take/[id]"));
 const IdCardPage = lazy(() => import("@/pages/id_card"));
 const ChatPage = lazy(() => import("@/pages/chat"));
+const ComplainPage = lazy(() => import("@/pages/complain"));
+const NoticePage = lazy(() => import("@/pages/notices"));
+
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
     {
@@ -148,7 +151,7 @@ const AppRouter: React.FC = () => {
           path: "notice",
           element: (
             <PremiumPlusRoute>
-              <h1>notice</h1>
+              <NoticePage />
             </PremiumPlusRoute>
           ),
         },
@@ -172,7 +175,7 @@ const AppRouter: React.FC = () => {
           path: "complain",
           element: (
             <PremiumPlusRoute>
-              <h1>complain</h1>
+              <ComplainPage />
             </PremiumPlusRoute>
           ),
         },

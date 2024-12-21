@@ -57,6 +57,7 @@ import StudentDashboard from "./student/StudentDashboard";
 import StudentComponent from "@/components/shared/StudentComponent";
 import TeacherComponent from "@/components/shared/TeacherComponent";
 import TeacherDashboard from "./teacher/TeacherDashboard";
+import ReceptionComponent from "@/components/shared/ReceptionComponent";
 
 type Dashboard = {
   totalAmount: string;
@@ -285,71 +286,72 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("yearly");
   const [course, setCourse] = useState<Course>();
 
-  const fetchDashboardData = async () => {
-    try {
-      setDashboardLoading(true);
-      const response = await crudRequest<Dashboard>(
-        "GET",
-        "/student/dashboard"
-      );
-      if (response) {
-        setDashboard(response);
-      } else {
-        setError("Unexpected response format");
-      }
-    } catch (error) {
-      setError("Error fetching dashboard data");
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setDashboardLoading(false);
-    }
-  };
-
-  const fetchAlertData = async () => {
-    try {
-      setAlertLoading(true);
-      const response = await crudRequest<Alert[]>(
-        "GET",
-        "/student/students-with-remaining"
-      );
-      if (response) {
-        setAlert(response);
-      } else {
-        setError("Unexpected response format");
-      }
-    } catch (error) {
-      setError("Error fetching alert data");
-      console.error("Error fetching alert data:", error);
-    } finally {
-      setAlertLoading(false);
-    }
-  };
-
-  const fetchCourseData = async (period: string) => {
-    try {
-      setCourseLoading(true);
-      const response = await crudRequest<Course>(
-        "GET",
-        `/student/count-students-by-courses?period=${period}`
-      );
-      if (response) {
-        setCourse(response);
-      } else {
-        setError("Unexpected response format");
-      }
-    } catch (error) {
-      setError("Error fetching course data");
-      console.error("Error fetching course data:", error);
-    } finally {
-      setCourseLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setDashboardLoading(true);
+        const response = await crudRequest<Dashboard>(
+          "GET",
+          "/student/dashboard"
+        );
+        if (response) {
+          setDashboard(response);
+        }
+      } catch (error) {
+        setError("Error fetching dashboard data");
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setDashboardLoading(false);
+      }
+    };
+
+    const fetchAlertData = async () => {
+      try {
+        setAlertLoading(true);
+        const response = await crudRequest<Alert[]>(
+          "GET",
+          "/student/students-with-remaining"
+        );
+        if (response) {
+          setAlert(response);
+        }
+      } catch (error) {
+        setError("Error fetching alert data");
+        console.error("Error fetching alert data:", error);
+      } finally {
+        setAlertLoading(false);
+      }
+    };
+
+    const fetchCourseData = async (period: string) => {
+      try {
+        setCourseLoading(true);
+        const response = await crudRequest<Course>(
+          "GET",
+          `/student/count-students-by-courses?period=${period}`
+        );
+        if (response) {
+          setCourse(response);
+        }
+      } catch (error) {
+        setError("Error fetching course data");
+        console.error("Error fetching course data:", error);
+      } finally {
+        setCourseLoading(false);
+      }
+    };
     fetchDashboardData();
     fetchAlertData();
     fetchCourseData(selectedPeriod);
-  }, [selectedPeriod]);
+  }, [
+    selectedPeriod,
+    setCourse,
+    setAlert,
+    setDashboard,
+    setDashboardLoading,
+    setAlertLoading,
+    setCourseLoading,
+  ]);
 
   const DashboardSkeleton = () => (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -436,8 +438,10 @@ export default function DashboardPage() {
               <TabsTrigger value="overview">Overview</TabsTrigger>
             </TeacherComponent>
             <PremiumComponent>
-              <AdminComponent>
+              <ReceptionComponent>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+              </ReceptionComponent>
+              <AdminComponent>
                 <TabsTrigger value="accounting">Accounting</TabsTrigger>
                 <SuperAdminComponent>
                   <TabsTrigger value="control">Control</TabsTrigger>

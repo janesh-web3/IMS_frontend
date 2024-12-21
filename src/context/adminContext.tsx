@@ -1,4 +1,5 @@
 import { crudRequest } from "@/lib/api";
+import { Student } from "@/types";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface Notification {
@@ -8,9 +9,15 @@ interface Notification {
   createdAt: string;
   _id: string;
 }
+
+interface TeacherInfo {
+  name: string;
+}
+
 interface AdminDetails {
   role: string;
   username: string;
+  user: Student | TeacherInfo;
   notifications: {
     isRead: boolean;
     notificationId: Notification;
@@ -24,7 +31,12 @@ const initialState: AdminDetails = {
   username: "",
   notifications: [],
   _id: "",
+  user: {} as Student | TeacherInfo,
 };
+
+if (initialState.role === "teacher") {
+  initialState.user = { name: "" };
+}
 
 // Define the shape of the context
 interface AdminContextType {
@@ -50,7 +62,7 @@ export default function AdminProvider({ children }: AdminProviderProps) {
     try {
       const response = await crudRequest<AdminDetails>("GET", "/user/get-role");
       setAdminDetails(response);
-      console.log(response);
+      console.log("Fetched admin details:", response);
     } catch (error) {
       console.error("Failed to fetch admin details:", error);
     }

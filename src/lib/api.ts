@@ -7,7 +7,7 @@ const token = sessionStorage.getItem("token");
 
 const axiosInstance = axios.create({
   baseURL: server,
-  timeout: 10000,
+  timeout: 50000,
   headers: {
     "Content-Type": "application/json",
     Authorization: token,
