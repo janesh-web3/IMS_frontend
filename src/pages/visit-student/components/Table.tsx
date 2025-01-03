@@ -76,9 +76,11 @@ type VisitStudent = {
   address: string;
   gender: string;
   dateOfVisit: string;
+  message : string;
   courses: StudentCourse[];
   photo?: string;
   schoolName: string;
+  admission : boolean;
 };
 
 type SubjectEnroll = {
@@ -111,9 +113,7 @@ export function VisitStudentTable() {
     setCurrentPage(page);
   };
 
-  useEffect(() => {
-    fetchStudent(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+
 
   //search functionality
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -209,6 +209,8 @@ export function VisitStudentTable() {
     fetchCourses();
   }, [currentPage, itemsPerPage, searchQuery]);
 
+
+
   useEffect(() => {
     let filtered = student;
 
@@ -235,6 +237,17 @@ export function VisitStudentTable() {
     setFilteredStudents(student);
   }, [student]);
 
+  const updateAdmission = async (id: string) => {
+    try {
+      await crudRequest("PUT", `/visit/update-admission/${id}`);
+      fetchStudent(currentPage, itemsPerPage);
+      toast.success("Admission updated successfully");
+    } catch (error) {
+      console.error("Error updating admission:", error);
+      toast.error("Failed to update admission");
+    }
+  }
+
   // if (error) return <div>{error}</div>;
 
   const renderStudentTable = () => (
@@ -242,10 +255,12 @@ export function VisitStudentTable() {
       <TableHeader className="sticky top-0 bg-background">
         <TableRow>
           {columnVisibility.name && <TableHead>Name</TableHead>}
-          {columnVisibility.gender && <TableHead>Gender</TableHead>}
           {columnVisibility.contact && <TableHead>Contact</TableHead>}
-          {columnVisibility.address && <TableHead>Address</TableHead>}
           {columnVisibility.schoolName && <TableHead>School</TableHead>}
+          {columnVisibility.gender && <TableHead>Gender</TableHead>}
+          {columnVisibility.address && <TableHead>Address</TableHead>}
+           <TableHead>Admission</TableHead>
+           <TableHead>Messages</TableHead>
           {columnVisibility.dateOfVisit && <TableHead>Visit Date</TableHead>}
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
@@ -256,7 +271,7 @@ export function VisitStudentTable() {
             <TableCell colSpan={7}>No student a vailable</TableCell>
           </TableRow>
         ) : (
-          filteredStudents.map((student, index) => (
+          filteredStudents &&  filteredStudents.map((student, index) => (
             <TableRow key={index}>
               {columnVisibility.name && (
                 <TableCell className="font-medium">
@@ -280,6 +295,8 @@ export function VisitStudentTable() {
               {columnVisibility.address && (
                 <TableCell className="table-cell">{student.address}</TableCell>
               )}
+              <TableCell className="table-cell">{student.admission ? <span className="text-green-500">Done</span>: <span className="text-red-500">Pending</span>}</TableCell>
+              <TableCell className="table-cell">{student.message}</TableCell>
               {columnVisibility.dateOfVisit && (
                 <TableCell className="table-cell">
                   <span>
@@ -309,6 +326,14 @@ export function VisitStudentTable() {
                           View <View size={17} />
                         </DropdownMenuItem>
                       </DrawerTrigger>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            updateAdmission(student._id);
+                          }}
+                          className="flex justify-between cursor-pointer"
+                        >
+                          Do Admission
+                        </DropdownMenuItem>
                       <AdminComponent>
                         <DropdownMenuItem
                           onClick={() => {

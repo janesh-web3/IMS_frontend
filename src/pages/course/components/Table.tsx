@@ -46,7 +46,10 @@ export function CourseTable() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<{ isOpen: boolean; courseId: string | null }>({
+    isOpen: false,
+    courseId: null
+  });
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const fetchCourses = async (search?: string) => {
@@ -69,16 +72,18 @@ export function CourseTable() {
     }
   };
 
-  const onConfirm = async (id: string) => {
+  const onConfirm = async () => {
+    if (!open.courseId) return;
+    
     try {
-      const success = await moveToRecycleBin("Course", id);
+      const success = await moveToRecycleBin("Course", open.courseId);
       if (success) {
-        setOpen(false);
+        setOpen({ isOpen: false, courseId: null });
         fetchCourses();
       }
     } catch (error) {
       console.error("Error deleting course:", error);
-      setOpen(false);
+      setOpen({ isOpen: false, courseId: null });
     }
   };
 
@@ -173,8 +178,8 @@ export function CourseTable() {
               </TableRow>
             ) : (
               courses.map((course, index) => (
-                <TableRow>
-                  <TableCell className="font-medium" key={index}>
+                <TableRow key={course._id}>
+                  <TableCell className="font-medium">
                     {index + 1}
                   </TableCell>
                   <Link to={`/course/${course._id}`}>
@@ -202,9 +207,9 @@ export function CourseTable() {
 
                   <TableCell className="cursor-pointer">
                     <AlertModal
-                      isOpen={open}
-                      onClose={() => setOpen(false)}
-                      onConfirm={() => onConfirm(course._id)}
+                      isOpen={open.isOpen && open.courseId === course._id}
+                      onClose={() => setOpen({ isOpen: false, courseId: null })}
+                      onConfirm={onConfirm}
                       loading={loading}
                     />
                     <DropdownMenu modal={false}>
@@ -224,7 +229,7 @@ export function CourseTable() {
                         </Link>
                         <AdminComponent>
                           <DropdownMenuItem
-                            onClick={() => setOpen(true)}
+                            onClick={() => setOpen({ isOpen: true, courseId: course._id })}
                             className="cursor-pointer"
                           >
                             <Trash className="w-4 h-4 mr-2" /> Delete

@@ -18,6 +18,7 @@ import {
 import { crudRequest } from "@/lib/api";
 import { Courses } from "@/types";
 import { useEffect, useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface UpdateModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ interface UpdateModalProps {
     studentNumber: string;
     schoolName: string;
     address: string;
+    message : string;
     gender: string;
     courses: Array<{
       courseEnroll: { _id: string; name: string };
@@ -50,6 +52,7 @@ export function UpdateModal({
     studentNumber: string;
     schoolName: string;
     address: string;
+    message : string;
     gender: string;
     courses: Array<{
       courseEnroll: { _id: string; name: string };
@@ -62,6 +65,7 @@ export function UpdateModal({
     studentNumber: initialData?.studentNumber || "",
     schoolName: initialData?.schoolName || "",
     address: initialData?.address || "",
+    message : initialData?.message || "",
     gender: initialData?.gender || "",
     courses: [],
   });
@@ -76,6 +80,7 @@ export function UpdateModal({
         studentNumber: initialData.studentNumber,
         schoolName: initialData.schoolName,
         address: initialData.address,
+        message : initialData.message,
         gender: initialData.gender,
         courses: initialData.courses,
       });
@@ -163,7 +168,7 @@ export function UpdateModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[800px]">
+      <DialogContent className="max-w-[800px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Update Visit Student</DialogTitle>
         </DialogHeader>
@@ -199,6 +204,14 @@ export function UpdateModal({
                 id="schoolName"
                 value={formData.schoolName}
                 onChange={(e) => handleChange("schoolName", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="message">Messages</Label>
+              <Textarea
+                id="message"
+                value={formData.message}
+                onChange={(e) => handleChange("message", e.target.value)}
               />
             </div>
             <div>

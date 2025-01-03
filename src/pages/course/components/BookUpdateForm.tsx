@@ -55,7 +55,7 @@ const BookUpdateForm = ({
       toast.error("Failed to update book");
     } finally {
       setLoading(false);
-    }
+    } 
   };
 
   return (

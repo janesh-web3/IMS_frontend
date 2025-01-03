@@ -8,13 +8,7 @@ import {
   CardFooter,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Pagination,
   PaginationContent,
@@ -24,9 +18,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
   ChevronRight,
-  Copy,
-  MoreVertical,
-  Truck,
 } from "lucide-react";
 
 import React from "react";
@@ -75,6 +66,7 @@ type PersonalInfo = {
   contactNo: string;
   billNo: Bill[];
   email: string;
+  password: string;
   admissionNumber: string;
   paymentDeadline: string;
   guardianName: string;
@@ -123,38 +115,8 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({
             <div className="grid gap-0.5">
               <CardTitle className="flex items-center gap-2 text-lg group">
                 {personalInfo.studentName}
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="w-6 h-6 transition-opacity opacity-0 group-hover:opacity-100"
-                >
-                  <Copy className="w-3 h-3" />
-                  <span className="sr-only">Copy Order ID</span>
-                </Button>
               </CardTitle>
               <CardDescription>{personalInfo.schoolName}</CardDescription>
-            </div>
-            <div className="flex items-center gap-1 ml-auto">
-              <Button size="sm" variant="outline" className="h-8 gap-1">
-                <Truck className="h-3.5 w-3.5" />
-                <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                  Track Order
-                </span>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button size="icon" variant="outline" className="w-8 h-8">
-                    <MoreVertical className="h-3.5 w-3.5" />
-                    <span className="sr-only">More</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Export</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Trash</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </CardHeader>
           <CardContent className="p-6 text-sm">
@@ -175,6 +137,10 @@ const StudentDetails: React.FC<StudentDetailsProps> = ({
                   <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">Email</span>
                     <span>{personalInfo.email}</span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Password</span>
+                    <span>{personalInfo.password}</span>
                   </li>
                   <li className="flex items-center justify-between">
                     <span className="text-muted-foreground">Contact Us </span>

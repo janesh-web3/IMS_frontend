@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -40,9 +41,13 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       paymentMethod: "",
     },
   });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   // Handle form submission
   const onSubmit = async (values: StudentFormSchemaType) => {
+    setIsSubmitting(true);
+
     try {
       await crudRequest("POST", "/recipt/add-recipt", values);
       toast.success("Receipt added successfully");
@@ -67,6 +72,9 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     } catch (error) {
       console.error("Error adding receipt:", error);
       toast.error("Error adding receipt");
+    }finally{
+      setIsSubmitting(false);
+
     }
   };
 
@@ -167,8 +175,8 @@ const ReciptCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full" size="lg">
-              Create Receipt
+            <Button type="submit" disabled={isSubmitting} className="rounded-full" size="lg">
+            {isSubmitting ? "Creating..." : "Create Receipt"}
             </Button>
           </div>
         </form>

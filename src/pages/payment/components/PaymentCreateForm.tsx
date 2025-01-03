@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -40,9 +41,13 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       paymentMethod: "",
     },
   });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   // Handle form submission
   const onSubmit = async (values: StudentFormSchemaType) => {
+    setIsSubmitting(true);
+
     try {
       const notificationPayload = {
         title: "New Payment Added",
@@ -65,6 +70,9 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     } catch (error) {
       console.error("Error adding payment:", error);
       toast.error("Failed to add payment");
+    }finally{
+      setIsSubmitting(false);
+
     }
   };
 
@@ -167,7 +175,7 @@ const PaymentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               Cancel
             </Button>
             <Button type="submit" className="rounded-full" size="lg">
-              Create Payment
+            {isSubmitting ? "Creating..." : "Create Payment"}
             </Button>
           </div>
         </form>

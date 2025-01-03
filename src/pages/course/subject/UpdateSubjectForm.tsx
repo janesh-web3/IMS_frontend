@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -38,6 +38,8 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
       regularFee: "",
     },
   });
+      const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   useEffect(() => {
     const fetchCourse = () => {
@@ -56,6 +58,8 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
   }, [id, form]);
 
   const onSubmit = async (values: CourseFormSchemaType) => {
+    setIsSubmitting(true);
+
     const data = {
       subjectName: values.subjectName,
       monthlyFee: values.monthlyFee,
@@ -72,22 +76,32 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
       sound: true,
     };
 
-    await crudRequest("PUT", `/subject/update-subject/${id}`, data)
-      .then(() => {
-        toast.success("Subject updated successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      })
-      .catch(() => {
-        toast.error("Failed to updated subject");
-      });
+    try {
+      
+      await crudRequest("PUT", `/subject/update-subject/${id}`, data)
+        .then(() => {
+          toast.success("Subject updated successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        })
+        .catch(() => {
+          toast.error("Failed to updated subject");
+        });
+  
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+    } catch (error) {
+      toast.error("Failed to update subject");
+      
+    }finally{
+      setIsSubmitting(false);
 
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
+    }
+
   };
 
   return (
@@ -157,7 +171,8 @@ const UpdateSubjectForm = ({ id }: { id: string }) => {
 
             <div className="flex items-center justify-center gap-4">
               <Button type="submit" className="rounded-full" size="lg">
-                Update Subject
+                
+                  {isSubmitting ? "Updating..." : " Update Subject"}
               </Button>
             </div>
           </form>

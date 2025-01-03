@@ -98,7 +98,7 @@ export function Transactions() {
       </div>
 
       {/* Summary Cards */}
-      {summaryLoading ? (
+      {summaryLoading && summaryLoading ? (
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
           {[1, 2, 3, 4, 5].map((i) => (
             <Card key={i}>
@@ -112,7 +112,7 @@ export function Transactions() {
             </Card>
           ))}
         </div>
-      ) : summary ? (
+      ) : summary && summary ? (
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-5">
           <Card>
             <CardHeader>
@@ -121,7 +121,7 @@ export function Transactions() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-xl font-bold">{summary.totalCount}</div>
+              <div className="text-xl font-bold">{summary?.totalCount}</div>
             </CardContent>
           </Card>
           <Card>
@@ -132,11 +132,11 @@ export function Transactions() {
             </CardHeader>
             <CardContent>
               <div className="text-xl font-bold">
-                {formatCurrency(summary.totalAmount)}
+                {formatCurrency(summary?.totalAmount)}
               </div>
             </CardContent>
           </Card>
-          {Object.entries(summary.byReferenceModel).map(([model, data]) => (
+          {summary && summary.byReferenceModel && Object.entries(summary?.byReferenceModel).map(([model, data]) => (
             <Card key={model}>
               <CardHeader>
                 <CardTitle className="text-sm font-medium">
@@ -144,9 +144,9 @@ export function Transactions() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-xl font-bold">{data.count}</div>
+                <div className="text-xl font-bold">{data?.count}</div>
                 <p className="text-xs text-muted-foreground">
-                  {formatCurrency(data.amount)}
+                  {formatCurrency(data?.amount)}
                 </p>
               </CardContent>
             </Card>
@@ -212,10 +212,10 @@ export function Transactions() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
-                    <TableRow key={transaction.id}>
+                  {transactions && transactions.map((transaction) => (
+                    <TableRow key={transaction?.id}>
                       <TableCell>
-                        {new Date(transaction.date).toLocaleDateString(
+                        {new Date(transaction?.date).toLocaleDateString(
                           "en-IN",
                           {
                             day: "2-digit",
@@ -226,21 +226,21 @@ export function Transactions() {
                           }
                         )}
                       </TableCell>
-                      <TableCell>{transaction.description}</TableCell>
-                      <TableCell>{transaction.category}</TableCell>
+                      <TableCell>{transaction?.description}</TableCell>
+                      <TableCell>{transaction?.category}</TableCell>
                       <TableCell>
-                        {transaction.referenceModel} #{transaction.referenceId}
+                        {transaction?.referenceModel} #{transaction?.referenceId}
                       </TableCell>
                       <TableCell>{transaction.paymentMethod}</TableCell>
                       <TableCell
                         className={`text-right ${
-                          transaction.type === "income"
+                          transaction?.type === "income"
                             ? "text-green-600"
                             : "text-red-600"
                         }`}
                       >
-                        {transaction.type === "expense" ? "-" : "+"}
-                        {formatCurrency(transaction.amount)}
+                        {transaction?.type === "expense" ? "-" : "+"}
+                        {formatCurrency(transaction?.amount)}
                       </TableCell>
                     </TableRow>
                   ))}

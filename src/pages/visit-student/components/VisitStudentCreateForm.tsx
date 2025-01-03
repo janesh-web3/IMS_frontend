@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { crudRequest } from "@/lib/api";
 import { Courses } from "@/types";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     address: "",
     gender: "",
     courses: [],
+    message : "",
   });
   const [coursesData, setCourseData] = useState<Courses[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
@@ -169,6 +171,15 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 placeholder="Enter student school name"
                 value={formData.schoolName}
                 onChange={(e) => handleChange("schoolName", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="message">Messages</Label>
+              <Textarea
+                id="message"
+                placeholder="Enter messages"
+                value={formData.message}
+                onChange={(e) => handleChange("message", e.target.value)}
               />
             </div>
             <div>

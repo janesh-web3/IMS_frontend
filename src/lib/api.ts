@@ -37,6 +37,7 @@ export const moveToRecycleBin = async (type: string, id: string) => {
   try {
     await crudRequest("PUT", `/recycle/move-to-bin/${type}/${id}`);
     toast.success("Item moved to recycle bin");
+    window.location.reload();
     return true;
   } catch (error) {
     toast.error("Failed to move item to recycle bin");

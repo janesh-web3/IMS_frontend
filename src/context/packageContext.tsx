@@ -16,7 +16,7 @@ interface PackageDetails {
 
 // Define the initial state for the basic plan
 const initialState: PackageDetails = {
-  plan: "Basic", // Initial plan is 'basic'
+  plan: "PremiumPlus", // Initial plan is 'basic'
   features: {
     studentsLimit: 100,
     analytics: false,

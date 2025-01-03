@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -27,8 +28,11 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       name: "",
     },
   });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   const onSubmit = async (values: CourseFormSchemaType) => {
+    setIsSubmitting(true);
     const notificationPayload = {
       title: "New Course Added",
       message: `A course ${values.name} has been created.`,
@@ -38,24 +42,33 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       sound: true,
     };
 
-    const response = await crudRequest<{ success: boolean }>(
-      "POST",
-      "/course/add-course",
-      values
-    );
-
-    if (response.success) {
-      await crudRequest(
+    try {
+      const response = await crudRequest<{ success: boolean }>(
         "POST",
-        "/notification/add-notification",
-        notificationPayload
+        "/course/add-course",
+        values
       );
-      toast.success("Course added successfully");
-      modalClose();
-      window.location.reload();
-    } else {
+  
+      if (response.success) {
+        await crudRequest(
+          "POST",
+          "/notification/add-notification",
+          notificationPayload
+        );
+        toast.success("Course added successfully");
+        window.location.reload();
+        modalClose();
+      } else {
+        toast.error("Failed to add course");
+      }
+    } catch (error) {
       toast.error("Failed to add course");
+      
+    }finally{
+      setIsSubmitting(false);
+
     }
+  
   };
 
   return (
@@ -100,8 +113,9 @@ const CourseCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full" size="lg">
-              Create Course
+             
+              <Button  disabled={isSubmitting}  type="submit" className="rounded-full" size="lg">
+               {isSubmitting ? "Creating..." : "Create Course"}
             </Button>
           </div>
         </form>

@@ -18,6 +18,42 @@ module.exports = {
     },
     extend: {
       colors: {
+        dashboard1 : {
+          DEFAULT: "hsl(var(--dashboard1))",
+        },
+        dashboard2 : {
+          DEFAULT: "hsl(var(--dashboard2))",
+        },
+        dashboard3 : {
+          DEFAULT: "hsl(var(--dashboard3))",
+        },
+        dashboard4 : {
+          DEFAULT: "hsl(var(--dashboard4))",
+        },
+        dashboard5 : {
+          DEFAULT: "hsl(var(--dashboard5))",
+        },
+        dashboard6 : {
+          DEFAULT: "hsl(var(--dashboard6))",
+        },
+        dashboard7 : {
+          DEFAULT: "hsl(var(--dashboard7))",
+        },
+        dashboard8 : {
+          DEFAULT: "hsl(var(--dashboard8))",
+        },
+        dashboard9 : {
+          DEFAULT: "hsl(var(--dashboard9))",
+        },
+        dashboard10 : {
+          DEFAULT: "hsl(var(--dashboard10))",
+        },
+        dashboard11 : {
+          DEFAULT: "hsl(var(--dashboard11))",
+        },
+        dashboard12 : {
+          DEFAULT: "hsl(var(--dashboard12))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -38,6 +38,23 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    
+    /* dashboard */
+    --dashboard1:48 96.6% 76.7%;
+    --dashboard2:168.4 83.8% 78.2%;
+    --dashboard3:214.3 94.6% 92.7%;
+    --dashboard4:149.3 80.4% 90%;
+    --dashboard5:48 96.5% 88.8%;
+    --dashboard6:251.4 91.3% 95.5%;
+    --dashboard7:355.6 100% 94.7%;
+    --dashboard8:220 14.3% 95.9%;
+    --dashboard9:60 4.8% 95.9%;
+    --dashboard10:141 78.9% 85.1%;
+    --dashboard11:213.3 96.9% 87.3%;
+    --dashboard12:80.9 88.5% 79.6%;
+
+    --calander: 0;
   }
 
   .dark {
@@ -73,6 +90,23 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* dashboard */
+    --dashboard1:35.5 91.7% 32.9%;
+    --dashboard2: 175.3 77.4% 26.1%;
+    --dashboard3: 224.4 64.3% 32.9%;
+    --dashboard4: 164.2 85.7% 16.5%;
+    --dashboard5: 21.7 77.8% 26.5%;
+    --dashboard6: 263.5 67.4% 34.9%;
+    --dashboard7: 341.5 75.5% 30.4%;
+    --dashboard8: 220.9 39.3% 11%;
+    --dashboard9: 12 6.5% 15.1%;
+    --dashboard10: 142.4 71.8% 29.2%;
+    --dashboard11: 224.3 76.3% 48%;
+    --dashboard12: 86.3 69% 22.7%;
+
+
+    --calander: 1;
   }
 }
 
@@ -720,4 +754,19 @@
   50% {
     background-color: rgba(59, 130, 246, 0.1);
   }
+}
+
+
+.time-input::-webkit-calendar-picker-indicator,
+.date-input::-webkit-calendar-picker-indicator {
+  filter: invert(var(--calander));
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 4px;
+}
+
+.time-input::-webkit-calendar-picker-indicator:hover,
+.date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }

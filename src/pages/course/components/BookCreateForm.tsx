@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { crudRequest } from "@/lib/api";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 const bookFormSchema = z.object({
   name: z.string().min(1, { message: "Book name is required" }),
@@ -42,6 +43,7 @@ const BookCreateForm = ({
   courseId: string;
   modalClose: () => void;
 }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<BookFormSchemaType>({
     resolver: zodResolver(bookFormSchema),
     defaultValues: {
@@ -53,6 +55,8 @@ const BookCreateForm = ({
   });
 
   const onSubmit = async (values: BookFormSchemaType) => {
+    setIsSubmitting(true);
+
     try {
       const response = await crudRequest<BookResponse>(
         "POST",
@@ -71,6 +75,9 @@ const BookCreateForm = ({
       }
     } catch (error) {
       toast.error("Error adding book");
+    }finally{
+      setIsSubmitting(false);
+
     }
   };
 
@@ -151,10 +158,10 @@ const BookCreateForm = ({
         />
 
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={modalClose}>
+          <Button  type="button" variant="outline" onClick={modalClose}>
             Cancel
           </Button>
-          <Button type="submit">Add Book</Button>
+          <Button type="submit"  disabled={isSubmitting}>   {isSubmitting ? "Adding..." : "Add Book"}</Button>
         </div>
       </form>
     </Form>

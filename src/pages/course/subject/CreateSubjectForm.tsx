@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -34,8 +35,12 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   });
 
   const { id } = useParams();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const onSubmit = async (values: CourseFormSchemaType) => {
+    setIsSubmitting(true);
+
     const data = {
       subjectName: values.subjectName,
       monthlyFee: values.monthlyFee,
@@ -52,22 +57,32 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       sound: true,
     };
 
-    await crudRequest("POST", "/subject/add-subject", data)
-      .then(() => {
-        toast.success("Subject added successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      })
-      .catch(() => {
-        toast.error("Failed to add subject");
-      });
+    try {
+      await crudRequest("POST", "/subject/add-subject", data)
+        .then(() => {
+          toast.success("Subject added successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        })
+        .catch(() => {
+          toast.error("Failed to add subject");
+        });
+  
+      await crudRequest(
+        "POST",
+        "/notification/add-notification",
+        notificationPayload
+      );
+      
+    } catch (error) {
+      toast.error("Failed to add subject");
+      
+    }finally{
+      setIsSubmitting(false);
 
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
+    }
+
   };
 
   return (
@@ -144,8 +159,8 @@ const SubjectCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full" size="lg">
-              Create Subject
+            <Button  disabled={isSubmitting}  type="submit" className="rounded-full" size="lg">
+              {isSubmitting ? "Creating..." : " Create Subject"}
             </Button>
           </div>
         </form>

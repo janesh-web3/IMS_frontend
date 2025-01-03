@@ -181,7 +181,7 @@ export function HandOverTable() {
         <AdminComponent>
           <div className="flex gap-3">
             <PopupModal
-              text="Add Payment"
+              text="Add HandOver"
               icon={<Plus className="w-4 h-4 mr-2" />}
               renderModal={(onClose) => (
                 <HandOverCreateForm modalClose={onClose} />

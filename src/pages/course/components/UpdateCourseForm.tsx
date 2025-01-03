@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { crudRequest } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -36,6 +36,8 @@ const UpdateCourseForm = ({ id, onCourseUpdated }: UpdateCourseFormProps) => {
       name: "",
     },
   });
+      const [isSubmitting, setIsSubmitting] = useState(false);
+  
 
   useEffect(() => {
     const fetchCourse = () => {
@@ -50,6 +52,7 @@ const UpdateCourseForm = ({ id, onCourseUpdated }: UpdateCourseFormProps) => {
   }, [id, form]);
 
   const onSubmit = async (values: CourseFormSchemaType) => {
+    setIsSubmitting(true);
     const notificationPayload = {
       title: " Course Updated",
       message: `A course name ${values.name} has been updated.`,
@@ -59,20 +62,30 @@ const UpdateCourseForm = ({ id, onCourseUpdated }: UpdateCourseFormProps) => {
       sound: true,
     };
 
+    try {
+      
     await crudRequest("PUT", `/course/update-course/${id}`, values)
-      .then(() => {
-        toast.success("Course updated successfully");
-        onCourseUpdated();
-      })
-      .catch(() => {
-        toast.error("Failed to update course");
-      });
+    .then(() => {
+      toast.success("Course updated successfully");
+      onCourseUpdated();
+    })
+    .catch(() => {
+      toast.error("Failed to update course");
+    });
 
-    await crudRequest(
-      "POST",
-      "/notification/add-notification",
-      notificationPayload
-    );
+  await crudRequest(
+    "POST",
+    "/notification/add-notification",
+    notificationPayload
+  );
+    } catch (error) {
+      toast.error("Failed to update course");
+      
+    }finally{
+      setIsSubmitting(false);
+
+    }
+
   };
 
   return (
@@ -108,8 +121,8 @@ const UpdateCourseForm = ({ id, onCourseUpdated }: UpdateCourseFormProps) => {
           </div>
 
           <div className="flex items-center justify-center gap-4">
-            <Button type="submit" className="rounded-full" size="lg">
-              Update Course
+            <Button disabled={isSubmitting}   type="submit" className="rounded-full" size="lg">
+            {isSubmitting ? "Updating..." : "Update Course"}
             </Button>
           </div>
         </form>

@@ -74,6 +74,8 @@ export interface StudentDetails {
 const StudentUpdateForm = () => {
   const [step, setStep] = useState(1);
   const { id } = useParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   //step-1
   const [personalInfo, setPersonalInfo] = useState({
     studentName: "",
@@ -374,6 +376,7 @@ const StudentUpdateForm = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const formattedDateOfBirth = personalInfo.dateOfBirth
       ? format(personalInfo.dateOfBirth, "yyyy-MM-dd")
@@ -444,6 +447,8 @@ const StudentUpdateForm = () => {
       .catch((err) => {
         toast.error("Error updating student");
         console.error("Error updating student:", err);
+      }).finally(() => {
+        setIsSubmitting(false);
       });
     await crudRequest(
       "POST",
@@ -990,8 +995,9 @@ const StudentUpdateForm = () => {
               className="rounded-full max-w-40"
               size="lg"
               onClick={onSubmit}
+              disabled={isSubmitting}
             >
-              Update
+             {isSubmitting ? "Updating..." : "Update"}
             </Button>
           )}
         </div>

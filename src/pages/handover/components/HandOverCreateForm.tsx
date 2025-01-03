@@ -39,6 +39,7 @@ type AdminUser = {
 const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [receptions, setReceptions] = useState<AdminUser[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -78,6 +79,8 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const { handleSubmit, control } = form;
 
   const onSubmit = async (values: StudentFormSchemaType) => {
+    setIsSubmitting(true);
+
     try {
       const notificationPayload = {
         title: "New Handover Added",
@@ -101,6 +104,9 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     } catch (error) {
       console.error("Error adding handover:", error);
       toast.error("Failed to add handover");
+    }finally{
+      setIsSubmitting(false);
+
     }
   };
 
@@ -229,8 +235,8 @@ const HandOverCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" className="rounded-full" size="lg">
-              Create HandOver
+            <Button type="submit" disabled={isSubmitting} className="rounded-full" size="lg">
+            {isSubmitting ? "Adding..." : "Add Handover"}
             </Button>
           </div>
         </form>

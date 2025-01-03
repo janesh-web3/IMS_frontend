@@ -10,15 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { crudRequest } from "@/lib/api";
 import { Courses, Book } from "@/types";
@@ -30,6 +23,7 @@ import PremiumComponent from "@/components/shared/PremiumComponent";
 
 const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //step-1
   const [personalInfo, setPersonalInfo] = useState({
@@ -209,18 +203,18 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       Number(feesInfo.admissionFee) +
       Number(feesInfo.tshirtFee) +
       Number(feesInfo.examFee) +
-      totalSubjectFees +
-      totalBookFees;
+      Number(totalSubjectFees) +
+      Number(totalBookFees);
 
-    const totalDiscount = subjectDiscount + totalBookDiscount;
-    const totalAfterDiscount = totalAmount - totalDiscount;
+    const totalDiscount = Number(subjectDiscount) + Number(totalBookDiscount);
+    const totalAfterDiscount = Number(totalAmount) - Number(totalDiscount);
 
     handleFeesInfoChange("totalAmount", totalAmount);
     handleFeesInfoChange("totalDiscount", totalDiscount);
     handleFeesInfoChange("totalAfterDiscount", totalAfterDiscount);
     handleFeesInfoChange(
       "remainingAmount",
-      totalAfterDiscount - Number(feesInfo.paidAmount)
+      Number(totalAfterDiscount) - Number(feesInfo.paidAmount)
     );
   }, [
     feesInfo.admissionFee,
@@ -258,8 +252,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     if (step === 1) {
       if (
         !personalInfo.studentName ||
-        !personalInfo.address ||
-        !personalInfo.gender ||
         !personalInfo.contactNo ||
         !personalInfo.billNo
       ) {
@@ -394,6 +386,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   // Update onSubmit to include books
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+ setIsSubmitting(true);
 
     const formattedDateOfBirth = personalInfo.dateOfBirth
       ? format(personalInfo.dateOfBirth, "yyyy-MM-dd")
@@ -499,6 +492,9 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       toast.error("Failed to add student");
       console.error("Error adding student:", error);
     }
+    finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ... rest of the component code ...
@@ -525,30 +521,12 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="contactNo">Enter Phone Number *</Label>
                 <Input
-                  id="email"
-                  placeholder="Enter email"
-                  value={personalInfo.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="schoolName">School Name</Label>
-                <Input
-                  id="schoolName"
-                  placeholder="Enter school name"
-                  value={personalInfo.schoolName}
-                  onChange={(e) => handleChange("schoolName", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="address">Enter Address *</Label>
-                <Input
-                  id="address"
-                  placeholder="Enter address"
-                  value={personalInfo.address}
-                  onChange={(e) => handleChange("address", e.target.value)}
+                  id="contactNo"
+                  placeholder="Enter phone number"
+                  value={personalInfo.contactNo}
+                  onChange={(e) => handleChange("contactNo", e.target.value)}
                 />
               </div>
               <div className="grid">
@@ -557,7 +535,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   id="dateOfBirth"
                   type="date"
                   placeholder="Enter dateOfBirth"
-                  className="bg-card-foreground/60 text-background"
                   value={personalInfo.dateOfBirth}
                   onChange={(e) => handleChange("dateOfBirth", e.target.value)}
                 />
@@ -580,24 +557,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label htmlFor="contactNo">Enter Phone Number *</Label>
-                <Input
-                  id="contactNo"
-                  placeholder="Enter phone number"
-                  value={personalInfo.contactNo}
-                  onChange={(e) => handleChange("contactNo", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="billNo">Enter Bill No *</Label>
-                <Input
-                  id="billNo"
-                  placeholder="Enter bill number"
-                  value={personalInfo.billNo}
-                  onChange={(e) => handleChange("billNo", e.target.value)}
-                />
               </div>
               <div>
                 <Label htmlFor="guardianName">Enter Guardian Name</Label>
@@ -646,6 +605,47 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div>
+                <Label htmlFor="billNo">Enter Bill No *</Label>
+                <Input
+                  id="billNo"
+                  placeholder="Enter bill number"
+                  value={personalInfo.billNo}
+                  onChange={(e) => handleChange("billNo", e.target.value)}
+                />
+              </div>
+             
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  placeholder="Enter email"
+                  value={personalInfo.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="schoolName">School Name</Label>
+                <Input
+                  id="schoolName"
+                  placeholder="Enter school name"
+                  value={personalInfo.schoolName}
+                  onChange={(e) => handleChange("schoolName", e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="address">Enter Address</Label>
+                <Input
+                  id="address"
+                  placeholder="Enter address"
+                  value={personalInfo.address}
+                  onChange={(e) => handleChange("address", e.target.value)}
+                />
+              </div>
+              
+              
+            
+            
+              <div>
                 <Label htmlFor="referredBy">Referred By</Label>
                 <Select
                   onValueChange={(value) => handleChange("referredBy", value)}
@@ -661,6 +661,13 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                     <SelectItem value="Social Media">Social Media</SelectItem>
                     <SelectItem value="Website">Website</SelectItem>
                     <SelectItem value="Advertisement">Advertisement</SelectItem>
+                    <SelectItem value="News Paper">News Paper</SelectItem>
+                    <SelectItem value="Friends">Friends</SelectItem>
+                    <SelectItem value="Relatives">Relatives</SelectItem>
+                    <SelectItem value="Seniors">Seniors</SelectItem>
+                    <SelectItem value="F.M">F.M</SelectItem>
+                    <SelectItem value="Prospectus">Prospectus</SelectItem>
+                    <SelectItem value="Counselor">Counselor</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -709,7 +716,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   <Label htmlFor="tShirtFee">T-Shirt Fee</Label>
                   <Checkbox
                     id="tshirtFee"
-                    checked={feesInfo.tshirtFee === 500} // Convert to boolean
+                    checked={feesInfo.tshirtFee === 0} // Convert to boolean
                     onCheckedChange={(checked) =>
                       handleTshirtChange("tshirtFee", checked)
                     }
@@ -720,7 +727,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   <Label htmlFor="examFee">Exam Fee</Label>
                   <Checkbox
                     id="examFee"
-                    checked={feesInfo.examFee === 100} // Convert to boolean
+                    checked={feesInfo.examFee === 0} // Convert to boolean
                     onCheckedChange={(checked) =>
                       handleExamChange("examFee", checked)
                     }
@@ -946,32 +953,16 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
               <div className="col-span-2 md:col-span-1">
                 <Label htmlFor="paymentDeadline">Payment Deadline</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[280px] justify-start text-left font-normal",
-                        !deadlinedate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {deadlinedate ? (
-                        format(deadlinedate, "PPP")
-                      ) : (
-                        <span>Payment Deadline</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={deadlinedate}
-                      onSelect={handleDealineChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  id="deadlinedate"
+                  type="date"
+                  placeholder="Enter deadlinedate"
+                  value={deadlinedate ? format(deadlinedate, 'yyyy-MM-dd') : ''}
+                  onChange={(e) => {
+                    const date = e.target.value ? new Date(e.target.value) : undefined;
+                    handleDealineChange(date);
+                  }}
+                />
               </div>
             </div>
           </>
@@ -1026,9 +1017,10 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               type="button"
               className="rounded-full max-w-40"
               size="lg"
+              disabled={isSubmitting}
               onClick={onSubmit}
             >
-              Submit
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           )}
         </div>

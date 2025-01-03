@@ -147,6 +147,7 @@ type PersonalInfo = {
   gender: string;
   contactNo: string;
   email: string;
+  password: string;
   billNo: Bill[];
   admissionNumber: string;
   paymentDeadline: string;

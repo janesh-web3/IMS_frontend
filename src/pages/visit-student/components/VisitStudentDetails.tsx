@@ -31,6 +31,7 @@ type VisitStudent = {
   studentNumber: string;
   address: string;
   gender: string;
+  message :  string;
   dateOfVisit: string;
   courses: StudentCourse[];
   photo?: string;
@@ -42,6 +43,7 @@ const VisitStudentDetails: React.FC<VisitStudent> = ({
   studentNumber,
   address,
   gender,
+  message,
   courses,
   schoolName,
 }) => {
@@ -74,6 +76,10 @@ const VisitStudentDetails: React.FC<VisitStudent> = ({
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">Address </span>
                   <span>{address}</span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Messages </span>
+                  <span>{message}</span>
                 </li>
               </ul>
             </div>
