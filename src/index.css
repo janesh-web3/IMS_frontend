@@ -39,7 +39,6 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    
     /* dashboard */
     --dashboard1:48 96.6% 76.7%;
     --dashboard2:168.4 83.8% 78.2%;
@@ -53,6 +52,9 @@
     --dashboard10:141 78.9% 85.1%;
     --dashboard11:213.3 96.9% 87.3%;
     --dashboard12:80.9 88.5% 79.6%;
+
+    /* color */
+    --blue : 211.7 96.4% 78.4%;
 
     --calander: 0;
   }
@@ -105,6 +107,8 @@
     --dashboard11: 224.3 76.3% 48%;
     --dashboard12: 86.3 69% 22.7%;
 
+    /* color */
+    --blue : 224.3 76.3% 48%;
 
     --calander: 1;
   }

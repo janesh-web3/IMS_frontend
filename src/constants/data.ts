@@ -74,6 +74,14 @@ export const navItems: NavItem[] = [
     label: "Quiz",
   },
   {
+    title: "Task",
+    href: "/task",
+    icon: "helpCircle",
+    role: "all",
+    tag: "Premium",
+    label: "Task",
+  },
+  {
     title: "AI Model",
     href: "/ai-model",
     icon: "brain",

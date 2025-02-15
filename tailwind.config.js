@@ -18,6 +18,12 @@ module.exports = {
     },
     extend: {
       colors: {
+        blue : {
+          DEFAULT: "hsl(var(--blue))",
+        },
+        violet : {
+          DEFAULT: "hsl(var(--violet))",
+        },
         dashboard1 : {
           DEFAULT: "hsl(var(--dashboard1))",
         },

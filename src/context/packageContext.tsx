@@ -1,5 +1,5 @@
-import { crudRequest } from "@/lib/api";
-import React, { createContext, useContext, useEffect, useState } from "react";
+// import { crudRequest } from "@/lib/api";
+import React, { createContext, useContext, useState } from "react";
 
 // Define the structure for package features
 interface PackageFeatures {
@@ -44,23 +44,23 @@ export default function PackageProvider({ children }: PackageProviderProps) {
     useState<PackageDetails>(initialState);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPackageDetails = async () => {
-      try {
-        const response = await crudRequest<PackageDetails>(
-          "GET",
-          "/packages/get-package"
-        );
-        setPackageDetails(response);
-      } catch (error) {
-        console.error("Failed to fetch package details:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchPackageDetails = async () => {
+  //     try {
+  //       const response = await crudRequest<PackageDetails>(
+  //         "GET",
+  //         "/packages/get-package"
+  //       );
+  //       setPackageDetails(response);
+  //     } catch (error) {
+  //       console.error("Failed to fetch package details:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    fetchPackageDetails();
-  }, []);
+  //   fetchPackageDetails();
+  // }, []);
 
   return (
     <PackageContext.Provider value={{ packageDetails, isLoading }}>

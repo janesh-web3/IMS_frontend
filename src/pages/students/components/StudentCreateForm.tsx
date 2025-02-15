@@ -127,7 +127,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const handleFeesInfoChange = (name: string, value: any) => {
     setFeesInfo((prev) => ({ ...prev, [name]: value }));
   };
-
+  
   const handleTshirtChange = (name: string, checked: any) => {
     handleFeesInfoChange(name, checked ? 500 : 0);
   };
@@ -712,11 +712,11 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:gap-10 md:grid-cols-3">
-                <div className="flex items-center justify-center gap-3 text-center">
+              <div className="flex items-center justify-center gap-3 text-center">
                   <Label htmlFor="tShirtFee">T-Shirt Fee</Label>
                   <Checkbox
                     id="tshirtFee"
-                    checked={feesInfo.tshirtFee === 0} // Convert to boolean
+                    checked={feesInfo.tshirtFee === 500} // Convert to boolean
                     onCheckedChange={(checked) =>
                       handleTshirtChange("tshirtFee", checked)
                     }
@@ -727,7 +727,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   <Label htmlFor="examFee">Exam Fee</Label>
                   <Checkbox
                     id="examFee"
-                    checked={feesInfo.examFee === 0} // Convert to boolean
+                    checked={feesInfo.examFee === 100} // Convert to boolean
                     onCheckedChange={(checked) =>
                       handleExamChange("examFee", checked)
                     }
