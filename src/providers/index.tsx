@@ -12,6 +12,7 @@ import PackageProvider from "@/context/packageContext";
 import NotificationProvider from "./notificationProvider";
 import AdminProvider from "@/context/adminContext";
 import { MessageProvider } from "./messageProvider";
+import { TaskProvider } from "@/context/taskContext";
 
 export const queryClient = new QueryClient();
 
@@ -50,12 +51,14 @@ export default function AppProvider({
                 <AdminProvider>
                   <NotificationProvider>
                     <MessageProvider>
-                      <ThemeProvider
-                        defaultTheme="dark"
-                        storageKey="vite-ui-theme"
-                      >
-                        <SidebarProvider>{children}</SidebarProvider>
-                      </ThemeProvider>
+                      <TaskProvider>
+                        <ThemeProvider
+                          defaultTheme="dark"
+                          storageKey="vite-ui-theme"
+                        >
+                          <SidebarProvider>{children}</SidebarProvider>
+                        </ThemeProvider>
+                      </TaskProvider>
                     </MessageProvider>
                   </NotificationProvider>
                 </AdminProvider>

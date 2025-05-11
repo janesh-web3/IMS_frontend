@@ -510,7 +510,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         {/* first step */}
         {step === 1 && (
           <>
-            <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-3 md:gap-x-8 gap-y-2 md:gap-y-4">
+            <div className="grid grid-cols-1 uppercase md:grid-cols-2 gap-x-3 md:gap-x-8 gap-y-4 md:gap-y-7">
               <div>
                 <Label htmlFor="studentName">Student Name *</Label>
                 <Input

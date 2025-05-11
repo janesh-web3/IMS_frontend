@@ -40,21 +40,21 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* dashboard */
-    --dashboard1:48 96.6% 76.7%;
-    --dashboard2:168.4 83.8% 78.2%;
-    --dashboard3:214.3 94.6% 92.7%;
-    --dashboard4:149.3 80.4% 90%;
-    --dashboard5:48 96.5% 88.8%;
-    --dashboard6:251.4 91.3% 95.5%;
-    --dashboard7:355.6 100% 94.7%;
-    --dashboard8:220 14.3% 95.9%;
-    --dashboard9:60 4.8% 95.9%;
-    --dashboard10:141 78.9% 85.1%;
-    --dashboard11:213.3 96.9% 87.3%;
-    --dashboard12:80.9 88.5% 79.6%;
+    --dashboard1: 48 96.6% 76.7%;
+    --dashboard2: 168.4 83.8% 78.2%;
+    --dashboard3: 214.3 94.6% 92.7%;
+    --dashboard4: 149.3 80.4% 90%;
+    --dashboard5: 48 96.5% 88.8%;
+    --dashboard6: 251.4 91.3% 95.5%;
+    --dashboard7: 355.6 100% 94.7%;
+    --dashboard8: 220 14.3% 95.9%;
+    --dashboard9: 60 4.8% 95.9%;
+    --dashboard10: 141 78.9% 85.1%;
+    --dashboard11: 213.3 96.9% 87.3%;
+    --dashboard12: 80.9 88.5% 79.6%;
 
     /* color */
-    --blue : 211.7 96.4% 78.4%;
+    --blue: 211.7 96.4% 78.4%;
 
     --calander: 0;
   }
@@ -94,7 +94,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     /* dashboard */
-    --dashboard1:35.5 91.7% 32.9%;
+    --dashboard1: 35.5 91.7% 32.9%;
     --dashboard2: 175.3 77.4% 26.1%;
     --dashboard3: 224.4 64.3% 32.9%;
     --dashboard4: 164.2 85.7% 16.5%;
@@ -108,7 +108,7 @@
     --dashboard12: 86.3 69% 22.7%;
 
     /* color */
-    --blue : 224.3 76.3% 48%;
+    --blue: 224.3 76.3% 48%;
 
     --calander: 1;
   }
@@ -173,46 +173,28 @@
 }
 
 /* premium plus themes */
-
 @layer base {
   :root.premium-plus {
-    /* Ultra-clean background with subtle blue undertone */
-    --background: 225 30% 98%;
-    --foreground: 228 19% 15%;
-
-    /* Futuristic electric blue gradient */
-    --primary: 240 96% 70%;
+    --background: 142.1 100% 95%;
+    --foreground: 142.1 5% 0%;
+    --card: 142.1 50% 90%;
+    --card-foreground: 142.1 5% 10%;
+    --popover: 142.1 100% 95%;
+    --popover-foreground: 142.1 100% 0%;
+    --primary: 142.1 76.2% 36.3%;
     --primary-foreground: 0 0% 100%;
-
-    /* Pristine secondary tones */
-    --secondary: 230 15% 94%;
-    --secondary-foreground: 228 19% 15%;
-
-    /* Neo-morphic card design */
-    --card: 225 30% 99%;
-    --card-foreground: 228 19% 15%;
-    --popover: 225 30% 99%;
-    --popover-foreground: 228 19% 15%;
-
-    /* Crystal-clear muted palette */
-    --muted: 228 15% 94%;
-    --muted-foreground: 228 15% 45%;
-
-    /* Ethereal accent */
-    --accent: 240 96% 96%;
-    --accent-foreground: 240 96% 35%;
-
-    /* Refined alert colors */
-    --destructive: 360 95% 65%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Crisp borders and focus states */
-    --border: 228 20% 90%;
-    --input: 228 20% 90%;
-    --ring: 240 96% 70%;
-
-    /* Modern rounded corners */
-    --radius: 1.4rem;
+    --secondary: 142.1 30% 70%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 104.1 30% 85%;
+    --muted-foreground: 142.1 5% 35%;
+    --accent: 104.1 30% 80%;
+    --accent-foreground: 142.1 5% 10%;
+    --destructive: 0 100% 30%;
+    --destructive-foreground: 142.1 5% 90%;
+    --border: 142.1 30% 50%;
+    --input: 142.1 30% 18%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
 
     /* Futuristic data visualization palette */
     --chart-1: 240 96% 70%; /* Electric Blue */
@@ -223,41 +205,27 @@
   }
 
   .dark.premium-plus {
-    /* Deep space background */
-    --background: 228 30% 5%;
-    --foreground: 228 25% 98%;
-
-    /* Luminescent primary */
-    --primary: 240 96% 70%;
+    --background: 142.1 50% 5%;
+    --foreground: 142.1 5% 90%;
+    --card: 142.1 50% 0%;
+    --card-foreground: 142.1 5% 90%;
+    --popover: 142.1 50% 5%;
+    --popover-foreground: 142.1 5% 90%;
+    --primary: 142.1 76.2% 36.3%;
     --primary-foreground: 0 0% 100%;
-
-    /* Obsidian secondary */
-    --secondary: 228 20% 10%;
-    --secondary-foreground: 228 25% 98%;
-
-    /* Dark matter cards */
-    --card: 228 30% 7%;
-    --card-foreground: 228 25% 98%;
-    --popover: 228 30% 7%;
-    --popover-foreground: 228 25% 98%;
-
-    /* Stellar muted tones */
-    --muted: 228 20% 13%;
-    --muted-foreground: 228 20% 75%;
-
-    /* Aurora accent */
-    --accent: 240 96% 15%;
-    --accent-foreground: 240 96% 70%;
-
-    /* Plasma destructive */
-    --destructive: 360 95% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Nebula borders */
-    --border: 228 20% 13%;
-    --input: 228 20% 13%;
-    --ring: 240 96% 70%;
-
+    --secondary: 142.1 30% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 104.1 30% 15%;
+    --muted-foreground: 142.1 5% 60%;
+    --accent: 104.1 30% 15%;
+    --accent-foreground: 142.1 5% 90%;
+    --destructive: 0 100% 30%;
+    --destructive-foreground: 142.1 5% 90%;
+    --border: 142.1 30% 18%;
+    --input: 142.1 30% 18%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
+    
     /* Cosmic chart colors */
     --chart-1: 240 96% 70%; /* Plasma Blue */
     --chart-2: 290 90% 70%; /* Nebula Purple */
@@ -759,7 +727,6 @@
     background-color: rgba(59, 130, 246, 0.1);
   }
 }
-
 
 .time-input::-webkit-calendar-picker-indicator,
 .date-input::-webkit-calendar-picker-indicator {

@@ -26,7 +26,7 @@ export default function PopupModal({
         isOpen={isOpen}
         onClose={onClose}
         className={
-          "!bg-background !px-1 w-full min-w-[300px] max-w-[1600px] overflow-y-auto"
+          "!bg-dashboard9 !px-1 w-full min-w-[300px] max-w-[1000px] overflow-y-auto"
         }
       >
         <ScrollArea className="max-h-[80dvh] px-6 overflow-y-auto ">
