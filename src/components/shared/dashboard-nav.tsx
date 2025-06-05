@@ -12,11 +12,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePathname } from "@/routes/hooks";
-import { Link, useNavigate } from "react-router-dom";
-import UpgradeToPro from "./upgrade-pro";
+import { Link } from "react-router-dom";
 import { usePackageContext } from "@/context/packageContext";
 import { useAdminContext } from "@/context/adminContext";
-import AdminComponent from "./AdminComponent";
 
 interface DashboardNavProps {
   items: NavItem[];
@@ -81,12 +79,6 @@ export default function DashboardNav({
     return null;
   }
 
-  const navigate = useNavigate();
-
-  const handleUpgradeClick = () => {
-    navigate("/upgrade-to-pro");
-  };
-
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
@@ -131,13 +123,11 @@ export default function DashboardNav({
             )
           );
         })}
-        <AdminComponent>
-          <div className="mb-28">
+        {/* <div className="mb-28">
             {(isMobileNav || !isMinimized) && (
               <UpgradeToPro onClick={handleUpgradeClick} />
             )}
-          </div>
-        </AdminComponent>
+          </div> */}
       </TooltipProvider>
     </nav>
   );

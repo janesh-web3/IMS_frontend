@@ -41,7 +41,6 @@ import ReciptCreateForm from "./ReciptCreateForm";
 import { Plus } from "lucide-react";
 import ReciptStats from "./ReciptStats";
 import AdminComponent from "@/components/shared/AdminComponent";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import { Input } from "@/components/ui/input";
 
 type Recipt = {
@@ -162,11 +161,9 @@ export function ReciptTable() {
           </div>
         </AdminComponent>
       </div>
-      <PremiumComponent>
         <AdminComponent>
           <ReciptStats />
         </AdminComponent>
-      </PremiumComponent>
       <div className="w-full">
         <div className="w-full ">
           <Table>

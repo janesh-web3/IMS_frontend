@@ -14,7 +14,7 @@ const PremiumRoute: React.FC<PremiumRouteProps> = ({ children }) => {
     packageDetails.plan !== "Premium" &&
     packageDetails.plan !== "PremiumPlus"
   ) {
-    return <Navigate to="/" replace />; // Redirect to the dashboard if not authorized
+    return <Navigate to="/home" replace />; // Redirect to the dashboard if not authorized
   }
 
   return <>{children}</>;

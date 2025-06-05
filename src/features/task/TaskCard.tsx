@@ -9,7 +9,6 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import { BGS, formatDate, PRIOTITYSTYELS, TASK_TYPE } from "@/lib/utils";
-import { useTaskContext } from "@/context/taskContext";
 
 const ICONS = {
   high: <ArrowUp />,
@@ -34,6 +33,7 @@ interface Task {
   isTrashed: boolean;
   activities: any[];
   subTasks: {
+    completed: unknown;
     title: string;
     date: string;
     tag: string;
@@ -48,17 +48,9 @@ interface TaskCardProps {
   task: Task;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({task}) => {
-  const { updateTaskStatus, addTaskActivity } = useTaskContext();
+const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const [expanded, setExpanded] = useState(false);
 
-  // Map stage to status
-  const getStatusFromStage = (stage: string): string => {
-    if (stage === "in progress") return "In Progress";
-    if (stage === "completed") return "Completed";
-    return "Pending";
-  };
-  
   return (
     <div className="w-full h-fit bg-card shadow-md p-4 rounded">
       <div className="w-full flex justify-between">
@@ -73,20 +65,21 @@ const TaskCard: React.FC<TaskCardProps> = ({task}) => {
         </div>
       </div>
 
-      <div className='flex items-center gap-2 mt-2'>
+      <div className="flex items-center gap-2 mt-2">
         <div
-          className={clsx("w-4 h-4 rounded-full", 
-            TASK_TYPE[task.stage] || TASK_TYPE.todo
+          className={clsx(
+            "w-4 h-4 rounded-full",
+            TASK_TYPE[task.stage as keyof typeof TASK_TYPE] || TASK_TYPE.todo
           )}
         />
-        <h4 className='line-clamp-1 font-medium'>{task?.title}</h4>
+        <h4 className="line-clamp-1 font-medium">{task?.title}</h4>
       </div>
-      <span className='text-sm text-muted-foreground'>
-        {task?.date ? formatDate(new Date(task?.date)) : 'No due date'}
+      <span className="text-sm text-muted-foreground">
+        {task?.date ? formatDate(new Date(task?.date)) : "No due date"}
       </span>
 
       <div className="w-full border-t border-muted my-2" />
-      
+
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <div className="flex gap-1 items-center text-sm text-muted-foreground">
@@ -100,13 +93,13 @@ const TaskCard: React.FC<TaskCardProps> = ({task}) => {
           <div className="flex gap-1 items-center text-sm text-muted-foreground">
             <ListIcon className="w-4 h-4" />
             <span>
-              {(task?.subTasks?.filter(st => st.completed) || []).length}/
+              {(task?.subTasks?.filter((st) => st.completed) || []).length}/
               {task?.subTasks?.length || 0}
             </span>
           </div>
         </div>
 
-        <div className='flex flex-row-reverse'>
+        <div className="flex flex-row-reverse">
           {task?.team?.map((m, index) => (
             <div
               key={index}
@@ -124,18 +117,19 @@ const TaskCard: React.FC<TaskCardProps> = ({task}) => {
 
       {/* Sub tasks preview */}
       {task?.subTasks?.length > 0 && (
-        <div className='py-2 border-t border-muted cursor-pointer' 
+        <div
+          className="py-2 border-t border-muted cursor-pointer"
           onClick={() => setExpanded(!expanded)}
         >
           <div className="flex justify-between items-center">
-            <h5 className='text-sm font-medium'>
+            <h5 className="text-sm font-medium">
               Subtasks ({task.subTasks.length})
             </h5>
             <span className="text-xs text-muted-foreground">
-              {expanded ? 'Hide' : 'Show'}
+              {expanded ? "Hide" : "Show"}
             </span>
           </div>
-          
+
           {expanded && (
             <div className="mt-2 space-y-2">
               {task.subTasks.map((subtask, i) => (
@@ -143,7 +137,9 @@ const TaskCard: React.FC<TaskCardProps> = ({task}) => {
                   <div className="font-medium">{subtask.title}</div>
                   <div className="flex justify-between mt-1">
                     <span className="text-muted-foreground">
-                      {subtask.date ? formatDate(new Date(subtask.date)) : 'No date'}
+                      {subtask.date
+                        ? formatDate(new Date(subtask.date))
+                        : "No date"}
                     </span>
                     {subtask.tag && (
                       <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full">

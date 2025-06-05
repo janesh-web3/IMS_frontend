@@ -19,7 +19,6 @@ import WebcamCapture from "@/components/shared/WebcamCapture";
 import axios from "axios";
 import { server } from "@/server";
 import { toast } from "react-toastify";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 
 const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const [step, setStep] = useState(1);
@@ -972,9 +971,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         {step === 3 && (
           <>
             <h2 className="text-lg font-medium">Upload Photo</h2>
-            <PremiumComponent>
               <WebcamCapture onCapture={handleCapturePhoto} />
-            </PremiumComponent>
           </>
         )}
 

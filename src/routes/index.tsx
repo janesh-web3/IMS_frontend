@@ -4,10 +4,9 @@ import PrivateRoute from "./PrivateRoute";
 import StudentUpdateForm from "@/pages/students/components/StudentUpdateForm";
 import VisitPage from "@/pages/visit-student";
 import Loading from "@/pages/not-found/loading";
-import PremiumRoute from "./PremiumRoute";
 import ProPlanUpgrade from "@/components/shared/ProPlanUpgrade";
-import PremiumPlusRoute from "./PremiumPlusRoute";
 import IDCardGenerator from "@/pages/id_card/IDCardGenerator";
+import LandingPage from "@/components/landing/LandingPage";
 
 // Lazy-loaded components
 const DashboardLayout = lazy(
@@ -16,6 +15,7 @@ const DashboardLayout = lazy(
 const SignInPage = lazy(() => import("@/pages/auth/signin"));
 const DashboardPage = lazy(() => import("@/pages/dashboard"));
 const StudentPage = lazy(() => import("@/pages/students"));
+const StudentDocumentPage = lazy(() => import("@/pages/students/document"));
 const CoursePage = lazy(() => import("@/pages/course"));
 const CourseDetail = lazy(() => import("@/pages/course/CourseDetail"));
 const SubjectDetails = lazy(
@@ -61,10 +61,11 @@ const AppRouter: React.FC = () => {
         </PrivateRoute>
       ),
       children: [
-        { path: "/", element: <DashboardPage />, index: true },
+        { path: "", element: <DashboardPage />, index: true },
         { path: "student", element: <StudentPage /> },
         { path: "visit-student", element: <VisitPage /> },
         { path: "student/update/:id", element: <StudentUpdateForm /> },
+        { path: "students/document/:studentId", element: <StudentDocumentPage /> },
         { path: "form", element: <FormPage /> },
         { path: "course", element: <CoursePage /> },
         { path: "course/:id", element: <CourseDetail /> },
@@ -80,105 +81,79 @@ const AppRouter: React.FC = () => {
         {
           path: "quiz",
           element: (
-            <PremiumRoute>
               <QuizPage />
-            </PremiumRoute>
-          ),
+            ),
         },
         {
           path: "quiz/take/:id",
           element: (
-            <PremiumRoute>
               <TakeQuiz />
-            </PremiumRoute>
           ),
         },
         {
           path: "setting",
           element: (
-            <PremiumRoute>
-              <SettingPage />
-            </PremiumRoute>
+            <SettingPage />
           ),
         },
         {
           path: "notification",
           element: (
-            <PremiumRoute>
-              <NotificationPage />
-            </PremiumRoute>
+            <NotificationPage />
           ),
         },
         {
           path: "ai-model",
           element: (
-            <PremiumRoute>
-              <AIPage />
-            </PremiumRoute>
+            <AIPage />
           ),
         },
         {
           path: "administration",
           element: (
-            <PremiumRoute>
-              <AdministrationPage />
-            </PremiumRoute>
+            <AdministrationPage />
           ),
         },
         {
           path: "recycle-bin",
           element: (
-            <PremiumRoute>
-              <RecycleBinPage />
-            </PremiumRoute>
+            <RecycleBinPage />
           ),
         },
         {
           path: "chat-bot",
           element: (
-            <PremiumPlusRoute>
               <ChatPage />
-            </PremiumPlusRoute>
           ),
         },
         {
           path: "live-classes",
           element: (
-            <PremiumPlusRoute>
               <h1>live-classes</h1>
-            </PremiumPlusRoute>
           ),
         },
         {
           path: "notice",
           element: (
-            <PremiumPlusRoute>
               <NoticePage />
-            </PremiumPlusRoute>
           ),
         },
         {
           path: "id-card",
           element: (
-            <PremiumPlusRoute>
               <IdCardPage />
-            </PremiumPlusRoute>
           ),
         },
         {
           path: "id-card/:id",
           element: (
-            <PremiumPlusRoute>
               <IDCardGenerator />
-            </PremiumPlusRoute>
           ),
         },
         {
           path: "complain",
           element: (
-            <PremiumPlusRoute>
               <ComplainPage />
-            </PremiumPlusRoute>
           ),
         },
       ],
@@ -186,12 +161,13 @@ const AppRouter: React.FC = () => {
   ];
 
   const publicRoutes = [
-    { path: "/login", element: <SignInPage />, index: true },
+    { path: "/home", element: <LandingPage />, index: true},
+    { path: "/login", element: <SignInPage />},
     { path: "/404", element: <NotFound /> },
     { path: "*", element: <Navigate to="/404" replace /> },
   ];
 
-  const routes = useRoutes([...dashboardRoutes, ...publicRoutes]);
+  const routes = useRoutes([...publicRoutes, ...dashboardRoutes]);
 
   return routes;
 };

@@ -2,10 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useTaskContext } from "@/context/taskContext";
 import { useEffect, useMemo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Overview = () => {
-  const { tasks, loading, error, fetchTasks } = useTaskContext();
+  const { tasks, fetchTasks } = useTaskContext();
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
@@ -136,21 +135,5 @@ const Overview = () => {
   );
 };
 
-// Skeleton loader for task overview
-const TaskOverviewSkeleton = () => (
-  <div className="grid gap-2 md:gap-3 md:grid-cols-2 lg:grid-cols-5">
-    {[1, 2, 3, 4, 5].map((i) => (
-      <Card key={i}>
-        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <Skeleton className="h-4 w-[100px]" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-8 w-[50px] mb-2" />
-          <Skeleton className="h-4 w-[140px]" />
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-);
 
 export default Overview;

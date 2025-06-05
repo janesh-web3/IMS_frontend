@@ -40,7 +40,6 @@ import PopupModal from "@/components/shared/popup-modal";
 import PaymentCreateForm from "./PaymentCreateForm";
 import { Plus } from "lucide-react";
 import PaymentStats from "./PaymentStats";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import AdminComponent from "@/components/shared/AdminComponent";
 import { Input } from "@/components/ui/input";
 
@@ -214,11 +213,9 @@ export function PaymentTable() {
           </div>
         </AdminComponent>
       </div>
-      <PremiumComponent>
         <AdminComponent>
           <PaymentStats />
         </AdminComponent>
-      </PremiumComponent>
       <div className="w-full overflow-auto max-h-[700px] md:max-h-[500px] md:py-2">
         <div className="w-full max-h-[200vh]">
           <Table>

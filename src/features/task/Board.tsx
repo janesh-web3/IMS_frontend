@@ -11,7 +11,7 @@ import { Task } from "@/services/taskService";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 const Board = () => {
-  const { tasks, loading, error, fetchTasks, updateTaskStatus } = useTaskContext();
+  const { tasks, fetchTasks, updateTaskStatus } = useTaskContext();
   const [open, setOpen] = useState(false);
   const [columns, setColumns] = useState<Record<'Pending' | 'In Progress' | 'Completed', { title: string; items: Task[] }>>({
     Pending: {
@@ -165,7 +165,8 @@ const Board = () => {
                                   title: st.title,
                                   date: st.date,
                                   tag: st.tag || "Task",
-                                  _id: st._id
+                                  _id: st._id,
+                                  completed: false
                                 })) || [],
                                 createdAt: task.createdAt,
                                 updatedAt: task.updatedAt,

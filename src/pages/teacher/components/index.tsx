@@ -3,7 +3,6 @@ import TeacherCreateForm from "./TeacherCreateForm";
 import { TeacherTable } from "./Table";
 import { Plus } from "lucide-react";
 import TeacherStats from "./TeacherStats";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import AdminComponent from "@/components/shared/AdminComponent";
 
 export default function TeacherLayout() {
@@ -25,11 +24,9 @@ export default function TeacherLayout() {
           </div>
         </AdminComponent>
       </div>
-      <PremiumComponent>
         <AdminComponent>
           <TeacherStats />
         </AdminComponent>
-      </PremiumComponent>
 
       <TeacherTable />
     </>

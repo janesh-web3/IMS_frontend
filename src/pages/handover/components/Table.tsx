@@ -26,7 +26,6 @@ import PopupModal from "@/components/shared/popup-modal";
 import HandOverCreateForm from "./HandOverCreateForm";
 import { Plus } from "lucide-react";
 import HandOverStats from "./HandOverStats";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import AdminComponent from "@/components/shared/AdminComponent";
 import { Input } from "@/components/ui/input";
 
@@ -190,11 +189,9 @@ export function HandOverTable() {
           </div>
         </AdminComponent>
       </div>
-      <PremiumComponent>
         <AdminComponent>
           <HandOverStats />
         </AdminComponent>
-      </PremiumComponent>
       <div className="w-full overflow-x-auto max-h-[700px] md:max-h-[500px] md:py-2">
         <div className="w-full max-h-[200vh]">
           <Table>

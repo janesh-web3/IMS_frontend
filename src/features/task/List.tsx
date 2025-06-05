@@ -39,7 +39,7 @@ export const TASK_TYPE = {
 };
 
 const List = () => {
-  const { tasks, loading, error, fetchTasks, updateTaskStatus, deleteTask } = useTaskContext();
+  const { tasks,  fetchTasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [open, setOpen] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState(false);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
@@ -52,7 +52,7 @@ const List = () => {
     await updateTaskStatus(taskId, status);
   };
 
-  const handlePriorityChange = async (taskId: string, priority: string) => {
+  const handlePriorityChange = async (taskId: string, _priority: string) => {
     await updateTaskStatus(taskId, tasks.find(t => t._id === taskId)?.status || "Pending");
   };
 

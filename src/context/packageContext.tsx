@@ -40,9 +40,9 @@ type PackageProviderProps = {
 
 // Provider to fetch and store package details
 export default function PackageProvider({ children }: PackageProviderProps) {
-  const [packageDetails, setPackageDetails] =
+  const [packageDetails, _setPackageDetails] =
     useState<PackageDetails>(initialState);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, _setIsLoading] = useState(true);
 
   // useEffect(() => {
   //   const fetchPackageDetails = async () => {

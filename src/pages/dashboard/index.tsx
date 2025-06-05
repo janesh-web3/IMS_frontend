@@ -47,7 +47,6 @@ import {
 import StudentDetails from "../students/components/StudentDetails";
 import { Button } from "@/components/ui/button";
 import Accounting from "./accounting";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import StudentDataVisualization from "./statistics/StudentDataVisualization";
 import { Transactions } from "./transactions/Transactions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,12 +58,6 @@ import TeacherComponent from "@/components/shared/TeacherComponent";
 import TeacherDashboard from "./teacher/TeacherDashboard";
 import ReceptionComponent from "@/components/shared/ReceptionComponent";
 import { Link } from "react-router-dom";
-import Board from "@/features/task/Board";
-import List from "@/features/task/List";
-import Overview from "@/features/task/Overview";
-import PopupModal from "@/components/shared/popup-modal";
-import { Plus } from "lucide-react";
-import AddTask from "@/features/task/AddTask";
 
 type Dashboard = {
   totalAmount: string;
@@ -461,7 +454,6 @@ export default function DashboardPage() {
               <ReceptionComponent>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
               </ReceptionComponent>
-              <PremiumComponent>
                 <AdminComponent>
                   <TabsTrigger value="accounting">Accounting</TabsTrigger>
                   <SuperAdminComponent>
@@ -470,7 +462,6 @@ export default function DashboardPage() {
                   <TabsTrigger value="transactions">Transactions</TabsTrigger>
                   <TabsTrigger value="stats">Stats</TabsTrigger>
                 </AdminComponent>
-              </PremiumComponent>
             </TabsList>
 
             <StudentComponent>
@@ -878,7 +869,6 @@ export default function DashboardPage() {
                 </Card>
               </div>
             </TabsContent>
-            <PremiumComponent>
               <AdminComponent>
                 <TabsContent value="accounting">
                   <Accounting />
@@ -895,7 +885,6 @@ export default function DashboardPage() {
                   <StudentDataVisualization />
                 </TabsContent>
               </AdminComponent>
-            </PremiumComponent>
           </Tabs>
         </div>
       </div>

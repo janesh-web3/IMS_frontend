@@ -63,7 +63,6 @@ import { Courses } from "@/types";
 import VisitStudentDetails from "./VisitStudentDetails";
 import VisitStudentCreateForm from "./VisitStudentCreateForm";
 import Error from "@/pages/not-found/error";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import VisitStats from "./VisitStats";
 import AdminComponent from "@/components/shared/AdminComponent";
 import { UpdateModal } from "./UpdateModal";
@@ -634,7 +633,6 @@ export function VisitStudentTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <PremiumComponent>
                   <AdminComponent>
                     <Button
                       size="sm"
@@ -646,7 +644,6 @@ export function VisitStudentTable() {
                       <span>Export</span>
                     </Button>
                   </AdminComponent>
-                </PremiumComponent>
                 <PopupModal
                   text="Add Visit Student"
                   icon={<Plus className="w-4 h-4 mr-2" />}
@@ -656,13 +653,11 @@ export function VisitStudentTable() {
                 />
               </div>
             </div>
-            <PremiumComponent>
               <AdminComponent>
                 <div>
                   <VisitStats />
                 </div>
               </AdminComponent>
-            </PremiumComponent>
             {loading ? (
               <div className="flex justify-center p-8">
                 {renderLoadingSkeleton()}

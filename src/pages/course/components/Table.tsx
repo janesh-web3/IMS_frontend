@@ -34,7 +34,6 @@ import PopupModal from "@/components/shared/popup-modal";
 import CourseCreateForm from "./CourseCreateForm";
 import { Plus } from "lucide-react";
 import CourseStats from "./CourseStats";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import { Input } from "@/components/ui/input";
 
 type Course = {
@@ -155,11 +154,9 @@ export function CourseTable() {
         </AdminComponent>
       </div>
       <div>
-        <PremiumComponent>
           <AdminComponent>
             <CourseStats />
           </AdminComponent>
-        </PremiumComponent>
       </div>
       <div className="min-h-fit overflow-auto max-h-fit pt-6">
         <Table>

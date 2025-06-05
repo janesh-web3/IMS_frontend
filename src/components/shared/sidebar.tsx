@@ -5,6 +5,7 @@ import { useSidebar } from "@/hooks/use-sidebar";
 import { cn } from "@/lib/utils";
 import { ChevronsLeft } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 type SidebarProps = {
   className?: string;
@@ -35,7 +36,21 @@ export default function Sidebar({ className }: SidebarProps) {
           isMinimized ? "justify-center " : "justify-between"
         )}
       >
-        {!isMinimized && <h1 className="text-2xl font-bold">Logo</h1>}
+        {!isMinimized && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1 }}
+          >
+            <img
+              src={"logot.png"}
+              alt="Logo"
+              className="rounded-full"
+              width={70}
+              height={70}
+            />
+          </motion.div>
+        )}
         <ChevronsLeft
           className={cn(
             "size-8 cursor-pointer rounded-full border bg-background text-foreground",

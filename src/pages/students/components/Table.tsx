@@ -91,7 +91,6 @@ import {
 import { Courses } from "@/types/index";
 import Error from "@/pages/not-found/error";
 import { toast } from "react-toastify";
-import PremiumComponent from "@/components/shared/PremiumComponent";
 import { Modal } from "@/components/ui/modal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Zap } from "lucide-react";
@@ -100,6 +99,7 @@ import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import AdminComponent from "@/components/shared/AdminComponent";
 import PremiumPlusComponent from "@/components/shared/PremiumPlusComponent";
+import { DocumentCount } from "@/components/ui/DocumentCard";
 
 type Bill = {
   billNo: string;
@@ -168,6 +168,7 @@ type Student = {
   examFee: number;
   booksFee: number;
   document: string;
+  documentCount?: number; // Added for document count
   totalDiscount: number;
   paid: number;
   remaining: number;
@@ -766,6 +767,7 @@ export function StudentTable() {
                 {columnVisibility.dateOfBirth && (
                   <TableHead className="table-cell">Date of Birth</TableHead>
                 )}
+                <TableHead className="table-cell">Documents</TableHead>
                 <TableHead className="table-cell">Billing</TableHead>
                 <PremiumPlusComponent>
                   <TableHead className="table-cell">AI</TableHead>
@@ -827,6 +829,13 @@ export function StudentTable() {
                         {student.personalInfo.dateOfBirth}
                       </TableCell>
                     )}
+                    
+                    <TableCell className="table-cell">
+                      <DocumentCount 
+                        count={student.documentCount || 0} 
+                        onClick={() => navigate(`/students/document/${student._id}`)}
+                      />
+                    </TableCell>
 
                     <Sheet>
                       <TableCell className="table-cell">
@@ -1321,7 +1330,6 @@ export function StudentTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <PremiumComponent>
                   <AdminComponent>
                     <Button
                       size="sm"
@@ -1335,7 +1343,6 @@ export function StudentTable() {
                       </span>
                     </Button>
                   </AdminComponent>
-                </PremiumComponent>
                 <PopupModal
                   text="Add Student"
                   icon={<Plus className="w-4 h-4 mr-2" />}
@@ -1371,9 +1378,7 @@ export function StudentTable() {
                 )}
               </div>
             </div>
-            <PremiumComponent>
               <AdminComponent>{renderStats()}</AdminComponent>
-            </PremiumComponent>
 
             {loading ? (
               <div>
