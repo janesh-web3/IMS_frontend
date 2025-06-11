@@ -38,7 +38,10 @@ import {
 import { Task, TaskFilter, taskService } from "@/services/taskService";
 import { format } from "date-fns";
 import ViewSwitcher from "./ViewSwitcher";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAdminContext } from "@/context/adminContext";
 
 const TaskList: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -46,8 +49,14 @@ const TaskList: React.FC = () => {
   const [filters, setFilters] = useState<TaskFilter>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const tasksPerPage = 10;
   const navigate = useNavigate();
+  const { adminDetails } = useAdminContext();
+  
+  // Check if user is admin or superadmin
+  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
 
   // Fetch tasks with filters
   useEffect(() => {
@@ -60,6 +69,11 @@ const TaskList: React.FC = () => {
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch tasks:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load tasks",
+          variant: "destructive",
+        });
         setLoading(false);
       }
     };
@@ -84,6 +98,34 @@ const TaskList: React.FC = () => {
       search: searchTerm || undefined,
     }));
     setCurrentPage(1);
+  };
+  
+  // Handle task deletion
+  const handleDeleteTask = async () => {
+    if (!taskToDelete) return;
+    
+    try {
+      await taskService.deleteTask(taskToDelete);
+      
+      // Update local state
+      setTasks(prevTasks => prevTasks.filter(task => task._id !== taskToDelete));
+      
+      toast({
+        title: "Success",
+        description: "Task deleted successfully",
+      });
+      
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setTaskToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task",
+        variant: "destructive",
+      });
+    }
   };
 
   // Get priority badge color
@@ -225,18 +267,14 @@ const TaskList: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={`${getStatusColor(task.status)} hover:${getStatusColor(
-                                task.status
-                              )}`}
+                              className={getStatusColor(task.status)}
                             >
                               {task.status}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={`${getPriorityColor(
-                                task.priority
-                              )} hover:${getPriorityColor(task.priority)}`}
+                              className={getPriorityColor(task.priority)}
                             >
                               {task.priority}
                             </Badge>
@@ -250,13 +288,70 @@ const TaskList: React.FC = () => {
                             {task.assignedTo.map((user) => user.username).join(", ")}
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate(`/tasks/${task._id}`)}
-                            >
-                              View
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => navigate(`/tasks/${task._id}`)}
+                              >
+                                View
+                              </Button>
+                              
+                              {isAdmin && (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigate(`/tasks/${task._id}/edit`)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  
+                                  <Dialog open={deleteDialogOpen && taskToDelete === task._id} onOpenChange={(open) => {
+                                    setDeleteDialogOpen(open);
+                                    if (!open) setTaskToDelete(null);
+                                  }}>
+                                    <DialogTrigger asChild>
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={() => {
+                                          setTaskToDelete(task._id);
+                                          setDeleteDialogOpen(true);
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Delete Task</DialogTitle>
+                                        <DialogDescription>
+                                          Are you sure you want to delete this task? This action cannot be undone.
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      <DialogFooter>
+                                        <Button
+                                          variant="outline"
+                                          onClick={() => {
+                                            setDeleteDialogOpen(false);
+                                            setTaskToDelete(null);
+                                          }}
+                                        >
+                                          Cancel
+                                        </Button>
+                                        <Button
+                                          variant="destructive"
+                                          onClick={handleDeleteTask}
+                                        >
+                                          Delete
+                                        </Button>
+                                      </DialogFooter>
+                                    </DialogContent>
+                                  </Dialog>
+                                </>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

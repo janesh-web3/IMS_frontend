@@ -27,6 +27,7 @@ import { Task, taskService } from "@/services/taskService";
 import { format } from "date-fns";
 import { CheckCircle, Clock, AlertCircle, FileText, Paperclip, MessageSquare, Activity, Edit, Trash2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useAdminContext } from "@/context/adminContext";
 
 const TaskDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +38,20 @@ const TaskDetail: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { adminDetails } = useAdminContext();
+  
+  // Check if user is admin or superadmin
+  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
+  
+  // Check if current user is the creator or an assignee of the task
+  const isCreatorOrAssignee = () => {
+    if (!task || !adminDetails) return false;
+    
+    const isCreator = task.createdBy._id === adminDetails._id;
+    const isAssignee = task.assignedTo.some(user => user._id === adminDetails._id);
+    
+    return isCreator || isAssignee || isAdmin;
+  };
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -324,44 +339,46 @@ const TaskDetail: React.FC = () => {
               )}
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate(`/tasks/${id}/edit`)}
-            >
-              <Edit className="h-4 w-4 mr-1" /> Edit
-            </Button>
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Delete Task</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to delete this task? This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setDeleteDialogOpen(false)}
-                  >
-                    Cancel
+          {(isAdmin || task.createdBy._id === adminDetails._id) && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/tasks/${id}/edit`)}
+              >
+                <Edit className="h-4 w-4 mr-1" /> Edit
+              </Button>
+              <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
                   </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={handleDeleteTask}
-                  >
-                    Delete
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Task</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to delete this task? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setDeleteDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleDeleteTask}
+                    >
+                      Delete
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -411,6 +428,7 @@ const TaskDetail: React.FC = () => {
                                   checked as boolean
                                 )
                               }
+                              disabled={!isCreatorOrAssignee()}
                             />
                             <span
                               className={
@@ -566,13 +584,15 @@ const TaskDetail: React.FC = () => {
                             >
                               Download
                             </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteAttachment(attachment._id)}
-                            >
-                              Delete
-                            </Button>
+                            {(isAdmin || attachment.uploadedBy._id === adminDetails._id) && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteAttachment(attachment._id)}
+                              >
+                                Delete
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))
@@ -628,46 +648,48 @@ const TaskDetail: React.FC = () => {
                   <CardTitle className="text-lg">Task Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Change Status</h4>
-                    <div className="grid grid-cols-1 gap-2">
-                      <Button
-                        variant={task.status === "Pending" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStatusChange("Pending")}
-                      >
-                        Pending
-                      </Button>
-                      <Button
-                        variant={task.status === "In Progress" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStatusChange("In Progress")}
-                      >
-                        In Progress
-                      </Button>
-                      <Button
-                        variant={task.status === "Completed" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStatusChange("Completed")}
-                      >
-                        Completed
-                      </Button>
-                      <Button
-                        variant={task.status === "On Hold" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStatusChange("On Hold")}
-                      >
-                        On Hold
-                      </Button>
-                      <Button
-                        variant={task.status === "Cancelled" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleStatusChange("Cancelled")}
-                      >
-                        Cancelled
-                      </Button>
+                  {isCreatorOrAssignee() && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Change Status</h4>
+                      <div className="grid grid-cols-1 gap-2">
+                        <Button
+                          variant={task.status === "Pending" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleStatusChange("Pending")}
+                        >
+                          Pending
+                        </Button>
+                        <Button
+                          variant={task.status === "In Progress" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleStatusChange("In Progress")}
+                        >
+                          In Progress
+                        </Button>
+                        <Button
+                          variant={task.status === "Completed" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleStatusChange("Completed")}
+                        >
+                          Completed
+                        </Button>
+                        <Button
+                          variant={task.status === "On Hold" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleStatusChange("On Hold")}
+                        >
+                          On Hold
+                        </Button>
+                        <Button
+                          variant={task.status === "Cancelled" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => handleStatusChange("Cancelled")}
+                        >
+                          Cancelled
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <h4 className="text-sm font-medium mb-2">Assigned To</h4>

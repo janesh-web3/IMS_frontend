@@ -102,15 +102,15 @@ export interface TaskFormData {
   assignedTeam?: string;
   subTasks?: {
     title: string;
-    date: string;
-    tag: string;
+    date?: Date;
+    tag?: string;
     assignedTo?: string;
   }[];
   isRecurring?: boolean;
   recurringPattern?: {
     frequency: "Daily" | "Weekly" | "Monthly" | "Custom";
     interval: number;
-    endDate: Date;
+    endDate?: Date;
   };
   dependencies?: {
     taskId: string;
@@ -159,7 +159,7 @@ class TaskService {
     return this.socket;
   }
   
-  // Get all tasks
+  // Get all tasks with role-based filtering
   async getTasks(filters: TaskFilter = {}) {
     try {
       const queryParams = new URLSearchParams();
@@ -169,6 +169,8 @@ class TaskService {
       
       const queryString = queryParams.toString();
       const url = queryString ? `/tasks?${queryString}` : '/tasks';
+      
+      // The backend will handle role-based filtering
       const response = await crudRequest<Task[]>('GET', url);
       return response || [];
     } catch (error) {
@@ -177,9 +179,204 @@ class TaskService {
     }
   }
   
+  // Cache for dashboard and board data
+  private dashboardCache: any = null;
+  private boardCache: any = null;
+  
+  // Get tasks for dashboard view with improved error handling
+  async getTasksForDashboard() {
+    try {
+      // First check if we have cached data
+      if (this.dashboardCache) {
+        console.log("Using cached dashboard data while fetching fresh data");
+        
+        // Start fetching fresh data in the background without awaiting it
+        this.fetchDashboardDataInBackground();
+        
+        // Return cached data immediately
+        return this.dashboardCache;
+      }
+      
+      // If no cache, fetch data synchronously
+      return await this.fetchDashboardDataFresh();
+    } catch (error) {
+      console.error("Error fetching dashboard tasks:", error);
+      
+      // Return cached data if available
+      if (this.dashboardCache) {
+        console.log("Returning cached dashboard data after error");
+        return this.dashboardCache;
+      }
+      
+      // Create empty data structure if nothing else is available
+      return {
+        summary: {
+          statusCounts: {},
+          priorityCounts: {},
+          overdueTasks: 0,
+          dueTodayTasks: 0,
+          dueThisWeekTasks: 0,
+          recentTasks: []
+        },
+        pendingTasks: [],
+        inProgressTasks: [],
+        completedTasks: []
+      };
+    }
+  }
+  
+  // Helper method to fetch dashboard data in background
+  private async fetchDashboardDataInBackground() {
+    try {
+      await this.fetchDashboardDataFresh();
+    } catch (error) {
+      console.error("Background dashboard data fetch failed:", error);
+    }
+  }
+  
+  // Helper method to fetch fresh dashboard data
+  private async fetchDashboardDataFresh() {
+    try {
+      // Get task summary for dashboard
+      const summary = await this.getTaskSummary();
+      
+      // Get tasks for different statuses - use Promise.allSettled to handle partial failures
+      const [pendingResult, inProgressResult, completedResult] = await Promise.allSettled([
+        this.getTasks({ status: 'Pending' }),
+        this.getTasks({ status: 'In Progress' }),
+        this.getTasks({ status: 'Completed' })
+      ]);
+      
+      // Extract values or use empty arrays for failed promises
+      const pendingTasks = pendingResult.status === 'fulfilled' ? pendingResult.value : [];
+      const inProgressTasks = inProgressResult.status === 'fulfilled' ? inProgressResult.value : [];
+      const completedTasks = completedResult.status === 'fulfilled' ? completedResult.value : [];
+      
+      // Create new dashboard data
+      const dashboardData = {
+        summary,
+        pendingTasks,
+        inProgressTasks,
+        completedTasks
+      };
+      
+      // Update cache
+      this.dashboardCache = dashboardData;
+      
+      return dashboardData;
+    } catch (error) {
+      console.error("Error fetching fresh dashboard data:", error);
+      throw error;
+    }
+  }
+  
+  // Get tasks for board view with improved error handling
+  async getTasksForBoard() {
+    try {
+      // First check if we have cached data
+      if (this.boardCache) {
+        console.log("Using cached board data while fetching fresh data");
+        
+        // Start fetching fresh data in the background without awaiting it
+        this.fetchBoardDataInBackground();
+        
+        // Return cached data immediately
+        return this.boardCache;
+      }
+      
+      // If no cache, fetch data synchronously
+      return await this.fetchBoardDataFresh();
+    } catch (error) {
+      console.error("Error fetching board tasks:", error);
+      
+      // Return cached data if available
+      if (this.boardCache) {
+        console.log("Returning cached board data after error");
+        return this.boardCache;
+      }
+      
+      // Create empty data structure if nothing else is available
+      return {
+        Pending: [],
+        'In Progress': [],
+        'On Hold': [],
+        Completed: [],
+        Cancelled: []
+      };
+    }
+  }
+  
+  // Helper method to fetch board data in background
+  private async fetchBoardDataInBackground() {
+    try {
+      await this.fetchBoardDataFresh();
+    } catch (error) {
+      console.error("Background board data fetch failed:", error);
+    }
+  }
+  
+  // Helper method to fetch fresh board data
+  private async fetchBoardDataFresh() {
+    try {
+      const allTasks = await this.getTasks();
+      
+      // Group tasks by status
+      const tasksByStatus = {
+        Pending: allTasks.filter(task => task.status === 'Pending'),
+        'In Progress': allTasks.filter(task => task.status === 'In Progress'),
+        'On Hold': allTasks.filter(task => task.status === 'On Hold'),
+        Completed: allTasks.filter(task => task.status === 'Completed'),
+        Cancelled: allTasks.filter(task => task.status === 'Cancelled')
+      };
+      
+      // Update cache
+      this.boardCache = tasksByStatus;
+      
+      return tasksByStatus;
+    } catch (error) {
+      console.error("Error fetching fresh board data:", error);
+      throw error;
+    }
+  }
+  
   // Create new task
   async createTask(taskData: TaskFormData) {
     try {
+      console.log("Creating task with data:", JSON.stringify(taskData, null, 2));
+      
+      // Ensure assignedTo is valid
+      if (Array.isArray(taskData.assignedTo)) {
+        // Filter out invalid IDs - MongoDB ObjectIDs are 24 hex characters
+        taskData.assignedTo = taskData.assignedTo.filter(id => 
+          id && 
+          typeof id === 'string' && 
+          id !== 'none' && 
+          /^[0-9a-fA-F]{24}$/.test(id)
+        );
+      }
+      
+      // Handle recurring pattern
+      if (!taskData.isRecurring) {
+        // If not recurring, completely remove the recurringPattern field
+        delete taskData.recurringPattern;
+      } else if (taskData.isRecurring && taskData.recurringPattern) {
+        // Ensure valid values for recurring pattern
+        taskData.recurringPattern = {
+          frequency: taskData.recurringPattern.frequency || "Daily",
+          interval: Number(taskData.recurringPattern.interval) || 1,
+          endDate: taskData.recurringPattern.endDate
+        };
+      } else if (taskData.isRecurring) {
+        // If recurring but no pattern, create a default one
+        taskData.recurringPattern = {
+          frequency: "Daily",
+          interval: 1,
+          endDate: undefined
+        };
+      }
+      
+      console.log("Sanitized task data:", JSON.stringify(taskData, null, 2));
+      
       const response = await crudRequest<{success: boolean, task: Task}>('POST', '/tasks', taskData);
       return response.task;
     } catch (error) {

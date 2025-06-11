@@ -41,6 +41,9 @@ import { format } from "date-fns";
 import { CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Task, TaskFormData, taskService } from "@/services/taskService";
 import { toast } from "@/components/ui/use-toast";
+import { useAdminContext } from "@/context/adminContext";
+import axios from "axios";
+import { server } from "@/server";
 
 // Define form schema with Zod
 const taskFormSchema = z.object({
@@ -103,7 +106,37 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(id ? true : false);
+  const [originalTask, setOriginalTask] = useState<Task | null>(null);
   const isEditMode = Boolean(id);
+  const { adminDetails } = useAdminContext();
+  
+  // Debug adminDetails
+  useEffect(() => {
+    console.log("Admin details in TaskForm:", adminDetails);
+  }, [adminDetails]);
+  
+  // Check if user is admin or superadmin
+  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
+  
+  // Function to check API status and auth status
+  const checkApiStatus = async () => {
+    try {
+      // Check if token exists
+      const token = sessionStorage.getItem("token");
+      console.log("Auth token:", token ? "exists" : "missing");
+      
+      // Check user details endpoint
+      const response = await axios.get(`${server}/tasks/debug/user`, {
+        headers: { Authorization: token }
+      });
+      console.log("User debug info:", response.data);
+      
+      return true;
+    } catch (error) {
+      console.error("API status check failed:", error);
+      return false;
+    }
+  };
 
   // Initialize form
   const form = useForm<TaskFormValues>({
@@ -120,6 +153,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
       dependencies: [],
     },
   });
+  
+  // Set default assignee when adminDetails is available
+  useEffect(() => {
+    if (adminDetails && adminDetails._id && !isEditMode) {
+      console.log("Setting default assignee to current admin:", adminDetails._id);
+      form.setValue("assignedTo", [adminDetails._id]);
+    }
+  }, [adminDetails, form, isEditMode]);
 
   // Setup field array for subtasks
   const {
@@ -149,6 +190,21 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
       try {
         setInitializing(true);
         const task = await taskService.getTaskById(id);
+        setOriginalTask(task);
+        
+        // Check if user has permission to edit this task
+        const isCreator = task.createdBy._id === adminDetails._id;
+        const isAssignee = task.assignedTo.some(user => user._id === adminDetails._id);
+        
+        if (!isAdmin && !isCreator && !isAssignee) {
+          toast({
+            title: "Access Denied",
+            description: "You don't have permission to edit this task",
+            variant: "destructive",
+          });
+          navigate(`/tasks/${id}`);
+          return;
+        }
         
         // Transform the data to match form structure
         form.reset({
@@ -163,7 +219,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
             title: st.title,
             date: st.date ? new Date(st.date) : undefined,
             tag: st.tag,
-            assignedTo: st.assignedTo?._id,
+            assignedTo: st.assignedTo?._id || "none",
           })),
           isRecurring: task.isRecurring,
           recurringPattern: task.recurringPattern
@@ -194,21 +250,88 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
     };
 
     fetchTask();
-  }, [id, form]);
+  }, [id, form, adminDetails._id, isAdmin, navigate]);
 
   // Watch for form values that affect conditional rendering
   const isRecurring = form.watch("isRecurring");
+  
+  // Set default values for recurring pattern when isRecurring changes
+  useEffect(() => {
+    if (isRecurring && !form.getValues("recurringPattern.frequency")) {
+      form.setValue("recurringPattern.frequency", "Daily");
+      form.setValue("recurringPattern.interval", 1);
+    }
+  }, [isRecurring, form]);
 
   // Handle form submission
   const onSubmit = async (values: TaskFormValues) => {
     try {
       setLoading(true);
       
+      // Check API status before proceeding
+      const apiStatus = await checkApiStatus();
+      if (!apiStatus) {
+        toast({
+          title: "API Error",
+          description: "Could not connect to the API or authentication issue",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+      
       // Prepare data for API
       const taskData: TaskFormData = {
         ...values,
         dueDate: values.dueDate as Date,
       };
+      
+              // Make sure we have at least one assignee and all IDs are valid
+        if (Array.isArray(taskData.assignedTo)) {
+          // Filter out invalid IDs - MongoDB ObjectIDs are 24 hex characters
+          taskData.assignedTo = taskData.assignedTo.filter(id => 
+            id && 
+            typeof id === 'string' && 
+            id !== 'none' && 
+            /^[0-9a-fA-F]{24}$/.test(id)
+          );
+        }
+        
+        // Check if we still have at least one valid assignee
+        if (!taskData.assignedTo || (Array.isArray(taskData.assignedTo) && taskData.assignedTo.length === 0)) {
+          if (adminDetails && adminDetails._id && /^[0-9a-fA-F]{24}$/.test(adminDetails._id)) {
+            console.log("No valid assignees selected, using current admin as default");
+            taskData.assignedTo = [adminDetails._id];
+          } else {
+            throw new Error("At least one valid assignee is required");
+          }
+        }
+        
+        // Log the assignedTo field
+        console.log("Final assignedTo value:", taskData.assignedTo);
+      
+      // Handle recurring pattern
+      if (!taskData.isRecurring) {
+        // If not recurring, completely remove the recurringPattern field
+        delete taskData.recurringPattern;
+      } else if (taskData.isRecurring) {
+        // Initialize recurringPattern if it doesn't exist
+        if (!taskData.recurringPattern) {
+          taskData.recurringPattern = {
+            frequency: "Daily",
+            interval: 1,
+            endDate: undefined
+          };
+        } else {
+          // Make sure frequency is one of the allowed values
+          if (!["Daily", "Weekly", "Monthly", "Custom"].includes(taskData.recurringPattern.frequency)) {
+            taskData.recurringPattern.frequency = "Daily";
+          }
+          
+          // Ensure interval is a number
+          taskData.recurringPattern.interval = Number(taskData.recurringPattern.interval) || 1;
+        }
+      }
       
       if (isEditMode && id) {
         // Update existing task
@@ -433,15 +556,20 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
                       <FormLabel>Assigned To*</FormLabel>
                       <Select
                         onValueChange={(value) => {
-                          const currentValues = new Set(field.value);
-                          if (currentValues.has(value)) {
-                            currentValues.delete(value);
+                          // Validate that the value is a proper MongoDB ObjectId
+                          if (value && typeof value === 'string' && /^[0-9a-fA-F]{24}$/.test(value)) {
+                            const currentValues = new Set(field.value);
+                            if (currentValues.has(value)) {
+                              currentValues.delete(value);
+                            } else {
+                              currentValues.add(value);
+                            }
+                            field.onChange(Array.from(currentValues));
                           } else {
-                            currentValues.add(value);
+                            console.warn("Invalid user ID selected:", value);
                           }
-                          field.onChange(Array.from(currentValues));
                         }}
-                        value={field.value[0] || ""}
+                        value={field.value[0] || undefined}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -498,7 +626,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      appendSubTask({ title: "", tag: "" })
+                      appendSubTask({ title: "", tag: "", assignedTo: "none" })
                     }
                   >
                     <Plus className="h-4 w-4 mr-1" /> Add Subtask
@@ -593,7 +721,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
                               <FormLabel>Assigned To</FormLabel>
                               <Select
                                 onValueChange={field.onChange}
-                                value={field.value || ""}
+                                value={field.value || "none"}
                               >
                                 <FormControl>
                                   <SelectTrigger>
@@ -601,7 +729,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="">None</SelectItem>
+                                  <SelectItem value="none">None</SelectItem>
                                   {users.map((user) => (
                                     <SelectItem key={user._id} value={user._id}>
                                       {user.username} ({user.role})
@@ -654,7 +782,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
                           <FormLabel>Frequency</FormLabel>
                           <Select
                             onValueChange={field.onChange}
-                            value={field.value}
+                            value={field.value || "Daily"}
                           >
                             <FormControl>
                               <SelectTrigger>

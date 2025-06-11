@@ -11,10 +11,22 @@ interface TaskContextType {
   error: string | null;
   fetchTasks: (filters?: any) => Promise<void>;
   updateTaskStatus: (taskId: string, status: string) => Promise<void>;
+  updateTaskPriority: (taskId: string, priority: string) => Promise<void>;
   addTaskActivity: (taskId: string, activity: string, type?: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   delegateTask: (taskId: string, assignedTo: string | string[]) => Promise<void>;
   notifications: TaskNotification[];
+  dashboardData: {
+    summary: any;
+    pendingTasks: Task[];
+    inProgressTasks: Task[];
+    completedTasks: Task[];
+  } | null;
+  boardData: {
+    [key: string]: Task[];
+  } | null;
+  fetchDashboardData: () => Promise<void>;
+  fetchBoardData: () => Promise<void>;
 }
 
 interface TaskNotification {
@@ -33,8 +45,16 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
   const [socket, setSocket] = useState<any>(null);
   const [notifications, setNotifications] = useState<TaskNotification[]>([]);
+  const [dashboardData, setDashboardData] = useState<TaskContextType['dashboardData']>(null);
+  const [boardData, setBoardData] = useState<TaskContextType['boardData']>(null);
   
   const { adminDetails } = useAdminContext();
+
+  // Add these fetch state flags
+  const [isFetchingTasks, setIsFetchingTasks] = useState<boolean>(false);
+  const [isFetchingDashboard, setIsFetchingDashboard] = useState<boolean>(false);
+  const [isFetchingBoard, setIsFetchingBoard] = useState<boolean>(false);
+  const [dataInitialized, setDataInitialized] = useState<boolean>(false);
 
   // Initialize socket
   useEffect(() => {
@@ -101,7 +121,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [adminDetails._id]);
 
   const fetchTasks = async (filters = {}) => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingTasks) return;
+    
     try {
+      setIsFetchingTasks(true);
       setLoading(true);
       const fetchedTasks = await taskService.getTasks(filters);
       setTasks(fetchedTasks);
@@ -116,6 +140,59 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     } finally {
       setLoading(false);
+      setIsFetchingTasks(false);
+    }
+  };
+  
+  const fetchDashboardData = async () => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingDashboard) return;
+    
+    try {
+      setIsFetchingDashboard(true);
+      setLoading(true);
+      const data = await taskService.getTasksForDashboard();
+      if (data) {
+        setDashboardData(data);
+        setError(null);
+      }
+    } catch (err: any) {
+      console.error("Error fetching dashboard data:", err);
+      setError(err.message || 'Failed to fetch dashboard data');
+      toast({
+        variant: "destructive",
+        title: "Error fetching dashboard data",
+        description: err.message || "Failed to load dashboard data"
+      });
+    } finally {
+      setLoading(false);
+      setIsFetchingDashboard(false);
+    }
+  };
+  
+  const fetchBoardData = async () => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingBoard) return;
+    
+    try {
+      setIsFetchingBoard(true);
+      setLoading(true);
+      const data = await taskService.getTasksForBoard();
+      if (data) {
+        setBoardData(data);
+        setError(null);
+      }
+    } catch (err: any) {
+      console.error("Error fetching board data:", err);
+      setError(err.message || 'Failed to fetch board data');
+      toast({
+        variant: "destructive",
+        title: "Error fetching board data",
+        description: err.message || "Failed to load board data"
+      });
+    } finally {
+      setLoading(false);
+      setIsFetchingBoard(false);
     }
   };
 
@@ -135,6 +212,32 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         )
       );
       
+      // Update board data if available
+      if (boardData) {
+        // Find the task in the current status column
+        let updatedTask: Task | undefined;
+        const updatedBoardData = { ...boardData };
+        
+        // Remove the task from its current status column
+        Object.keys(updatedBoardData).forEach(key => {
+          const taskIndex = updatedBoardData[key].findIndex(t => t._id === taskId);
+          if (taskIndex !== -1) {
+            updatedTask = { ...updatedBoardData[key][taskIndex], status: status as any };
+            updatedBoardData[key] = updatedBoardData[key].filter(t => t._id !== taskId);
+          }
+        });
+        
+        // Add the task to its new status column
+        if (updatedTask) {
+          if (!updatedBoardData[status]) {
+            updatedBoardData[status] = [];
+          }
+          updatedBoardData[status] = [...updatedBoardData[status], updatedTask];
+        }
+        
+        setBoardData(updatedBoardData);
+      }
+      
       toast({
         title: "Success",
         description: `Task status updated to ${status}`,
@@ -144,6 +247,43 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
         title: "Error",
         description: err.message || "Failed to update task status",
+      });
+    }
+  };
+  
+  const updateTaskPriority = async (taskId: string, priority: string) => {
+    try {
+      await taskService.updateTask(taskId, { priority: priority as any });
+      
+      // Update local state
+      setTasks(prev => 
+        prev.map(task => 
+          task._id === taskId ? { ...task, priority: priority as any } : task
+        )
+      );
+      
+      // Update board data if available
+      if (boardData) {
+        const updatedBoardData = { ...boardData };
+        
+        Object.keys(updatedBoardData).forEach(key => {
+          updatedBoardData[key] = updatedBoardData[key].map(task => 
+            task._id === taskId ? { ...task, priority: priority as any } : task
+          );
+        });
+        
+        setBoardData(updatedBoardData);
+      }
+      
+      toast({
+        title: "Success",
+        description: `Task priority updated to ${priority}`,
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message || "Failed to update task priority",
       });
     }
   };
@@ -187,6 +327,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Update local state
       setTasks(prev => prev.filter(task => task._id !== taskId));
       
+      // Update board data if available
+      if (boardData) {
+        const updatedBoardData = { ...boardData };
+        
+        Object.keys(updatedBoardData).forEach(key => {
+          updatedBoardData[key] = updatedBoardData[key].filter(task => task._id !== taskId);
+        });
+        
+        setBoardData(updatedBoardData);
+      }
+      
       toast({
         title: "Success",
         description: "Task deleted successfully",
@@ -221,8 +372,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (!dataInitialized && adminDetails?._id) {
+      console.log("Initializing task data...");
+      fetchTasks();
+      setDataInitialized(true);
+    }
+  }, [adminDetails, dataInitialized]);
 
   return (
     <TaskContext.Provider
@@ -232,10 +387,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         error,
         fetchTasks,
         updateTaskStatus,
+        updateTaskPriority,
         addTaskActivity,
         deleteTask,
         delegateTask,
         notifications,
+        dashboardData,
+        boardData,
+        fetchDashboardData,
+        fetchBoardData,
       }}
     >
       {children}

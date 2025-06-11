@@ -6,50 +6,49 @@ import TaskForm from "./TaskForm";
 import TaskDashboard from "./TaskDashboard";
 import TaskBoard from "./TaskBoard";
 import { Task, taskService } from "@/services/taskService";
-
-interface User {
-  _id: string;
-  username: string;
-  role: string;
-}
+import { useAdminContext } from "@/context/adminContext";
 
 const TasksModule: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [relatedTasks, setRelatedTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { adminDetails } = useAdminContext();
+  
+  // Check if user is admin or superadmin
+  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
 
   useEffect(() => {
+    // Fetch users for task assignment
     const fetchUsers = async () => {
       try {
-        // This would be replaced with an actual API call to get users
-        // For now, using mock data
+        // In a real application, you would fetch users from an API
+        // For now, we'll use dummy data
         setUsers([
           { _id: "1", username: "admin", role: "admin" },
           { _id: "2", username: "teacher1", role: "teacher" },
           { _id: "3", username: "staff1", role: "staff" },
+          // Add the current user if not already in the list
+          ...(adminDetails && !users.some(u => u._id === adminDetails._id) 
+            ? [{ _id: adminDetails._id, username: adminDetails.username, role: adminDetails.role }] 
+            : [])
         ]);
-        
-        // Fetch tasks for dependencies
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
+    };
+
+    // Fetch related tasks for dependencies
+    const fetchRelatedTasks = async () => {
+      try {
         const tasks = await taskService.getTasks();
         setRelatedTasks(tasks);
-        
-        setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch initial data:", error);
-        setLoading(false);
+        console.error("Failed to fetch related tasks:", error);
       }
     };
 
     fetchUsers();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto py-6 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+    fetchRelatedTasks();
+  }, [adminDetails]);
 
   return (
     <Routes>
@@ -59,7 +58,7 @@ const TasksModule: React.FC = () => {
       <Route path="/new" element={<TaskForm users={users} relatedTasks={relatedTasks} />} />
       <Route path="/:id" element={<TaskDetail />} />
       <Route path="/:id/edit" element={<TaskForm users={users} relatedTasks={relatedTasks} />} />
-      <Route path="*" element={<Navigate to="/tasks" replace />} />
+      <Route path="*" element={<Navigate to="/tasks" />} />
     </Routes>
   );
 };

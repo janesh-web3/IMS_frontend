@@ -4,9 +4,9 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TaskSummary, taskService } from "@/services/taskService";
+import { Task, TaskSummary, taskService } from "@/services/taskService";
 import { format } from "date-fns";
 import { 
   CheckCircle, 
@@ -30,65 +30,115 @@ import {
   BarChart3,
   Calendar,
   ListTodo,
-  Plus
+  Plus,
+  Edit,
+  RefreshCw
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import ViewSwitcher from "./ViewSwitcher";
+import { useAdminContext } from "@/context/adminContext";
+import { useTaskContext } from "@/context/taskContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TaskDashboard: React.FC = () => {
-  const [summary, setSummary] = useState<TaskSummary | null>(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { adminDetails } = useAdminContext();
+  const { 
+    loading, 
+    dashboardData, 
+    fetchDashboardData 
+  } = useTaskContext();
+  
+  const [refreshing, setRefreshing] = useState(false);
+  
+  // Check if user is admin or superadmin
+  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
 
+  // Fetch dashboard data on component mount with retry logic - only once
   useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        setLoading(true);
-        const data = await taskService.getTaskSummary();
-        setSummary(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch task summary:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load task summary data",
-          variant: "destructive",
-        });
-        setLoading(false);
+    console.log("Fetching dashboard data...");
+    
+    // Use a ref to track if component is mounted
+    const isMounted = { current: true };
+    
+    const fetchData = async () => {
+      if (!dashboardData) { // Only fetch if we don't have data yet
+        try {
+          await fetchDashboardData();
+        } catch (error) {
+          console.error("Error in initial dashboard data fetch:", error);
+          
+          // Retry after 3 seconds if still mounted
+          const retryTimeout = setTimeout(async () => {
+            if (isMounted.current) {
+              console.log("Retrying dashboard data fetch...");
+              try {
+                await fetchDashboardData();
+              } catch (retryError) {
+                console.error("Error in retry dashboard data fetch:", retryError);
+              }
+            }
+          }, 3000);
+          
+          return () => {
+            clearTimeout(retryTimeout);
+          };
+        }
       }
     };
+    
+    fetchData();
+    
+    // Cleanup function
+    return () => {
+      isMounted.current = false;
+    };
+  }, []); // Empty dependency array - only run once on mount
 
-    fetchSummary();
-  }, []);
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchDashboardData();
+      toast({
+        title: "Dashboard Refreshed",
+        description: "The dashboard data has been updated",
+      });
+    } catch (error) {
+      console.error("Failed to refresh dashboard:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // Calculate total tasks
   const getTotalTasks = () => {
-    if (!summary) return 0;
+    if (!dashboardData?.summary) return 0;
     
-    return Object.values(summary.statusCounts).reduce(
-      (total, count) => total + count,
+    return Object.values(dashboardData.summary.statusCounts as Record<string, number>).reduce(
+      (total: number, count: number) => total + count,
       0
     );
   };
 
   // Get percentage for a specific status
   const getStatusPercentage = (status: string) => {
-    if (!summary || !summary.statusCounts[status]) return 0;
+    if (!dashboardData?.summary || !dashboardData.summary.statusCounts[status]) return 0;
     
     const total = getTotalTasks();
     if (total === 0) return 0;
     
-    return Math.round((summary.statusCounts[status] / total) * 100);
+    return Math.round((dashboardData.summary.statusCounts[status] as number / total) * 100);
   };
 
   // Get percentage for a specific priority
   const getPriorityPercentage = (priority: string) => {
-    if (!summary || !summary.priorityCounts[priority]) return 0;
+    if (!dashboardData?.summary || !dashboardData.summary.priorityCounts[priority]) return 0;
     
     const total = getTotalTasks();
     if (total === 0) return 0;
     
-    return Math.round((summary.priorityCounts[priority] / total) * 100);
+    return Math.round((dashboardData.summary.priorityCounts[priority] as number / total) * 100);
   };
 
   // Get color for status
@@ -125,19 +175,162 @@ const TaskDashboard: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Render loading skeleton
+  const renderSkeleton = () => {
     return (
-      <div className="container mx-auto py-6 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="container mx-auto py-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <Skeleton className="h-10 w-48" />
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <Skeleton className="h-10 w-32" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        {/* Summary Cards Skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Skeleton className="h-4 w-24 mb-2" />
+                    <Skeleton className="h-8 w-16" />
+                  </div>
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Charts Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                    <Skeleton className="h-2.5 w-full" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                    <Skeleton className="h-2.5 w-full" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Table Skeleton */}
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
+  };
+
+  // Render error state
+  const renderError = () => {
+    return (
+      <div className="container mx-auto py-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h1 className="text-3xl font-bold">Task Dashboard</h1>
+          <div className="flex items-center gap-4 mt-4 md:mt-0">
+            <ViewSwitcher currentView="dashboard" />
+            <Button onClick={() => navigate("/tasks/new")}>
+              <Plus className="h-4 w-4 mr-1" /> New Task
+            </Button>
+          </div>
+        </div>
+        
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-10">
+            <div className="text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold">Failed to load dashboard</h2>
+              <p className="text-gray-500 mt-2 mb-4">
+                There was an error loading the dashboard data.
+              </p>
+              <Button 
+                onClick={handleRefresh}
+                disabled={refreshing}
+              >
+                {refreshing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Dashboard
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return renderSkeleton();
   }
+
+  if (!dashboardData || !dashboardData.summary) {
+    return renderError();
+  }
+
+  const summary = dashboardData.summary;
 
   return (
     <div className="container mx-auto py-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h1 className="text-3xl font-bold">Task Dashboard</h1>
         <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="Refresh dashboard"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
           <ViewSwitcher currentView="dashboard" />
           <Button onClick={() => navigate("/tasks/new")}>
             <Plus className="h-4 w-4 mr-1" /> New Task
@@ -214,28 +407,34 @@ const TaskDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {summary && Object.entries(summary.statusCounts).map(([status, count]) => (
-                <div key={status}>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(status)}
-                      <span>{status}</span>
+              {summary && Object.entries(summary.statusCounts as Record<string, number>).length > 0 ? (
+                Object.entries(summary.statusCounts as Record<string, number>).map(([status, count]) => (
+                  <div key={status}>
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(status)}
+                        <span>{status}</span>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {count} ({getStatusPercentage(status)}%)
+                      </span>
                     </div>
-                    <span className="text-sm font-medium">
-                      {count} ({getStatusPercentage(status)}%)
-                    </span>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className={`h-2.5 rounded-full ${status === "Completed" ? "bg-green-500" : 
+                          status === "In Progress" ? "bg-blue-500" : 
+                          status === "On Hold" ? "bg-yellow-500" : 
+                          status === "Cancelled" ? "bg-red-500" : "bg-gray-500"}`}
+                        style={{ width: `${getStatusPercentage(status)}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className={`h-2.5 rounded-full ${status === "Completed" ? "bg-green-500" : 
-                        status === "In Progress" ? "bg-blue-500" : 
-                        status === "On Hold" ? "bg-yellow-500" : 
-                        status === "Cancelled" ? "bg-red-500" : "bg-gray-500"}`}
-                      style={{ width: `${getStatusPercentage(status)}%` }}
-                    ></div>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No status data available
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -250,26 +449,32 @@ const TaskDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {summary && ["Urgent", "High", "Medium", "Low"].map((priority) => (
-                <div key={priority}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span>{priority}</span>
-                    <span className="text-sm font-medium">
-                      {summary.priorityCounts[priority] || 0} ({getPriorityPercentage(priority)}%)
-                    </span>
+              {summary && Object.entries(summary.priorityCounts as Record<string, number>).length > 0 ? (
+                ["Urgent", "High", "Medium", "Low"].map((priority) => (
+                  <div key={priority}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span>{priority}</span>
+                      <span className="text-sm font-medium">
+                        {(summary.priorityCounts as Record<string, number>)[priority] || 0} ({getPriorityPercentage(priority)}%)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className={`h-2.5 rounded-full ${
+                          priority === "Urgent" ? "bg-red-500" : 
+                          priority === "High" ? "bg-orange-500" : 
+                          priority === "Medium" ? "bg-yellow-500" : "bg-blue-500"
+                        }`}
+                        style={{ width: `${getPriorityPercentage(priority)}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className={`h-2.5 rounded-full ${
-                        priority === "Urgent" ? "bg-red-500" : 
-                        priority === "High" ? "bg-orange-500" : 
-                        priority === "Medium" ? "bg-yellow-500" : "bg-blue-500"
-                      }`}
-                      style={{ width: `${getPriorityPercentage(priority)}%` }}
-                    ></div>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No priority data available
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -277,11 +482,22 @@ const TaskDashboard: React.FC = () => {
 
       {/* Recent Tasks */}
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Tasks</CardTitle>
-          <CardDescription>
-            Your most recently created tasks
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Recent Tasks</CardTitle>
+            <CardDescription>
+              Your most recently created tasks
+            </CardDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -296,8 +512,8 @@ const TaskDashboard: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {summary && summary.recentTasks.length > 0 ? (
-                summary.recentTasks.map((task) => (
+              {summary && summary.recentTasks && summary.recentTasks.length > 0 ? (
+                summary.recentTasks.map((task: Task) => (
                   <TableRow key={task._id}>
                     <TableCell className="font-medium">{task.title}</TableCell>
                     <TableCell>
@@ -322,16 +538,27 @@ const TaskDashboard: React.FC = () => {
                         : "No due date"}
                     </TableCell>
                     <TableCell>
-                      {task.assignedTo.map((user) => user.username).join(", ")}
+                      {task.assignedTo.map((user: any) => user.username).join(", ")}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/tasks/${task._id}`)}
-                      >
-                        View
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/tasks/${task._id}`)}
+                        >
+                          View
+                        </Button>
+                        {(isAdmin || task.createdBy._id === adminDetails._id) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/tasks/${task._id}/edit`)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -344,15 +571,15 @@ const TaskDashboard: React.FC = () => {
               )}
             </TableBody>
           </Table>
-          <div className="mt-4 flex justify-center">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/tasks")}
-            >
-              View All Tasks
-            </Button>
-          </div>
         </CardContent>
+        <CardFooter className="flex justify-center border-t pt-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/tasks")}
+          >
+            View All Tasks
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );
