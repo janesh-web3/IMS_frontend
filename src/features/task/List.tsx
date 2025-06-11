@@ -38,6 +38,13 @@ export const TASK_TYPE = {
   completed: "bg-green-600",
 };
 
+// Define the user type to fix the TypeScript error
+interface User {
+  _id: string;
+  username: string;
+  role: string;
+}
+
 const List = () => {
   const { tasks,  fetchTasks, updateTaskStatus, deleteTask } = useTaskContext();
   const [open, setOpen] = useState(false);
@@ -119,7 +126,13 @@ const List = () => {
                     {task.dueDate ? format(new Date(task.dueDate), 'PP') : 'No due date'}
                   </TableCell>
                   <TableCell>
-                    {task.assignedTo?.username || 'Unassigned'}
+                    {task.assignedTo ? (
+                      Array.isArray(task.assignedTo) 
+                        ? (task.assignedTo[0] as User)?.username || 'Unassigned'
+                        : typeof task.assignedTo === 'object' && 'username' in task.assignedTo 
+                          ? (task.assignedTo as User).username 
+                          : 'Unassigned'
+                    ) : 'Unassigned'}
                   </TableCell>
                   <TableCell>
                     <Select

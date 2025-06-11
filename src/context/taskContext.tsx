@@ -198,6 +198,43 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateTaskStatus = async (taskId: string, status: string) => {
     try {
+      console.log(`Updating task ${taskId} status to ${status}`);
+      
+      // First update local state immediately for better UX
+      if (boardData) {
+        // Find the task in the current status column
+        let taskToUpdate: Task | undefined;
+        const updatedBoardData = { ...boardData };
+        
+        // Remove the task from its current status column
+        Object.keys(updatedBoardData).forEach(key => {
+          const taskIndex = updatedBoardData[key].findIndex(t => t._id === taskId);
+          if (taskIndex !== -1) {
+            taskToUpdate = { ...updatedBoardData[key][taskIndex], status: status as any };
+            updatedBoardData[key] = updatedBoardData[key].filter(t => t._id !== taskId);
+          }
+        });
+        
+        // Add the task to its new status column
+        if (taskToUpdate) {
+          if (!updatedBoardData[status]) {
+            updatedBoardData[status] = [];
+          }
+          updatedBoardData[status] = [...updatedBoardData[status], taskToUpdate];
+        }
+        
+        // Update board data immediately
+        setBoardData(updatedBoardData);
+      }
+      
+      // Update tasks list state
+      setTasks(prev => 
+        prev.map(task => 
+          task._id === taskId ? { ...task, status: status as any } : task
+        )
+      );
+      
+      // Then send to the backend
       await taskService.updateTask(taskId, { status: status as any });
       
       // Also emit via socket for real-time updates
@@ -205,44 +242,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         socket.emit('task-status-update', { taskId, status });
       }
       
-      // Update local state
-      setTasks(prev => 
-        prev.map(task => 
-          task._id === taskId ? { ...task, status: status as any } : task
-        )
-      );
-      
-      // Update board data if available
-      if (boardData) {
-        // Find the task in the current status column
-        let updatedTask: Task | undefined;
-        const updatedBoardData = { ...boardData };
-        
-        // Remove the task from its current status column
-        Object.keys(updatedBoardData).forEach(key => {
-          const taskIndex = updatedBoardData[key].findIndex(t => t._id === taskId);
-          if (taskIndex !== -1) {
-            updatedTask = { ...updatedBoardData[key][taskIndex], status: status as any };
-            updatedBoardData[key] = updatedBoardData[key].filter(t => t._id !== taskId);
-          }
-        });
-        
-        // Add the task to its new status column
-        if (updatedTask) {
-          if (!updatedBoardData[status]) {
-            updatedBoardData[status] = [];
-          }
-          updatedBoardData[status] = [...updatedBoardData[status], updatedTask];
-        }
-        
-        setBoardData(updatedBoardData);
-      }
-      
       toast({
         title: "Success",
         description: `Task status updated to ${status}`,
       });
     } catch (err: any) {
+      console.error("Failed to update task status:", err);
+      
+      // If API call fails, we need to revert the UI changes
+      // Refresh board data from the server
+      fetchBoardData();
+      
       toast({
         variant: "destructive",
         title: "Error",

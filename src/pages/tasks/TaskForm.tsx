@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -106,7 +104,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ users, relatedTasks = [] }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(id ? true : false);
-  const [originalTask, setOriginalTask] = useState<Task | null>(null);
+  const [_originalTask, setOriginalTask] = useState<Task | null>(null);
   const isEditMode = Boolean(id);
   const { adminDetails } = useAdminContext();
   

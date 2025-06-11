@@ -13,9 +13,6 @@ const TasksModule: React.FC = () => {
   const [relatedTasks, setRelatedTasks] = useState<Task[]>([]);
   const { adminDetails } = useAdminContext();
   
-  // Check if user is admin or superadmin
-  const isAdmin = adminDetails?.role === "admin" || adminDetails?.role === "superadmin";
-
   useEffect(() => {
     // Fetch users for task assignment
     const fetchUsers = async () => {

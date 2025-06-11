@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Task, TaskSummary, taskService } from "@/services/taskService";
+import { Task } from "@/services/taskService";
 import { format } from "date-fns";
 import { 
   CheckCircle, 

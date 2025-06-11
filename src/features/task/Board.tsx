@@ -153,11 +153,11 @@ const Board = () => {
                                 priority: task.priority.toLowerCase() as any,
                                 stage: task.status === "In Progress" ? "in progress" : task.status.toLowerCase() as any,
                                 team: [{
-                                  _id: task.assignedTo?._id || "",
-                                  name: task.assignedTo?.username || "Unassigned",
-                                  title: task.assignedTo?.role || "",
+                                  _id: Array.isArray(task.assignedTo) && task.assignedTo[0] ? task.assignedTo[0]._id : "",
+                                  name: Array.isArray(task.assignedTo) && task.assignedTo[0] ? task.assignedTo[0].username : "Unassigned",
+                                  title: Array.isArray(task.assignedTo) && task.assignedTo[0] ? task.assignedTo[0].role : "",
                                   email: "",
-                                  completed: false // Added missing property
+                                  completed: false
                                 }],
                                 isTrashed: false,
                                 activities: task.activities || [],
@@ -171,7 +171,9 @@ const Board = () => {
                                 createdAt: task.createdAt,
                                 updatedAt: task.updatedAt,
                                 __v: 0,
-                                assets: task.assets || [] // Added missing property
+                                assets: task.assets || [],
+                                delegatedBy: task.delegatedBy || null,
+                                assignedTo: (_: any) => task.assignedTo
                               }}
                             />
                           </div>

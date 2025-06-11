@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided } from "@hello-pangea/dnd";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Task, TaskFilter, taskService } from "@/services/taskService";
+import { Task } from "@/services/taskService";
 import { format } from "date-fns";
 import { 
   CheckCircle, 
@@ -152,21 +151,18 @@ const TaskBoard: React.FC = () => {
     // If dropped in a different column
     if (source.droppableId !== destination.droppableId) {
       const newStatus = destination.droppableId;
+      const oldStatus = source.droppableId;
       
       try {
-        toast({
-          title: "Updating task status...",
-          description: `Moving task to ${newStatus}`,
-        });
-        
         // Update task status in backend and context
+        // The updateTaskStatus function now handles optimistic UI updates
         await updateTaskStatus(draggableId, newStatus);
       } catch (error) {
         console.error("Failed to update task status:", error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to update task status",
+          description: `Failed to move task to ${newStatus}. The task will remain in ${oldStatus}.`,
         });
       }
     }
@@ -512,7 +508,7 @@ const TaskBoard: React.FC = () => {
                                 )}
                                 <div className="flex justify-between items-center mt-3">
                                   <div className="flex -space-x-2">
-                                    {task.assignedTo.slice(0, 3).map((user, i) => (
+                                    {task.assignedTo.slice(0, 3).map((user) => (
                                       <div 
                                         key={user._id} 
                                         className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium border-2 border-white"
