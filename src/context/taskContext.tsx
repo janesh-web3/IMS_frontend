@@ -13,6 +13,7 @@ interface TaskContextType {
   updateTaskStatus: (taskId: string, status: string) => Promise<void>;
   addTaskActivity: (taskId: string, activity: string, type?: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
+  delegateTask: (taskId: string, assignedTo: string | string[]) => Promise<void>;
   notifications: TaskNotification[];
 }
 
@@ -199,6 +200,26 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const delegateTask = async (taskId: string, assignedTo: string | string[]) => {
+    try {
+      await taskService.delegateTask(taskId, assignedTo);
+      
+      // Refresh tasks to update assignees
+      fetchTasks();
+      
+      toast({
+        title: "Success",
+        description: `Task delegated successfully`,
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err.message || "Failed to delegate task",
+      });
+    }
+  };
+  
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -213,6 +234,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateTaskStatus,
         addTaskActivity,
         deleteTask,
+        delegateTask,
         notifications,
       }}
     >

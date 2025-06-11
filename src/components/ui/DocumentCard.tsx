@@ -1,5 +1,4 @@
-import React from "react";
-import { FileIcon, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Badge } from "./badge";
 
 interface DocumentCountProps {

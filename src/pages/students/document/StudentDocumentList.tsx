@@ -1,5 +1,5 @@
 // src/components/students/StudentDocumentList.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { IDocument } from "@/types/document"; // Adjust path
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, Trash2, Eye, FileText, File, Image } from "lucide-react";
+import { Download, Trash2, FileText, File, Image } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
@@ -78,11 +78,6 @@ export function StudentDocumentList({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Public method to add a document to the list (used by DocumentUploadForm's callback)
-  const addDocumentToList = (newDocument: IDocument) => {
-    setDocuments((prevDocs) => [newDocument, ...prevDocs]);
   };
 
   const handleDownload = (doc: IDocument) => {

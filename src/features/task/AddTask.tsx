@@ -27,6 +27,7 @@ import { toast } from "@/components/ui/use-toast";
 import { taskService, TaskFormData } from "@/services/taskService";
 import { crudRequest } from "@/lib/api";
 import { useTaskContext } from "@/context/taskContext";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 const FormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
@@ -34,7 +35,10 @@ const FormSchema = z.object({
   priority: z.enum(["Low", "Medium", "High"]),
   status: z.enum(["Pending", "In Progress", "Completed"]),
   dueDate: z.date().min(new Date(), "Due date must be in the future"),
-  assignedTo: z.string().min(1, "Please select an administrator"),
+  assignedTo: z.union([z.string(), z.array(z.string())]).refine(val => val.length > 0, {
+    message: "Please select at least one assignee",
+  }),
+  assignedTeam: z.string().optional(),
 });
 
 const AddTask = ({ modalClose }: { modalClose: () => void }) => {
@@ -42,14 +46,15 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
   const [admins, setAdmins] = useState<
     { _id: string; username: string; role: string }[]
   >([]);
+  const [adminsLoading, setAdminsLoading] = useState(true);
   const { fetchTasks } = useTaskContext();
 
   useEffect(() => {
     const fetchAdmins = async () => {
       try {
+        setAdminsLoading(true);
         const response = await crudRequest<any[]>("GET", "/user/get-admin");
         if (response) {
-          // Only show admin and superadmin users
           const adminUsers = response.filter(
             (user) => user.role === "admin" || user.role === "superadmin"
           );
@@ -62,6 +67,8 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
           title: "Failed to load administrators",
           description: "Could not fetch admin users for assignment",
         });
+      } finally {
+        setAdminsLoading(false);
       }
     };
 
@@ -75,8 +82,9 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
       description: "",
       priority: "Medium",
       status: "Pending",
-      assignedTo: "",
-      dueDate: new Date(new Date().setDate(new Date().getDate() + 1)), // Default to tomorrow
+      assignedTo: [],
+      assignedTeam: "none",
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     },
   });
 
@@ -84,12 +92,11 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
     try {
       setLoading(true);
 
-      // Validate that an admin is selected
-      if (!values.assignedTo) {
+      if (!values.assignedTo || (Array.isArray(values.assignedTo) && values.assignedTo.length === 0)) {
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Please select an administrator to assign the task to",
+          description: "Please select at least one administrator to assign the task to",
         });
         return;
       }
@@ -100,6 +107,7 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
         priority: values.priority,
         status: values.status,
         assignedTo: values.assignedTo,
+        assignedTeam: values.assignedTeam,
         dueDate: values.dueDate,
       };
 
@@ -110,7 +118,6 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
         description: "Task created successfully",
       });
 
-      // Refresh the task list
       fetchTasks();
 
       modalClose();
@@ -257,36 +264,59 @@ const AddTask = ({ modalClose }: { modalClose: () => void }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Assign To</FormLabel>
+                  {adminsLoading ? (
+                    <div className="text-sm text-gray-500">Loading administrators...</div>
+                  ) : admins && admins.length > 0 ? (
+                    <MultiSelect
+                      options={admins.map(admin => ({
+                        label: `${admin.username} (${admin.role})`,
+                        value: admin._id
+                      }))}
+                      selected={Array.isArray(field.value) ? field.value : (field.value ? [field.value] : [])}
+                      onChange={(selected) => {
+                        field.onChange(selected);
+                        form.setValue("assignedTo", selected, {
+                          shouldValidate: true,
+                        });
+                      }}
+                      placeholder="Select administrators"
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-500">No administrators found.</div>
+                  )}
+                  <FormDescription>
+                    Select one or more administrators to assign this task to
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="assignedTeam"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assign to Team (Optional)</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.setValue("assignedTo", value, {
-                        shouldValidate: true,
-                      });
-                    }}
+                    onValueChange={field.onChange}
                     value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select an administrator" />
+                        <SelectValue placeholder="Select a team (optional)" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {admins.length === 0 ? (
-                        <SelectItem value="loading" disabled>
-                          No administrators available
-                        </SelectItem>
-                      ) : (
-                        admins.map((admin) => (
-                          <SelectItem key={admin._id} value={admin._id}>
-                            {admin.username} ({admin.role})
-                          </SelectItem>
-                        ))
-                      )}
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="Development">Development</SelectItem>
+                      <SelectItem value="Marketing">Marketing</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                      <SelectItem value="Support">Support</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select an administrator to assign this task to
+                    Optionally assign to a team for better organization
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -39,7 +39,7 @@ const IdCardPage = lazy(() => import("@/pages/id_card"));
 const ChatPage = lazy(() => import("@/pages/chat"));
 const ComplainPage = lazy(() => import("@/pages/complain"));
 const NoticePage = lazy(() => import("@/pages/notices"));
-const TaskFeature = lazy(() => import("@/features/task"));
+const TasksModule = lazy(() => import("@/pages/tasks"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -75,7 +75,10 @@ const AppRouter: React.FC = () => {
         { path: "payment", element: <PaymentPage /> },
         { path: "handover", element: <HandOverPage /> },
         { path: "profile", element: <ProfilePage /> },
-        { path: "task", element: <TaskFeature/> },
+        { 
+          path: "tasks/*", 
+          element: <TasksModule />
+        },
         { path: "upgrade-to-pro", element: <ProPlanUpgrade /> },
         { path: "quiz/take/:id", element: <TakeQuiz /> },
         {
