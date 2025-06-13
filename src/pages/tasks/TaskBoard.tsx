@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PRIORITY_COLORS, TASK_STATUS_COLORS } from "@/lib/utils";
 
 const TaskBoard: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -185,18 +186,11 @@ const TaskBoard: React.FC = () => {
 
   // Get priority badge color
   const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "Low":
-        return "bg-blue-100 text-blue-800";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800";
-      case "High":
-        return "bg-orange-100 text-orange-800";
-      case "Urgent":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+    const colorSet = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS];
+    if (colorSet) {
+      return `${colorSet.bg} ${colorSet.text}`;
     }
+    return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300";
   };
 
   // Format due date with relative indicator
@@ -348,32 +342,32 @@ const TaskBoard: React.FC = () => {
   const columns = {
     "Pending": {
       title: "Pending",
-      icon: <Clock className="h-5 w-5 text-gray-500" />,
-      color: "bg-gray-100",
+      icon: <Clock className={TASK_STATUS_COLORS["Pending"].icon} />,
+      color: TASK_STATUS_COLORS["Pending"].bg,
       tasks: filteredTasks["Pending"] || []
     },
     "In Progress": {
       title: "In Progress",
-      icon: <Clock className="h-5 w-5 text-blue-500" />,
-      color: "bg-blue-100",
+      icon: <Clock className={TASK_STATUS_COLORS["In Progress"].icon} />,
+      color: TASK_STATUS_COLORS["In Progress"].bg,
       tasks: filteredTasks["In Progress"] || []
     },
     "On Hold": {
       title: "On Hold",
-      icon: <PauseCircle className="h-5 w-5 text-yellow-500" />,
-      color: "bg-yellow-100",
+      icon: <PauseCircle className={TASK_STATUS_COLORS["On Hold"].icon} />,
+      color: TASK_STATUS_COLORS["On Hold"].bg,
       tasks: filteredTasks["On Hold"] || []
     },
     "Completed": {
       title: "Completed",
-      icon: <CheckCircle className="h-5 w-5 text-green-500" />,
-      color: "bg-green-100",
+      icon: <CheckCircle className={TASK_STATUS_COLORS["Completed"].icon} />,
+      color: TASK_STATUS_COLORS["Completed"].bg,
       tasks: filteredTasks["Completed"] || []
     },
     "Cancelled": {
       title: "Cancelled",
-      icon: <XCircle className="h-5 w-5 text-red-500" />,
-      color: "bg-red-100",
+      icon: <XCircle className={TASK_STATUS_COLORS["Cancelled"].icon} />,
+      color: TASK_STATUS_COLORS["Cancelled"].bg,
       tasks: filteredTasks["Cancelled"] || []
     }
   };
@@ -416,7 +410,9 @@ const TaskBoard: React.FC = () => {
             <div key={status} className="flex flex-col">
               <div className={`flex items-center gap-2 p-2 rounded-t-md ${column.color}`}>
                 {column.icon}
-                <h3 className="font-medium">{column.title}</h3>
+                <h3 className={`font-medium ${TASK_STATUS_COLORS[status as keyof typeof TASK_STATUS_COLORS].text}`}>
+                  {column.title}
+                </h3>
                 <Badge variant="outline" className="ml-auto">
                   {column.tasks.length}
                 </Badge>
@@ -428,7 +424,9 @@ const TaskBoard: React.FC = () => {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={`flex-1 p-2 rounded-b-md min-h-[70vh] overflow-y-auto transition-colors ${
-                      snapshot.isDraggingOver ? "bg-gray-100" : "bg-gray-50"
+                      snapshot.isDraggingOver 
+                        ? "bg-secondary/50" 
+                        : "bg-secondary/20"
                     }`}
                   >
                     {column.tasks.length > 0 ? (

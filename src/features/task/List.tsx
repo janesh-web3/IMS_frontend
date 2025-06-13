@@ -31,12 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-
-export const TASK_TYPE = {
-  todo: "bg-blue-600",
-  "in progress": "bg-yellow-600",
-  completed: "bg-green-600",
-};
+import { TASK_TYPE, TASK_STATUS_COLORS, PRIORITY_COLORS } from "@/lib/utils";
 
 // Define the user type to fix the TypeScript error
 interface User {
@@ -73,6 +68,18 @@ const List = () => {
   const openDeleteDialog = (taskId: string) => {
     setSelectedTask(taskId);
     setDeleteAlert(true);
+  };
+
+  // Get text color for priority
+  const getPriorityTextColor = (priority: string) => {
+    const colorSet = PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS];
+    return colorSet ? colorSet.text : "text-primary";
+  };
+
+  // Get text color for status
+  const getStatusTextColor = (status: string) => {
+    const colorSet = TASK_STATUS_COLORS[status as keyof typeof TASK_STATUS_COLORS];
+    return colorSet ? colorSet.text : "text-primary";
   };
 
   // if (loading) {
@@ -139,13 +146,7 @@ const List = () => {
                       value={task.priority}
                       onValueChange={(value) => handlePriorityChange(task._id, value)}
                     >
-                      <SelectTrigger className={
-                        task.priority === "High" 
-                          ? "text-red-600 w-28" 
-                          : task.priority === "Medium"
-                            ? "text-yellow-600 w-28"
-                            : "text-green-600 w-28"
-                      }>
+                      <SelectTrigger className={`w-28 ${getPriorityTextColor(task.priority)}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -160,13 +161,7 @@ const List = () => {
                       value={task.status}
                       onValueChange={(value) => handleStatusChange(task._id, value)}
                     >
-                      <SelectTrigger className={
-                        task.status === "Completed" 
-                          ? "text-green-600 w-32" 
-                          : task.status === "In Progress"
-                            ? "text-yellow-600 w-32"
-                            : "text-blue-600 w-32"
-                      }>
+                      <SelectTrigger className={`w-32 ${getStatusTextColor(task.status)}`}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -186,7 +181,7 @@ const List = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem 
-                          className="text-red-600"
+                          className="text-destructive"
                           onClick={() => openDeleteDialog(task._id)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
@@ -212,7 +207,7 @@ const List = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600">
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

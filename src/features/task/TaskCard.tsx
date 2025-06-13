@@ -8,7 +8,7 @@ import {
   List as ListIcon,
   MessageCircleMore,
 } from "lucide-react";
-import { BGS, formatDate, PRIOTITYSTYELS, TASK_TYPE } from "@/lib/utils";
+import { BGS, formatDate, PRIOTITYSTYELS, TASK_TYPE, TASK_STATUS_COLORS } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import DelegateTask from "./DelegateTask";
@@ -62,6 +62,18 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   // Check if current user is admin or superadmin
   const isAdmin = adminDetails.role === "admin" || adminDetails.role === "superadmin";
 
+  // Get status color class based on task stage
+  const getStatusColorClass = (stage: string) => {
+    const normalizedStage = stage.charAt(0).toUpperCase() + stage.slice(1);
+    const statusKey = normalizedStage as keyof typeof TASK_STATUS_COLORS;
+    
+    if (TASK_STATUS_COLORS[statusKey]) {
+      return TASK_STATUS_COLORS[statusKey].bg;
+    }
+    
+    return TASK_TYPE[stage as keyof typeof TASK_TYPE] || TASK_TYPE.todo;
+  };
+
   return (
     <div className="w-full h-fit bg-card shadow-md p-4 rounded">
       <div className="w-full flex justify-between">
@@ -80,7 +92,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
         <div
           className={clsx(
             "w-4 h-4 rounded-full",
-            TASK_TYPE[task.stage as keyof typeof TASK_TYPE] || TASK_TYPE.todo
+            getStatusColorClass(task.stage)
           )}
         />
         <h4 className="line-clamp-1 font-medium">{task?.title}</h4>
@@ -115,7 +127,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
             <div
               key={index}
               className={clsx(
-                "w-7 h-7 rounded-full text-white flex items-center justify-center text-sm -mr-1",
+                "w-7 h-7 rounded-full flex items-center justify-center text-sm -mr-1",
                 BGS[index % BGS?.length]
               )}
               title={`${m.name} (${m.title})`}
@@ -144,7 +156,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
           {expanded && (
             <div className="mt-2 space-y-2">
               {task.subTasks.map((subtask, i) => (
-                <div key={i} className="text-xs p-2 bg-muted/30 rounded">
+                <div key={i} className="text-xs p-2 bg-secondary/40 rounded">
                   <div className="font-medium">{subtask.title}</div>
                   <div className="flex justify-between mt-1">
                     <span className="text-muted-foreground">
@@ -172,13 +184,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
             ((task.assignedTo as unknown) as Array<{ _id: string; username: string }>).map((assignee) => (
               <span 
                 key={assignee._id} 
-                className="px-2 py-1 bg-primary/10 text-xs rounded-full"
+                className="px-2 py-1 bg-primary/10 text-primary rounded-full"
               >
                 {assignee.username}
               </span>
             ))
           ) : (
-            <span className="px-2 py-1 bg-primary/10 text-xs rounded-full">
+            <span className="px-2 py-1 bg-primary/10 text-primary rounded-full">
               {typeof task.assignedTo === 'function' ? "Unassigned" : 
                 (typeof task.assignedTo === 'object' && task.assignedTo !== null && 'username' in task.assignedTo) ? 
                   (task.assignedTo as unknown as {username: string}).username : "Unassigned"}
@@ -244,7 +256,7 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
           {expanded && (
             <div className="mt-2 space-y-2">
               {task.subTasks.map((subtask, i) => (
-                <div key={i} className="text-xs p-2 bg-muted/30 rounded">
+                <div key={i} className="text-xs p-2 bg-secondary/40 rounded">
                   <div className="font-medium">{subtask.title}</div>
                   <div className="flex justify-between mt-1">
                     <span className="text-muted-foreground">

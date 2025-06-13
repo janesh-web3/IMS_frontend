@@ -29,7 +29,7 @@ const ViewSwitcher: React.FC<ViewSwitcherProps> = ({ currentView }) => {
   };
   
   return (
-    <div className="flex bg-gray-100 rounded-md p-1">
+    <div className="flex bg-card rounded-md p-1">
       <Button
         variant={currentView === "list" ? "default" : "ghost"}
         size="sm"

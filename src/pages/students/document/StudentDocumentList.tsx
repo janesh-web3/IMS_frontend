@@ -80,31 +80,35 @@ export function StudentDocumentList({
     }
   };
 
-  const handleDownload = (doc: IDocument) => {
-    // Get the filename from the path
-    const getFilenameFromPath = () => {
-      if (!doc.path) return '';
+  const handleDownload = async (doc: IDocument) => {
+    try {
+      // Get filename from path
+      const pathParts = doc.path.split(/[\\\/]/);
+      const filename = pathParts[pathParts.length - 1];
       
-      // Get the last part of the path which should be the filename
-      const parts = doc.path.split(/[\\\/]/);
-      return parts[parts.length - 1];
-    };
-    
-    const filename = getFilenameFromPath();
-    
-    // Construct the download URL using our new file endpoint
-    const downloadUrl = filename 
-      ? `${socketBaseUrl}/api/document/${studentId}/file?filename=${encodeURIComponent(filename)}&download=true`
-      : `${socketBaseUrl}/api/document/${studentId}/documents/${doc._id}`;
-    
-    console.log('Downloading file:', {
-      path: doc.path,
-      filename,
-      downloadUrl
-    });
-    
-    // Open in a new tab to download
-    window.open(downloadUrl, "_blank");
+      // Use the API endpoint with download=true parameter
+      const downloadUrl = `${socketBaseUrl}/api/document/${studentId}/file?filename=${encodeURIComponent(filename)}&download=true`;
+      
+      // Create a temporary anchor element
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = doc.originalname; // Use original filename for download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download Started",
+        description: "Your file download has started.",
+      });
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the file. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Function to get the appropriate file icon
