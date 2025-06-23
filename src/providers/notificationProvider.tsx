@@ -6,19 +6,33 @@ import React, {
   createContext,
   useContext,
   ReactNode,
+  useCallback,
 } from "react";
 import { io, Socket } from "socket.io-client";
+import { useNotificationSound, type SoundType } from "@/contexts/NotificationSoundContext";
 
-interface Notification {
+export interface Notification {
   id: string;
-  message: string;
-  isRead?: boolean;
-  createdAt?: Date;
+  notificationId: {
+    _id: string;
+    title: string;
+    message: string;
+    type?: string; // e.g., 'info', 'success', 'warning', 'error'
+    category?: string; // e.g., 'message', 'alert', 'system'
+    createdAt: string;
+  };
+  isRead: boolean;
+  userId: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface NotificationContextProps {
   notifications: Notification[];
   countNotifications: number;
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  fetchNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(
@@ -34,39 +48,29 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [countNotifications, setCountNotifications] = useState(0);
+  const { playNotificationSound } = useNotificationSound();
   const token = sessionStorage.getItem("token");
 
-  // Fetch previous notifications on mount
-  useEffect(() => {
-    const fetchPreviousNotifications = async () => {
-      if (!token) return;
+  const fetchNotifications = useCallback(async () => {
+    if (!token) return;
 
-      try {
-        const response = await crudRequest<any>("GET", "/user/get-role");
-        const data = await response;
+    try {
+      const response = await crudRequest<any>("GET", "/user/get-role");
+      const data = await response;
 
-        if (data.notifications) {
-          setNotifications(
-            data.notifications.map((n: any) => ({
-              message: n.notificationId.message,
-              isRead: n.isRead,
-              id: n.notificationId._id,
-              createdAt: n.notificationId.createdAt,
-            }))
-          );
-
-          // Set count of unread notifications
-          setCountNotifications(
-            data.notifications.filter((n: any) => !n.isRead).length
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching previous notifications:", error);
+      if (data.notifications) {
+        setNotifications(data.notifications);
+        setCountNotifications(data.notifications.filter((n: any) => !n.isRead).length);
       }
-    };
-
-    fetchPreviousNotifications();
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
   }, [token]);
+
+  // Fetch notifications on mount and when fetchNotifications changes
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   // Socket connection effect
   useEffect(() => {
@@ -87,6 +91,21 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
       console.log("New notification received:", notification);
       setNotifications((prev) => [notification, ...prev]);
       setCountNotifications((prev) => prev + 1);
+
+      // Determine sound type based on notification category/type
+      let soundType: SoundType = 'default';
+      if (notification.notificationId?.category === 'message') {
+        soundType = 'message';
+      } else if (notification.notificationId?.type === 'error') {
+        soundType = 'error';
+      } else if (notification.notificationId?.type === 'success') {
+        soundType = 'success';
+      } else if (notification.notificationId?.category === 'alert' || 
+                notification.notificationId?.type === 'VisitStudent') {
+        soundType = 'alert';
+      }
+
+      playNotificationSound(soundType);
     });
 
     socket.on("notification-read", (notificationId: string) => {
@@ -105,8 +124,29 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
     };
   }, [token]);
 
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      await crudRequest("PATCH", `/notification/mark-as-read/${notificationId}`);
+      setNotifications(prev =>
+        prev.map(n =>
+          n.notificationId._id === notificationId ? { ...n, isRead: true } : n
+        )
+      );
+      setCountNotifications(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
   return (
-    <NotificationContext.Provider value={{ notifications, countNotifications }}>
+    <NotificationContext.Provider 
+      value={{ 
+        notifications, 
+        countNotifications, 
+        markNotificationAsRead,
+        fetchNotifications
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );

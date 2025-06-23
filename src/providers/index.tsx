@@ -10,6 +10,7 @@ import ThemeProvider from "./theme-provider";
 import { SidebarProvider } from "@/hooks/use-sidebar";
 import PackageProvider from "@/context/packageContext";
 import NotificationProvider from "./notificationProvider";
+import { NotificationSoundProvider } from "@/contexts/NotificationSoundContext";
 import AdminProvider from "@/context/adminContext";
 import { MessageProvider } from "./messageProvider";
 import { TaskProvider } from "@/context/taskContext";
@@ -47,22 +48,26 @@ export default function AppProvider({
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <QueryClientProvider client={queryClient}>
               <ReactQueryDevtools />
-              <PackageProvider>
-                <AdminProvider>
-                  <NotificationProvider>
-                    <MessageProvider>
-                      <TaskProvider>
-                        <ThemeProvider
-                          defaultTheme="dark"
-                          storageKey="vite-ui-theme"
-                        >
-                          <SidebarProvider>{children}</SidebarProvider>
-                        </ThemeProvider>
-                      </TaskProvider>
-                    </MessageProvider>
-                  </NotificationProvider>
-                </AdminProvider>
-              </PackageProvider>
+              <NotificationSoundProvider>
+                <PackageProvider>
+                  <AdminProvider>
+                    <NotificationProvider>
+                      <MessageProvider>
+                        <TaskProvider>
+                          <ThemeProvider
+                            defaultTheme="dark"
+                            storageKey="vite-ui-theme"
+                          >
+                            <SidebarProvider>
+                              {children}
+                            </SidebarProvider>
+                          </ThemeProvider>
+                        </TaskProvider>
+                      </MessageProvider>
+                    </NotificationProvider>
+                  </AdminProvider>
+                </PackageProvider>
+              </NotificationSoundProvider>
             </QueryClientProvider>
           </ErrorBoundary>
         </HashRouter>

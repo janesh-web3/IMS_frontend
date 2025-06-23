@@ -446,6 +446,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       title: "New Student Added",
       message: `New Student ${personalInfo.studentName} has been added.`,
       type: "Student",
+      category: "alert",
       forRoles: ["admin", "superadmin"],
       push: true,
       sound: true,

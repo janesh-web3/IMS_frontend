@@ -92,6 +92,7 @@ const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       title: "Visit Student Added",
       message: `New Visit Student ${formData.studentName} has been added.`,
       type: "VisitStudent",
+      category: "alert",
       forRoles: ["admin", "superadmin"],
       push: true,
       sound: true,
