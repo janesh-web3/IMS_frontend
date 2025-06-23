@@ -1,22 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, FolderPlus, FileText } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { DocumentUploadForm } from "./DocumentUpload";
 import { DocumentFolderView } from "./DocumentFolderView";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { IDocument, IDocumentFolder } from "@/types/document";
 import { crudRequest } from "@/lib/api";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function StudentDocumentPage() {
@@ -25,10 +15,9 @@ export default function StudentDocumentPage() {
   const [student, setStudent] = useState<any>(null);
   const [documents, setDocuments] = useState<IDocument[]>([]);
   const [folders, setFolders] = useState<IDocumentFolder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showUploadForm, setShowUploadForm] = useState(false);
-  const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -132,32 +121,6 @@ export default function StudentDocumentPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2">
-          <Dialog open={showNewFolderDialog} onOpenChange={setShowNewFolderDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <FolderPlus className="mr-2 h-4 w-4" />
-                New Folder
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Folder</DialogTitle>
-                <DialogDescription>
-                  Create a new folder to organize documents.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="folderName">Folder Name</Label>
-                  <Input id="folderName" placeholder="Enter folder name" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="folderDescription">Description</Label>
-                  <Input id="folderDescription" placeholder="Enter folder description" />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
           <Button onClick={() => setShowUploadForm(!showUploadForm)}>
             {showUploadForm ? "Cancel" : (
               <>

@@ -3,17 +3,10 @@ import { IDocument, IDocumentFolder } from '@/types/document';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Download, 
   Trash2, 
   FolderPlus,
-  Move,
-  User,
-  GraduationCap,
-  Award,
-  FileText,
-  Plus
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { DocumentViewer } from './DocumentViewer';
@@ -59,7 +52,7 @@ export function DocumentFolderView({
   onFolderCreated,
 }: DocumentFolderViewProps) {
   const { toast } = useToast();
-  const [activeFolder, setActiveFolder] = useState<string>('all');
+  const [_activeFolder, setActiveFolder] = useState<string>('all');
   const [showNewFolderDialog, setShowNewFolderDialog] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [newFolderColor, setNewFolderColor] = useState('dashboard1');
@@ -153,7 +146,7 @@ export function DocumentFolderView({
           </TabsList>
 
           <TabsContent value="all" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {getDocumentsForFolder('all').map((doc) => (
                 <DocumentCard
                   key={doc._id}
@@ -238,7 +231,6 @@ function DocumentCard({
   document: doc,
   studentId,
   onDelete,
-  onMove,
   folders,
 }: {
   document: IDocument;

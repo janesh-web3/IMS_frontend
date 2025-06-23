@@ -31,7 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { TASK_TYPE, TASK_STATUS_COLORS, PRIORITY_COLORS } from "@/lib/utils";
+import { TASK_STATUS_COLORS, PRIORITY_COLORS } from "@/lib/utils";
 
 // Define the user type to fix the TypeScript error
 interface User {

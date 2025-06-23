@@ -829,11 +829,13 @@ export function StudentTable() {
                         {student.personalInfo.dateOfBirth}
                       </TableCell>
                     )}
-                    
+
                     <TableCell className="table-cell">
-                      <DocumentCount 
-                        count={student.documentCount || 0} 
-                        onClick={() => navigate(`/students/document/${student._id}`)}
+                      <DocumentCount
+                        count={student.documentCount || 0}
+                        onClick={() =>
+                          navigate(`/students/document/${student._id}`)
+                        }
                       />
                     </TableCell>
 
@@ -1330,19 +1332,19 @@ export function StudentTable() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                  <AdminComponent>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 gap-1"
-                      onClick={exportToCSV}
-                    >
-                      <File className="h-3.5 w-3.5" />
-                      <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                        Export
-                      </span>
-                    </Button>
-                  </AdminComponent>
+                <AdminComponent>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1"
+                    onClick={exportToCSV}
+                  >
+                    <File className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                      Export
+                    </span>
+                  </Button>
+                </AdminComponent>
                 <PopupModal
                   text="Add Student"
                   icon={<Plus className="w-4 h-4 mr-2" />}
@@ -1378,7 +1380,7 @@ export function StudentTable() {
                 )}
               </div>
             </div>
-              <AdminComponent>{renderStats()}</AdminComponent>
+            <AdminComponent>{renderStats()}</AdminComponent>
 
             {loading ? (
               <div>

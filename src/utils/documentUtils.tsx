@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { FileText, Image, File } from 'lucide-react';
 
 // Get file icon based on mimetype

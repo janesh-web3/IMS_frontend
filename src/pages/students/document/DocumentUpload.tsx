@@ -20,19 +20,6 @@ interface DocumentUploadFormProps {
   folders: IDocumentFolder[];
 }
 
-// Define common document types, you can extend this
-const DOCUMENT_TYPES = [
-  "Passport",
-  "IELTS Certificate",
-  "Offer Letter",
-  "Visa Copy",
-  "Academic Transcript",
-  "Resume/CV",
-  "SOP",
-  "LOR",
-  "Other",
-];
-
 export function DocumentUploadForm({
   studentId,
   onUploadSuccess,

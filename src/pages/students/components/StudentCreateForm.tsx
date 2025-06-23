@@ -440,7 +440,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       photo: photo,
     };
 
-    console.log("Student Data:", studentData);
 
     // Prepare the notification payload
     const notificationPayload = {

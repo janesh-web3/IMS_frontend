@@ -15,7 +15,7 @@ export const navItems: NavItem[] = [
     icon: "graduationCap",
     tag: "Basic",
     label: "Student",
-    role: "admin",
+    role: "reception",
   },
   {
     title: "Visit Students",
