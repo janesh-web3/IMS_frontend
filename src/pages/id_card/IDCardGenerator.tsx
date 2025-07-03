@@ -331,6 +331,17 @@ const IDCardGenerator = () => {
     }
   }, [id]);
 
+  // Add smooth scrolling to the page
+  useEffect(() => {
+    // Add smooth scrolling CSS
+    document.documentElement.style.scrollBehavior = "smooth";
+
+    return () => {
+      // Clean up
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, []);
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -821,6 +832,17 @@ const IDCardGenerator = () => {
     }
   };
 
+  // Add smooth scrolling to the page
+  useEffect(() => {
+    // Add smooth scrolling CSS
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    return () => {
+      // Clean up
+      document.documentElement.style.scrollBehavior = '';
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -847,341 +869,109 @@ const IDCardGenerator = () => {
   return (
     <div className="container p-6 mx-auto">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {/* Customization Panel */}
-        <Card className="p-4">
-          <h2 className="mb-4 text-2xl font-bold">ID Card Customization</h2>
+        {/* Customization Panel - Made sticky */}
+        <div className="relative">
+          <Card className="p-4 sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+            <h2 className="mb-4 text-2xl font-bold">ID Card Customization</h2>
 
-          <div className="space-y-6">
-            {/* Colors Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Colors</h3>
-
-              <div className="space-y-2">
-                <Label>Background Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={customization.backgroundColor}
-                    onChange={(e) =>
-                      handleCustomizationChange(
-                        "backgroundColor",
-                        e.target.value
-                      )
-                    }
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={customization.backgroundColor}
-                    onChange={(e) =>
-                      handleCustomizationChange(
-                        "backgroundColor",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Text Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={customization.textColor}
-                    onChange={(e) =>
-                      handleCustomizationChange("textColor", e.target.value)
-                    }
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={customization.textColor}
-                    onChange={(e) =>
-                      handleCustomizationChange("textColor", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Header Text Color</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="color"
-                    value={customization.headerTextColor}
-                    onChange={(e) =>
-                      handleCustomizationChange(
-                        "headerTextColor",
-                        e.target.value
-                      )
-                    }
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={customization.headerTextColor}
-                    onChange={(e) =>
-                      handleCustomizationChange(
-                        "headerTextColor",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Typography Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Typography</h3>
-
-              <div className="space-y-2">
-                <Label>Font Style</Label>
-                <Select
-                  value={customization.fontStyle}
-                  onValueChange={(value) =>
-                    handleCustomizationChange("fontStyle", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select font style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {fontStyles.map((font) => (
-                      <SelectItem key={font.value} value={font.value}>
-                        {font.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Header Typography */}
-              <div className="space-y-2">
-                <Label>Header Typography</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Select
-                    value={customization.fontSize.header}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontSize", {
-                        ...customization.fontSize,
-                        header: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontSizes.map((size) => (
-                        <SelectItem key={size.value} value={size.value}>
-                          {size.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={customization.fontWeight.header}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontWeight", {
-                        ...customization.fontWeight,
-                        header: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontWeights.map((weight) => (
-                        <SelectItem key={weight.value} value={weight.value}>
-                          {weight.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Name Typography */}
-              <div className="space-y-2">
-                <Label>Name Typography</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Select
-                    value={customization.fontSize.name}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontSize", {
-                        ...customization.fontSize,
-                        name: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontSizes.map((size) => (
-                        <SelectItem key={size.value} value={size.value}>
-                          {size.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={customization.fontWeight.name}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontWeight", {
-                        ...customization.fontWeight,
-                        name: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontWeights.map((weight) => (
-                        <SelectItem key={weight.value} value={weight.value}>
-                          {weight.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Details Typography */}
-              <div className="space-y-2">
-                <Label>Details Typography</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <Select
-                    value={customization.fontSize.details}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontSize", {
-                        ...customization.fontSize,
-                        details: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontSizes.map((size) => (
-                        <SelectItem key={size.value} value={size.value}>
-                          {size.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select
-                    value={customization.fontWeight.details}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontWeight", {
-                        ...customization.fontWeight,
-                        details: value,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Font weight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontWeights.map((weight) => (
-                        <SelectItem key={weight.value} value={weight.value}>
-                          {weight.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label>Select Theme</Label>
-                <Select value={selectedTheme} onValueChange={handleThemeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {themes.map((theme) => (
-                      <SelectItem key={theme.id} value={theme.id}>
-                        {theme.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Upload Logo</Label>
-                <div className="space-y-2">
-                  <Input
-                    type="file"
-                    onChange={handleLogoUpload}
-                    accept="image/*"
-                    className="cursor-pointer"
-                  />
-                  {logoError && (
-                    <p className="text-sm text-red-500">{logoError}</p>
-                  )}
-                  {customLogo && (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={customLogo}
-                        alt="Preview"
-                        className="object-contain w-10 h-10"
-                      />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleRemoveLogo}
-                      >
-                        Remove Logo
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
+            <div className="space-y-6">
+              {/* Colors Section */}
               <div className="space-y-4">
-                <div>
-                  <Label>Orientation</Label>
-                  <Select
-                    value={customization.orientation}
-                    onValueChange={(value: "portrait" | "landscape") =>
-                      handleCustomizationChange("orientation", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select orientation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="portrait">Portrait</SelectItem>
-                      <SelectItem value="landscape">Landscape</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <h3 className="text-lg font-semibold">Colors</h3>
+
+                <div className="space-y-2">
+                  <Label>Background Color</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={customization.backgroundColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "backgroundColor",
+                          e.target.value
+                        )
+                      }
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={customization.backgroundColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "backgroundColor",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <Label>Font Family</Label>
+                <div className="space-y-2">
+                  <Label>Text Color</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={customization.textColor}
+                      onChange={(e) =>
+                        handleCustomizationChange("textColor", e.target.value)
+                      }
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={customization.textColor}
+                      onChange={(e) =>
+                        handleCustomizationChange("textColor", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Header Text Color</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={customization.headerTextColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "headerTextColor",
+                          e.target.value
+                        )
+                      }
+                      className="w-20 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={customization.headerTextColor}
+                      onChange={(e) =>
+                        handleCustomizationChange(
+                          "headerTextColor",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Typography Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Typography</h3>
+
+                <div className="space-y-2">
+                  <Label>Font Style</Label>
                   <Select
-                    value={customization.fontFamily}
+                    value={customization.fontStyle}
                     onValueChange={(value) =>
-                      handleCustomizationChange("fontFamily", value)
+                      handleCustomizationChange("fontStyle", value)
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select font" />
+                      <SelectValue placeholder="Select font style" />
                     </SelectTrigger>
                     <SelectContent>
-                      {fontOptions.map((font) => (
+                      {fontStyles.map((font) => (
                         <SelectItem key={font.value} value={font.value}>
                           {font.label}
                         </SelectItem>
@@ -1190,224 +980,460 @@ const IDCardGenerator = () => {
                   </Select>
                 </div>
 
-                <div>
-                  <Label>Font Size</Label>
-                  <Select
-                    value={customization.fontSize.details} // or .header or .name depending on context
-                    onValueChange={(value) =>
-                      handleCustomizationChange("fontSize", {
-                        ...customization.fontSize,
-                        details: value, // or header/name depending on context
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fontSizeOptions.map((size) => (
-                        <SelectItem key={size.value} value={size.value}>
-                          {size.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                {/* Header Typography */}
+                <div className="space-y-2">
+                  <Label>Header Typography</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      value={customization.fontSize.header}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontSize", {
+                          ...customization.fontSize,
+                          header: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontSizes.map((size) => (
+                          <SelectItem key={size.value} value={size.value}>
+                            {size.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                <div>
-                  <Label>Primary Color</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={customization.primaryColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "primaryColor",
-                          e.target.value
-                        )
+                    <Select
+                      value={customization.fontWeight.header}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontWeight", {
+                          ...customization.fontWeight,
+                          header: value,
+                        })
                       }
-                    />
-                    <Input
-                      type="text"
-                      value={customization.primaryColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "primaryColor",
-                          e.target.value
-                        )
-                      }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontWeights.map((weight) => (
+                          <SelectItem key={weight.value} value={weight.value}>
+                            {weight.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div>
-                  <Label>Border Radius</Label>
-                  <Select
-                    value={customization.borderRadius}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("borderRadius", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select border radius" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                      <SelectItem value="xl">Extra Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Name Typography */}
+                <div className="space-y-2">
+                  <Label>Name Typography</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      value={customization.fontSize.name}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontSize", {
+                          ...customization.fontSize,
+                          name: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontSizes.map((size) => (
+                          <SelectItem key={size.value} value={size.value}>
+                            {size.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={customization.fontWeight.name}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontWeight", {
+                          ...customization.fontWeight,
+                          name: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontWeights.map((weight) => (
+                          <SelectItem key={weight.value} value={weight.value}>
+                            {weight.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Details Typography */}
+                <div className="space-y-2">
+                  <Label>Details Typography</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Select
+                      value={customization.fontSize.details}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontSize", {
+                          ...customization.fontSize,
+                          details: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontSizes.map((size) => (
+                          <SelectItem key={size.value} value={size.value}>
+                            {size.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={customization.fontWeight.details}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontWeight", {
+                          ...customization.fontWeight,
+                          details: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Font weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontWeights.map((weight) => (
+                          <SelectItem key={weight.value} value={weight.value}>
+                            {weight.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label>Background Pattern</Label>
-                  <Select
-                    value={customization.backgroundPattern}
-                    onValueChange={(value) =>
-                      handleCustomizationChange("backgroundPattern", value)
-                    }
-                  >
+                  <Label>Select Theme</Label>
+                  <Select value={selectedTheme} onValueChange={handleThemeChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select pattern" />
+                      <SelectValue placeholder="Select theme" />
                     </SelectTrigger>
                     <SelectContent>
-                      {backgroundPatterns.map((pattern) => (
-                        <SelectItem key={pattern.id} value={pattern.id}>
-                          {pattern.name}
+                      {themes.map((theme) => (
+                        <SelectItem key={theme.id} value={theme.id}>
+                          {theme.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {customization.backgroundPattern !== "none" && (
-                  <>
-                    <div>
-                      <Label>Pattern Color</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          type="color"
-                          value={customization.patternColor}
-                          onChange={(e) =>
-                            handleCustomizationChange(
-                              "patternColor",
-                              e.target.value
-                            )
-                          }
-                          className="w-20 h-10"
+                <div>
+                  <Label>Upload Logo</Label>
+                  <div className="space-y-2">
+                    <Input
+                      type="file"
+                      onChange={handleLogoUpload}
+                      accept="image/*"
+                      className="cursor-pointer"
+                    />
+                    {logoError && (
+                      <p className="text-sm text-red-500">{logoError}</p>
+                    )}
+                    {customLogo && (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={customLogo}
+                          alt="Preview"
+                          className="object-contain w-10 h-10"
                         />
-                        <Input
-                          type="text"
-                          value={customization.patternColor}
-                          onChange={(e) =>
-                            handleCustomizationChange(
-                              "patternColor",
-                              e.target.value
-                            )
-                          }
-                        />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleRemoveLogo}
+                        >
+                          Remove Logo
+                        </Button>
                       </div>
-                    </div>
+                    )}
+                  </div>
+                </div>
 
-                    <div>
-                      <Label>Pattern Opacity</Label>
-                      <Slider
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        value={[customization.patternOpacity]}
-                        onValueChange={([value]) =>
-                          handleCustomizationChange("patternOpacity", value)
+                <div className="space-y-4">
+                  <div>
+                    <Label>Orientation</Label>
+                    <Select
+                      value={customization.orientation}
+                      onValueChange={(value: "portrait" | "landscape") =>
+                        handleCustomizationChange("orientation", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select orientation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="portrait">Portrait</SelectItem>
+                        <SelectItem value="landscape">Landscape</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Font Family</Label>
+                    <Select
+                      value={customization.fontFamily}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontFamily", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select font" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontOptions.map((font) => (
+                          <SelectItem key={font.value} value={font.value}>
+                            {font.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Font Size</Label>
+                    <Select
+                      value={customization.fontSize.details} // or .header or .name depending on context
+                      onValueChange={(value) =>
+                        handleCustomizationChange("fontSize", {
+                          ...customization.fontSize,
+                          details: value, // or header/name depending on context
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fontSizeOptions.map((size) => (
+                          <SelectItem key={size.value} value={size.value}>
+                            {size.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Primary Color</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="color"
+                        value={customization.primaryColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "primaryColor",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Input
+                        type="text"
+                        value={customization.primaryColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "primaryColor",
+                            e.target.value
+                          )
                         }
                       />
                     </div>
-                  </>
-                )}
-              </div>
+                  </div>
 
-              <div className="space-y-4">
-                <div>
-                  <Label>Header Background Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={customization.headerBgColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "headerBgColor",
-                          e.target.value
-                        )
+                  <div>
+                    <Label>Border Radius</Label>
+                    <Select
+                      value={customization.borderRadius}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("borderRadius", value)
                       }
-                      className="w-20 h-10"
-                    />
-                    <Input
-                      type="text"
-                      value={customization.headerBgColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "headerBgColor",
-                          e.target.value
-                        )
-                      }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select border radius" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="sm">Small</SelectItem>
+                        <SelectItem value="md">Medium</SelectItem>
+                        <SelectItem value="lg">Large</SelectItem>
+                        <SelectItem value="xl">Extra Large</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div>
-                  <Label>Footer Background Color</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      type="color"
-                      value={customization.footerBgColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "footerBgColor",
-                          e.target.value
-                        )
+                <div className="space-y-4">
+                  <div>
+                    <Label>Background Pattern</Label>
+                    <Select
+                      value={customization.backgroundPattern}
+                      onValueChange={(value) =>
+                        handleCustomizationChange("backgroundPattern", value)
                       }
-                      className="w-20 h-10"
-                    />
-                    <Input
-                      type="text"
-                      value={customization.footerBgColor}
-                      onChange={(e) =>
-                        handleCustomizationChange(
-                          "footerBgColor",
-                          e.target.value
-                        )
-                      }
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select pattern" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {backgroundPatterns.map((pattern) => (
+                          <SelectItem key={pattern.id} value={pattern.id}>
+                            {pattern.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {customization.backgroundPattern !== "none" && (
+                    <>
+                      <div>
+                        <Label>Pattern Color</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            value={customization.patternColor}
+                            onChange={(e) =>
+                              handleCustomizationChange(
+                                "patternColor",
+                                e.target.value
+                              )
+                            }
+                            className="w-20 h-10"
+                          />
+                          <Input
+                            type="text"
+                            value={customization.patternColor}
+                            onChange={(e) =>
+                              handleCustomizationChange(
+                                "patternColor",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label>Pattern Opacity</Label>
+                        <Slider
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          value={[customization.patternOpacity]}
+                          onValueChange={([value]) =>
+                            handleCustomizationChange("patternOpacity", value)
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label>Header Background Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={customization.headerBgColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "headerBgColor",
+                            e.target.value
+                          )
+                        }
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={customization.headerBgColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "headerBgColor",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Footer Background Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={customization.footerBgColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "footerBgColor",
+                            e.target.value
+                          )
+                        }
+                        className="w-20 h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={customization.footerBgColor}
+                        onChange={(e) =>
+                          handleCustomizationChange(
+                            "footerBgColor",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
+
+                <Button onClick={handleDownload} className="w-full">
+                  Download ID Card
+                </Button>
               </div>
-
-              <Button onClick={handleDownload} className="w-full">
-                Download ID Card
-              </Button>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
 
-        {/* ID Card Preview */}
-        <Card className="p-4">
-          <h2 className="mb-4 text-2xl font-bold">Preview</h2>
+        {/* ID Card Preview - Made sticky */}
+        <div className="relative">
+          <Card className="p-4 sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto">
+            <h2 className="mb-4 text-2xl font-bold">Preview</h2>
 
-          <div className="flex items-center justify-center min-h-[600px] rounded-lg p-4">
-            <div
-              className={`id-card ${
-                cardLayouts.find((l) => l.id === customization.layout)
-                  ?.className
-              }`}
-              style={getCardStyle()}
-            >
-              {renderLayoutContent()}
+            <div className="flex items-center justify-center min-h-[600px] rounded-lg p-4 overflow-hidden">
+              <div
+                className={`id-card ${
+                  cardLayouts.find((l) => l.id === customization.layout)
+                    ?.className
+                }`}
+                style={getCardStyle()}
+              >
+                {renderLayoutContent()}
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       </div>
     </div>
   );
