@@ -40,6 +40,7 @@ const ChatPage = lazy(() => import("@/pages/chat"));
 const ComplainPage = lazy(() => import("@/pages/complain"));
 const NoticePage = lazy(() => import("@/pages/notices"));
 const TasksModule = lazy(() => import("@/pages/tasks"));
+const CertificatesPage = lazy(() => import("@/pages/certificates"));
 
 const AppRouter: React.FC = () => {
   const dashboardRoutes = [
@@ -79,6 +80,7 @@ const AppRouter: React.FC = () => {
           path: "tasks/*", 
           element: <TasksModule />
         },
+        { path: "certificates", element: <CertificatesPage /> },
         { path: "upgrade-to-pro", element: <ProPlanUpgrade /> },
         { path: "quiz/take/:id", element: <TakeQuiz /> },
         {

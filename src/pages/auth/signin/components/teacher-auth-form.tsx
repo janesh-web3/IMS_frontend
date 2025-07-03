@@ -15,7 +15,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import * as z from "zod";
-import { Eye, EyeOff } from "lucide-react";
 
 interface AuthResponse {
   _id: string;
@@ -32,8 +31,7 @@ type UserFormValue = z.infer<typeof formSchema>;
 
 export default function TeacherForm() {
   const router = useRouter();
-  const [loading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const defaultValues = {
     email: "",
     password: "",
@@ -44,6 +42,7 @@ export default function TeacherForm() {
   });
 
   const onSubmit = async (formData: UserFormValue) => {
+    setLoading(true);
     try {
       const loginTime = new Date();
 
@@ -61,6 +60,8 @@ export default function TeacherForm() {
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login Failed!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,27 +97,12 @@ export default function TeacherForm() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password..."
-                      disabled={loading}
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4 text-foreground" />
-                      ) : (
-                        <Eye className="w-4 h-4 text-foreground" />
-                      )}
-                    </Button>
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password..."
+                    disabled={loading}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

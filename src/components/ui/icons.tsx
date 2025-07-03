@@ -53,6 +53,7 @@ import {
   Edit,
   Paperclip,
   Activity,
+  Award,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -130,4 +131,5 @@ export const Icons = {
   edit: Edit,
   paperclip: Paperclip,
   activity: Activity,
+  award: Award,
 };

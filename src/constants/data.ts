@@ -90,6 +90,14 @@ export const navItems: NavItem[] = [
     label: "Task Dashboard",
   },
   {
+    title: "Certificates",
+    href: "/certificates",
+    icon: "award",
+    role: "reception",
+    tag: "Basic",
+    label: "Certificates",
+  },
+  {
     title: "AI Model",
     href: "/ai-model",
     icon: "brain",

@@ -13,7 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { crudRequest } from "@/lib/api";
 import { Courses } from "@/types";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 const VisitStudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
