@@ -483,7 +483,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
             notificationPayload
           );
 
-          generateBill(studentBill);
+          // generateBill(studentBill);
         });
 
       modalClose();

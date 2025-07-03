@@ -48,7 +48,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
 import PopupModal from "@/components/shared/popup-modal";
 import StudentCreateForm from "./StudentCreateForm";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { crudRequest, moveToRecycleBin } from "@/lib/api";
 import { AlertModal } from "@/components/shared/alert-modal";
 import {
@@ -963,77 +963,103 @@ export function StudentTable() {
                     </PremiumPlusComponent>
 
                     <TableCell className="table-cell">
-                      <Drawer>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="w-8 h-8 p-0">
-                              <MoreHorizontal className="w-6 h-6" />
-                              <span className="sr-only">Open menu</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="cursor-pointer"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" className="w-8 h-8 p-0">
+                            <MoreHorizontal className="w-6 h-6" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="cursor-pointer"
+                        >
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="flex justify-between cursor-pointer"
+                            onClick={() =>
+                              navigate(`/student/update/${student._id}`)
+                            }
                           >
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
+                            Edit <Edit size={17} />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="flex justify-between cursor-pointer"
+                            onClick={() => {
+                              // Close dropdown menu first
+                              document.body.click(); 
+                              // Set a small timeout to ensure dropdown is fully closed before opening drawer
+                              setTimeout(() => {
+                                document.getElementById(`drawer-${student._id}`)?.click();
+                              }, 50);
+                            }}
+                          >
+                            View <View size={17} />
+                          </DropdownMenuItem>
+                          <AdminComponent>
                             <DropdownMenuItem
+                              onClick={() => {
+                                setOpen(true);
+                                setStudentToDelete(student._id);
+                              }}
                               className="flex justify-between cursor-pointer"
-                              onClick={() =>
-                                navigate(`/student/update/${student._id}`)
-                              }
                             >
-                              Edit <Edit size={17} />
+                              Delete
+                              <Trash size={17} />
                             </DropdownMenuItem>
-                            <DrawerTrigger asChild>
-                              <DropdownMenuItem className="flex justify-between cursor-pointer">
-                                View <View size={17} />
-                              </DropdownMenuItem>
-                            </DrawerTrigger>
-                            <AdminComponent>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setOpen(true);
-                                  setStudentToDelete(student._id);
-                                }}
-                                className="flex justify-between cursor-pointer"
-                              >
-                                Delete
-                                <Trash size={17} />
-                              </DropdownMenuItem>
-                            </AdminComponent>
-                            <PremiumPlusComponent>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  navigate(`/id-card/${student._id}`)
-                                }
-                                className="flex justify-between cursor-pointer"
-                              >
-                                ID Card
-                                <File size={17} />
-                              </DropdownMenuItem>
-                            </PremiumPlusComponent>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          </AdminComponent>
+                          <PremiumPlusComponent>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                navigate(`/id-card/${student._id}`)
+                              }
+                              className="flex justify-between cursor-pointer"
+                            >
+                              ID Card
+                              <File size={17} />
+                            </DropdownMenuItem>
+                          </PremiumPlusComponent>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
 
-                        <AlertModal
-                          isOpen={open}
-                          onClose={() => {
-                            setOpen(false);
-                            setStudentToDelete(null);
+                      <AlertModal
+                        isOpen={open}
+                        onClose={() => {
+                          setOpen(false);
+                          setStudentToDelete(null);
+                        }}
+                        onConfirm={onConfirm}
+                        loading={loading}
+                        title="Delete Student"
+                        description="Are you sure you want to delete this student?"
+                      />
+                    </TableCell>
+                    
+                    {/* Drawer in its own TableCell for proper isolation */}
+                    <TableCell className="hidden">
+                      <Drawer>
+                        <DrawerTrigger asChild>
+                          <Button id={`drawer-${student._id}`} className="hidden">View</Button>
+                        </DrawerTrigger>
+                        <DrawerContent 
+                          className="z-[100]" 
+                          onCloseAutoFocus={(e) => {
+                            e.preventDefault();
+                            setTimeout(cleanupOverlays, 10);
                           }}
-                          onConfirm={onConfirm}
-                          loading={loading}
-                          title="Delete Student"
-                          description="Are you sure you want to delete this student?"
-                        />
-                        <DrawerContent className="z-50">
+                          onEscapeKeyDown={() => {
+                            setTimeout(cleanupOverlays, 10);
+                          }}
+                          onPointerDownOutside={() => {
+                            setTimeout(cleanupOverlays, 10);
+                          }}
+                        >
                           <div className="w-full max-h-[80vh] mx-auto overflow-auto max-w-7xl">
                             <DrawerHeader>
                               <DrawerTitle>Student Details</DrawerTitle>
                               <DrawerDescription>
-                                See details about{" "}
-                                {student.personalInfo.studentName}
+                                See details about {student.personalInfo.studentName}
                               </DrawerDescription>
                             </DrawerHeader>
                             <div className="p-4 pb-0">
@@ -1041,7 +1067,14 @@ export function StudentTable() {
                             </div>
                             <DrawerFooter>
                               <DrawerClose asChild>
-                                <Button variant="outline">Cancel</Button>
+                                <Button 
+                                  variant="outline"
+                                  onClick={() => {
+                                    setTimeout(cleanupOverlays, 10);
+                                  }}
+                                >
+                                  Close
+                                </Button>
                               </DrawerClose>
                             </DrawerFooter>
                           </div>
@@ -1153,6 +1186,76 @@ export function StudentTable() {
     a.click();
     document.body.removeChild(a);
   };
+
+  // Add a memoized cleanup function to avoid recreating it on every render
+  const cleanupOverlays = useCallback(() => {
+    // Ensure body styles are reset
+    document.body.style.pointerEvents = '';
+    document.body.style.overflow = '';
+    
+    // Remove any lingering backdrop elements
+    const backdrops = document.querySelectorAll('[data-radix-popper-wrapper], [data-radix-portal]');
+    backdrops.forEach(el => {
+      if (el.parentElement) {
+        try {
+          el.parentElement.removeChild(el);
+        } catch (e) {
+          console.error("Failed to remove overlay element:", e);
+        }
+      }
+    });
+    
+    // Force a small reflow/repaint to ensure UI is responsive
+    document.body.classList.add('force-reflow');
+    setTimeout(() => document.body.classList.remove('force-reflow'), 10);
+  }, []);
+
+  // Define custom CSS to ensure proper stacking and cleanup
+  useEffect(() => {
+    // Create a style element to add our custom CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Higher z-index for the drawer to ensure it's on top */
+      [data-radix-popper-wrapper] {
+        z-index: 100 !important;
+      }
+      
+      /* Reset on force-reflow class to trigger repaint */
+      .force-reflow {
+        animation: none;
+        transform: translateZ(0);
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
+  // Add event listeners to cleanup any remaining overlays on page interactions
+  useEffect(() => {
+    const handleCleanup = () => {
+      // Use the memoized cleanup function
+      cleanupOverlays();
+    };
+
+    // Add listeners to common events that should dismiss overlays
+    window.addEventListener('click', handleCleanup);
+    
+    // Add a listener to detect the Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        handleCleanup();
+      }
+    });
+
+    return () => {
+      // Cleanup listeners when component unmounts
+      window.removeEventListener('click', handleCleanup);
+      window.removeEventListener('keydown', handleCleanup);
+    };
+  }, [cleanupOverlays]);
 
   return (
     <div className="flex flex-col w-full h-full">

@@ -7,9 +7,9 @@ const manifestForPlugIn = {
   registerType: "prompt",
   includeAssests: ["favicon.ico", "apple-touc-icon.png", "masked-icon.svg"],
   manifest: {
-    name: "Crown Dental Management System",
-    short_name: "Crown DMS",
-    description: "Crown Dental Management System",
+    name: "FINI",
+    short_name: "FINI",
+    description: "FINI - Institute Management System",
     icons: [
       {
         src: "/android-chrome-192x192.png",
