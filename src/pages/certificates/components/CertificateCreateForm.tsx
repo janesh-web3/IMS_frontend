@@ -13,7 +13,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { crudRequest } from "@/lib/api";
 import { toast } from "react-toastify";
-import { Trash2, Plus } from "lucide-react";
 
 interface Student {
   _id: string;
