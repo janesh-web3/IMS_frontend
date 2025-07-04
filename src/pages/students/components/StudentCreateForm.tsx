@@ -126,7 +126,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   const handleFeesInfoChange = (name: string, value: any) => {
     setFeesInfo((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleTshirtChange = (name: string, checked: any) => {
     handleFeesInfoChange(name, checked ? 500 : 0);
   };
@@ -254,7 +254,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         !personalInfo.contactNo ||
         !personalInfo.billNo
       ) {
-        toast.error("Please fill all the required fields");
+        toast.error("Please fill all the required fields (Name, Contact Number, and Bill Number)");
         return;
       }
     }
@@ -274,95 +274,95 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
 
   // bill print functionality
   // Add this utility function to format currency
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "NPR",
-    }).format(Number(amount));
-  };
+  // const formatCurrency = (amount: string) => {
+  //   return new Intl.NumberFormat("en-IN", {
+  //     style: "currency",
+  //     currency: "NPR",
+  //   }).format(Number(amount));
+  // };
 
   // ... existing imports ...
 
   // Add these type definitions at the top of the file
-  type StudentBill = {
-    studentName: string;
-    billNo: string;
-    amount: number;
-    totalAmount: number;
-    method: string;
-    remaining: number;
-  };
+  // type StudentBill = {
+  //   studentName: string;
+  //   billNo: string;
+  //   amount: number;
+  //   totalAmount: number;
+  //   method: string;
+  //   remaining: number;
+  // };
 
   // Update the generateBill function with proper typing
-  const generateBill = (studentData: StudentBill) => {
-    const billHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Fee Receipt</title>
-      <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .bill-container { max-width: 400px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .bill-details { margin-bottom: 20px; }
-        .bill-row { display: flex; justify-content: space-between; margin: 5px 0; }
-        .footer { margin-top: 30px; text-align: center; }
-        @media print {
-          .no-print { display: none; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="bill-container">
-        <div class="header">
-          <h2>Fee Receipt</h2>
-          <p>Date: ${new Date().toLocaleDateString()}</p>
-        </div>
-        
-        <div class="bill-details">
-          <div class="bill-row">
-            <strong>Student Name:</strong>
-            <span>${studentData.studentName}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Bill No:</strong>
-            <span>${studentData.billNo}</span>
-            <div class="bill-row">
-              <strong>Total Amount:</strong>
-              <span>${formatCurrency(studentData.totalAmount.toString())}</span>
-            </div>
-          </div>
-          <div class="bill-row">
-            <strong>Payment Method:</strong>
-            <span>${studentData.method}</span>
-          </div>
-          <div class="bill-row">
-            <strong>Remaining Amount:</strong>
-            <span>${formatCurrency(studentData.remaining.toString())}</span>
-          </div>
-        </div>
-        
-        <div class="footer">
-          <p>Thank you for your payment!</p>
-        </div>
-      </div>
-      <div class="no-print" style="text-align: center; margin-top: 20px;">
-        <button onclick="window.print()">Print Receipt</button>
-      </div>
-    </body>
-    </html>
-  `;
+  // const generateBill = (studentData: StudentBill) => {
+  //   const billHTML = `
+  //   <!DOCTYPE html>
+  //   <html>
+  //   <head>
+  //     <title>Fee Receipt</title>
+  //     <style>
+  //       body { font-family: Arial, sans-serif; margin: 20px; }
+  //       .bill-container { max-width: 400px; margin: 0 auto; }
+  //       .header { text-align: center; margin-bottom: 20px; }
+  //       .bill-details { margin-bottom: 20px; }
+  //       .bill-row { display: flex; justify-content: space-between; margin: 5px 0; }
+  //       .footer { margin-top: 30px; text-align: center; }
+  //       @media print {
+  //         .no-print { display: none; }
+  //       }
+  //     </style>
+  //   </head>
+  //   <body>
+  //     <div class="bill-container">
+  //       <div class="header">
+  //         <h2>Fee Receipt</h2>
+  //         <p>Date: ${new Date().toLocaleDateString()}</p>
+  //       </div>
 
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      printWindow.document.write(billHTML);
-      printWindow.document.close();
-      // Automatically trigger print
-      printWindow.onload = function () {
-        printWindow.print();
-      };
-    }
-  };
+  //       <div class="bill-details">
+  //         <div class="bill-row">
+  //           <strong>Student Name:</strong>
+  //           <span>${studentData.studentName}</span>
+  //         </div>
+  //         <div class="bill-row">
+  //           <strong>Bill No:</strong>
+  //           <span>${studentData.billNo}</span>
+  //           <div class="bill-row">
+  //             <strong>Total Amount:</strong>
+  //             <span>${formatCurrency(studentData.totalAmount.toString())}</span>
+  //           </div>
+  //         </div>
+  //         <div class="bill-row">
+  //           <strong>Payment Method:</strong>
+  //           <span>${studentData.method}</span>
+  //         </div>
+  //         <div class="bill-row">
+  //           <strong>Remaining Amount:</strong>
+  //           <span>${formatCurrency(studentData.remaining.toString())}</span>
+  //         </div>
+  //       </div>
+
+  //       <div class="footer">
+  //         <p>Thank you for your payment!</p>
+  //       </div>
+  //     </div>
+  //     <div class="no-print" style="text-align: center; margin-top: 20px;">
+  //       <button onclick="window.print()">Print Receipt</button>
+  //     </div>
+  //   </body>
+  //   </html>
+  // `;
+
+  //   const printWindow = window.open("", "_blank");
+  //   if (printWindow) {
+  //     printWindow.document.write(billHTML);
+  //     printWindow.document.close();
+  //     // Automatically trigger print
+  //     printWindow.onload = function () {
+  //       printWindow.print();
+  //     };
+  //   }
+  // };
 
   const handleBookChange = (bookId: string) => {
     setSelectedBooks((prev) =>
@@ -385,7 +385,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
   // Update onSubmit to include books
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
- setIsSubmitting(true);
+    setIsSubmitting(true);
 
     const formattedDateOfBirth = personalInfo.dateOfBirth
       ? format(personalInfo.dateOfBirth, "yyyy-MM-dd")
@@ -440,7 +440,6 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
       photo: photo,
     };
 
-
     // Prepare the notification payload
     const notificationPayload = {
       title: "New Student Added",
@@ -453,14 +452,14 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     };
 
     // Generate and print bill
-    const studentBill: StudentBill = {
-      studentName: personalInfo.studentName,
-      billNo: personalInfo.billNo,
-      totalAmount: feesInfo.totalAmount,
-      amount: feesInfo.paidAmount,
-      method: feesInfo.paymentMethod,
-      remaining: feesInfo.remainingAmount,
-    };
+    // const studentBill: StudentBill = {
+    //   studentName: personalInfo.studentName,
+    //   billNo: personalInfo.billNo,
+    //   totalAmount: feesInfo.totalAmount,
+    //   amount: feesInfo.paidAmount,
+    //   method: feesInfo.paymentMethod,
+    //   remaining: feesInfo.remainingAmount,
+    // };
 
     const contentType =
       photo === null ? "application/json" : "multipart/form-data";
@@ -490,8 +489,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
     } catch (error) {
       toast.error("Failed to add student");
       console.error("Error adding student:", error);
-    }
-    finally {
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -529,7 +527,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                 />
               </div>
               <div className="grid">
-                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
                 <Input
                   id="dateOfBirth"
                   type="date"
@@ -612,7 +610,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   onChange={(e) => handleChange("billNo", e.target.value)}
                 />
               </div>
-             
+
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -640,10 +638,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   onChange={(e) => handleChange("address", e.target.value)}
                 />
               </div>
-              
-              
-            
-            
+
               <div>
                 <Label htmlFor="referredBy">Referred By</Label>
                 <Select
@@ -711,7 +706,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:gap-10 md:grid-cols-3">
-              <div className="flex items-center justify-center gap-3 text-center">
+                <div className="flex items-center justify-center gap-3 text-center">
                   <Label htmlFor="tShirtFee">T-Shirt Fee</Label>
                   <Checkbox
                     id="tshirtFee"
@@ -956,9 +951,11 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
                   id="deadlinedate"
                   type="date"
                   placeholder="Enter deadlinedate"
-                  value={deadlinedate ? format(deadlinedate, 'yyyy-MM-dd') : ''}
+                  value={deadlinedate ? format(deadlinedate, "yyyy-MM-dd") : ""}
                   onChange={(e) => {
-                    const date = e.target.value ? new Date(e.target.value) : undefined;
+                    const date = e.target.value
+                      ? new Date(e.target.value)
+                      : undefined;
                     handleDealineChange(date);
                   }}
                 />
@@ -971,7 +968,7 @@ const StudentCreateForm = ({ modalClose }: { modalClose: () => void }) => {
         {step === 3 && (
           <>
             <h2 className="text-lg font-medium">Upload Photo</h2>
-              <WebcamCapture onCapture={handleCapturePhoto} />
+            <WebcamCapture onCapture={handleCapturePhoto} />
           </>
         )}
 
